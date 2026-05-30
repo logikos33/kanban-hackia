@@ -50,29 +50,32 @@ ALTER TABLE kanban_cards
 
 Sem isso o quadro continua funcionando, mas o botão "Salvar" do modal vai avisar que faltam as colunas.
 
-## Cronograma
+## Cronograma — sprints de 30 min ancoradas em "agora"
 
 Aba **⏱ Cronograma** mostra:
-- relógio em tempo real e a data de hoje;
-- contagem regressiva até o pitch (domingo 31/05 às 18:00);
-- etapa **atual** destacada conforme a hora;
-- checklist por dia (Sáb 30/05 e Dom 31/05) com **3 estados por clique**:
+- relógio em tempo real, data de hoje e contagem regressiva até o pitch (dom 31/05 18:00);
+- **sprints geradas dinamicamente** a partir do half-hour atual até o pitch (nada de schedule estático com horários fixos do passado);
+- **3 estados por clique** em cada sprint:
   - ⚪ pendente → ⏳ em andamento (grava `started_at`) → ✅ feito (grava `done_at`);
-  - re-clique em ✅ pede confirmação e reabre a etapa.
-- linha mono mostra "iniciada HH:MM · rodando há …" enquanto roda e "✅ HH:MM · DD/MM · durou …" depois;
-- chip **previsto vs real** por etapa: 🟢 no prazo / 🟡 estourou até 30% / 🔴 atrasada;
+  - re-clique em ✅ pede confirmação e reabre.
+- linha mono mostra `⏳ iniciada HH:MM · rodando há …` enquanto roda e `✅ fechada HH:MM · durou …` depois;
+- **relatório da sprint** embutido: lista os cards do backlog que mudaram de status na janela (`updated_at` em [start, end]), com chips ✅ feitos / 🔨 fazendo / 🔍 em revisão / 📥 backlog;
+- chip **previsto vs real** por sprint: 🟢 no prazo / 🟡 estourou até 30% / 🔴 atrasada;
 - pills no topo: **acumulado hoje**, **% no prazo**, **feitas**, **em andamento**.
 
 Estado dos timestamps é compartilhado em tempo real via Supabase (tabela `hackathon_schedule`). Para habilitar, rode o `supabase-setup.sql` no SQL Editor.
 
-Os responsáveis disponíveis nos cards e no cronograma são: **Victor, Vitão, Monica, Gustavo, Nicolas**.
+Os responsáveis disponíveis nos cards são: **Victor, Vitão, Monica, Gustavo, Nicolas**.
 
-## Botões destrutivos do header
+## Auto-seed do backlog
+
+Quando o quadro está vazio no Supabase, o backlog do MVP "Combinado Não Sai Caro" é **plantado automaticamente** no `fetchCards()` (sem precisar clicar nenhum botão). Realtime sincroniza com o resto do time.
+
+## Botões do header
 
 | Botão                       | O que faz                                                                                                | Confirma com    |
 |-----------------------------|----------------------------------------------------------------------------------------------------------|-----------------|
 | ↺ Voltar tudo ao backlog    | Move todos os cards para o Backlog. Nada é apagado.                                                      | OK do `confirm` |
-| 🧹 Limpar tudo               | **APAGA** todos os cards (inclusive os "feitos" e os adicionados pelo time). Não toca no cronograma.    | Digite `LIMPAR` |
 | 🔥 Re-seed MVP               | **APAGA** todos os cards **e** os timestamps do cronograma, depois planta o backlog do MoSCoW do zero.   | Digite `RESET MVP` |
 
 Como atalho equivalente via SQL para o Re-seed, rode `seed-mvp-contratos.sql` no Supabase SQL Editor.

@@ -190,6 +190,8 @@
   .schstats .pill{font-family:var(--mono);font-size:12px;font-weight:700;background:var(--card2);border:1px solid var(--line);padding:8px 14px;border-radius:999px;color:#cfd2ef;display:flex;gap:8px;align-items:center}
   .schstats .pill b{color:#fff;font-weight:800}
   .schstats .pill .k{color:#9296bd;font-weight:600}
+  .sprintlog{list-style:none;margin:8px 0 0;padding:0;width:100%;display:flex;flex-direction:column;gap:3px}
+  .sprintlog li{font-size:11.5px;color:#cfd2ef;background:var(--cell);border:1px solid var(--line);padding:5px 9px;border-radius:8px;font-weight:500}
 </style>
 </head>
 <body>
@@ -207,7 +209,6 @@
       </div>
       <span class="conn" id="conn">● conectando…</span>
       <button class="btn" id="reset">↺ Voltar tudo ao backlog</button>
-      <button class="btn" id="wipe" title="Apaga TODOS os cards (sem repor nada)">🧹 Limpar tudo</button>
       <button class="btn" id="reseed" title="Apaga tudo e planta o backlog do MVP">🔥 Re-seed MVP</button>
       <div class="alert" id="alert">Must no backlog: —</div>
     </div>
@@ -389,39 +390,9 @@ const COLS = [
 // PITCH: domingo 31/05/2026 às 18:00 (horário local)
 const PITCH_AT = new Date(2026, 4, 31, 18, 0, 0); // mês 0-indexed (4 = maio)
 
-// Cronograma do hackathon (do agora até o pitch)
-const SCHEDULE = [
-  {day:"Sábado 30/05 — Dia 1", items:[
-    {id:"s01", t:"09:00", who:"Todos",    label:"Kickoff + escopo congelado do MVP \"Combinado Não Sai Caro\""},
-    {id:"s02", t:"10:00", who:"Gestão",   label:"Validar dor com freelancer/dev real — coletar quanto custa hoje sem contrato"},
-    {id:"s03", t:"11:00", who:"Back",     label:"Setup do backend + chaves de API (Claude/GPT) + endpoint base"},
-    {id:"s04", t:"11:00", who:"Front",    label:"Setup do front + tela única (intake → resultado)"},
-    {id:"s05", t:"12:30", who:"Todos",    label:"Almoço + cortar tudo que não é Must do MoSCoW"},
-    {id:"s06", t:"14:00", who:"Jurídico", label:"Biblioteca de cláusulas curadas — 1ª versão (pgto, multa, escopo, PI)"},
-    {id:"s07", t:"14:00", who:"Back",     label:"Intake conversacional — coletar tipo, valor, prazo, entregáveis, revisões"},
-    {id:"s08", t:"15:30", who:"Front",    label:"Fluxo intake → contrato chamando a API"},
-    {id:"s09", t:"17:00", who:"Todos",    label:"Sync rápido — bloqueios e ajustes"},
-    {id:"s10", t:"18:00", who:"Back",     label:"Geração de contrato end-to-end (intake + cláusulas → texto)"},
-    {id:"s11", t:"19:30", who:"Todos",    label:"Jantar + decisão pivot vs. perseverar (BML #1)"},
-    {id:"s12", t:"21:00", who:"Jurídico", label:"RAG sobre Código Civil + Lei de Direito Autoral indexado"},
-    {id:"s13", t:"22:30", who:"Back",     label:"Explicação leiga por cláusula + sinalização de red flags"},
-    {id:"s14", t:"23:59", who:"Gestão",   label:"Demo end-to-end andando (caminho feliz da apresentação)"},
-  ]},
-  {day:"Domingo 31/05 — Dia do Pitch", items:[
-    {id:"s20", t:"08:00", who:"Todos",    label:"Café + checklist de bloqueios"},
-    {id:"s21", t:"09:00", who:"Back",     label:"Guardrails anti-alucinação + teste de stress com 2–3 contratos reais"},
-    {id:"s22", t:"09:00", who:"Front",    label:"Export do contrato em PDF/DOC pronto pra assinar"},
-    {id:"s23", t:"10:30", who:"Front",    label:"Deploy público + polimento final da UI"},
-    {id:"s24", t:"11:30", who:"Gestão",   label:"GRAVAR vídeo de fallback (demo à prova de falha)"},
-    {id:"s25", t:"12:30", who:"Todos",    label:"Almoço + feature freeze"},
-    {id:"s26", t:"14:00", who:"Gestão",   label:"Deck do pitch (3 min) + storytelling do problema"},
-    {id:"s27", t:"15:00", who:"Todos",    label:"Ensaio do pitch — rodada 1"},
-    {id:"s28", t:"16:00", who:"Todos",    label:"Ensaio do pitch — rodada 2 (cronometrado)"},
-    {id:"s29", t:"17:00", who:"Todos",    label:"Ensaio final + checagem do backup (vídeo)"},
-    {id:"s30", t:"17:30", who:"Todos",    label:"Última passada nos slides + respiração"},
-    {id:"s99", t:"18:00", who:"Todos",    label:"🎤 PITCH — apresentação", pitch:true},
-  ]},
-];
+// Cronograma dinâmico: sprints de 30 min ancoradas em "agora" → pitch.
+// Cada sprint vira um checkpoint do que o time mexeu no backlog na janela.
+const SPRINT_MS = 30 * 60 * 1000;
 
 const LANES = [
   {id:"front",    name:"Front / UX",          who:"Front-end",          color:"#7c83ff"},
@@ -489,6 +460,32 @@ async function fetchCards(){
   cards = data || [];
   setStatus(true);
   render();
+  // mantém o cronograma atualizado: reports da sprint dependem do estado dos cards
+  if(typeof renderSchedule === "function") renderSchedule();
+  // se o quadro está vazio, planta o backlog do MVP automaticamente
+  if(cards.length === 0 && !window._seedAttempted){
+    window._seedAttempted = true;
+    await autoSeedIfEmpty();
+  }
+}
+
+async function autoSeedIfEmpty(){
+  const nowIso = new Date().toISOString();
+  const seed = CARDS.map((c,i)=>({
+    id: c.id, lane: c.lane, moscow: c.m, title: c.t,
+    status: "backlog", is_custom: false, position: i,
+    description: c.d || "", assignees: [],
+    updated_at: nowIso
+  }));
+  let r = await sb.from("kanban_cards").upsert(seed, {onConflict:"id", ignoreDuplicates:true});
+  if(r.error && /column .* does not exist/i.test(r.error.message)){
+    const lean = seed.map(({description, assignees, ...rest})=>rest);
+    r = await sb.from("kanban_cards").upsert(lean, {onConflict:"id", ignoreDuplicates:true});
+  }
+  if(r.error){ console.warn("[autoSeed]", r.error.message); return; }
+  // realtime channel vai recarregar; chamamos também para garantir.
+  const refetch = await sb.from("kanban_cards").select("*").order("position", {ascending:true});
+  if(!refetch.error){ cards = refetch.data || []; render(); renderSchedule(); }
 }
 
 function render(){
@@ -589,8 +586,8 @@ document.getElementById("addform").addEventListener("submit", async e=>{
   const m = document.getElementById("fm").value;
   const id = "x" + Date.now().toString(36);
   input.value = ""; input.focus();
-  const row = {id, lane, moscow:m, title:t, status:"backlog", is_custom:true, position:9999};
-  cards.push(row); render();
+  const row = {id, lane, moscow:m, title:t, status:"backlog", is_custom:true, position:9999, updated_at:new Date().toISOString()};
+  cards.push(row); render(); renderSchedule();
   const { error } = await sb.from("kanban_cards").insert(row);
   if(error){ setStatus(false, error.message); fetchCards(); }
 });
@@ -622,25 +619,6 @@ document.getElementById("reset").addEventListener("click", async ()=>{
   cards.forEach(c=>c.status="backlog"); render();
   const { error } = await sb.from("kanban_cards").update({status:"backlog"}).neq("id","__none__");
   if(error){ setStatus(false, error.message); fetchCards(); }
-});
-
-// wipe: APAGA todos os cards do quadro (não toca no cronograma)
-document.getElementById("wipe").addEventListener("click", async ()=>{
-  const ok = confirm(
-    "⚠ Limpar TODO o quadro?\n\n" +
-    "Vai apagar TODOS os cards (inclusive os do MVP, os adicionados pelo time e os \"feitos\"). " +
-    "O cronograma e os timestamps NÃO são apagados.\n\n" +
-    "Depois disso o backlog fica vazio — você pode adicionar cards manualmente ou usar o \"Re-seed MVP\" para plantar o backlog do MoSCoW."
-  );
-  if(!ok) return;
-  const really = prompt("Para confirmar, digite LIMPAR:");
-  if(really !== "LIMPAR"){ alert("Cancelado."); return; }
-
-  const { error } = await sb.from("kanban_cards").delete().neq("id","__none__");
-  if(error){ alert("Erro ao limpar cards: " + error.message); return; }
-  cards = [];
-  render();
-  alert("✓ Quadro limpo. Adicione cards pelo formulário ou plante o MVP com 🔥 Re-seed.");
 });
 
 // re-seed: APAGA tudo e planta o backlog do MVP "Combinado Não Sai Caro"
@@ -820,26 +798,79 @@ function fmtDurShort(ms){
   return `${Math.floor(m/60)}h ${pad(m%60)}m`;
 }
 
-function flatSchedule(){
-  const out = [];
-  SCHEDULE.forEach((day, idx)=>{
-    const dayDate = idx===0 ? new Date(2026,4,30) : new Date(2026,4,31);
-    day.items.forEach(s=>{
-      const [h,m] = s.t.split(":").map(Number);
-      const d = new Date(dayDate); d.setHours(h, m, 0, 0);
-      out.push({...s, when:d, dayIdx:idx});
-    });
+// Ancora as sprints no half-hour atual e gera até o pitch.
+// Sprints com timestamp já registrado (em andamento ou feita) também aparecem,
+// mesmo que a janela planejada já tenha passado — assim o time não perde o histórico.
+function buildSprints(refNow){
+  const now = refNow || new Date();
+  const pitchMs = PITCH_AT.getTime();
+  let startMs = Math.floor(now.getTime() / SPRINT_MS) * SPRINT_MS;
+  // se houver sprint registrada antes do "agora", inclui desde lá
+  Object.values(scheduleState||{}).forEach(r=>{
+    if(!r || !r.started_at) return;
+    const t = new Date(r.started_at).getTime();
+    const floor = Math.floor(t / SPRINT_MS) * SPRINT_MS;
+    if(floor < startMs) startMs = floor;
   });
-  out.sort((a,b)=>a.when-b.when);
-  // calcula janela prevista (próxima etapa - esta)
-  for(let i=0;i<out.length;i++){
-    out[i].nextWhen = (i+1 < out.length) ? out[i+1].when : null;
-    out[i].plannedMs = out[i].nextWhen ? (out[i].nextWhen - out[i].when) : null;
+  const sprints = [];
+  let curMs = startMs;
+  let i = 1;
+  while(curMs < pitchMs){
+    const endMs = Math.min(curMs + SPRINT_MS, pitchMs);
+    const start = new Date(curMs);
+    const isPitch = endMs >= pitchMs;
+    const id = "sprint_" + start.getFullYear() +
+               pad(start.getMonth()+1) + pad(start.getDate()) + "T" +
+               pad(start.getHours()) + pad(start.getMinutes());
+    sprints.push({
+      id, num: i,
+      start, end: new Date(endMs),
+      plannedMs: endMs - curMs,
+      isPitch
+    });
+    curMs += SPRINT_MS;
+    i++;
   }
-  return out;
+  return sprints;
 }
-const FLAT = flatSchedule();
-const STAGE_BY_ID = Object.fromEntries(FLAT.map(s=>[s.id, s]));
+function sprintById(id){
+  return buildSprints().find(s => s.id === id);
+}
+
+// Apuração da sprint: cards mexidos no backlog dentro da janela.
+function computeSprintReport(startMs, endMs){
+  const changed = cards.filter(c => {
+    if(!c.updated_at) return false;
+    const t = new Date(c.updated_at).getTime();
+    return t >= startMs && t <= endMs;
+  });
+  const done       = changed.filter(c => c.status === "feito");
+  const fazendo    = changed.filter(c => c.status === "fazendo");
+  const revisao    = changed.filter(c => c.status === "revisao");
+  const backlog    = changed.filter(c => c.status === "backlog");
+  return { total: changed.length, done, fazendo, revisao, backlog, all: changed };
+}
+function renderReportInline(r){
+  if(r.total === 0) return `<span class="statchip" style="opacity:.65">sem movimento</span>`;
+  const out = [];
+  if(r.done.length)    out.push(`<span class="statchip green">✅ ${r.done.length} feito${r.done.length>1?"s":""}</span>`);
+  if(r.fazendo.length) out.push(`<span class="statchip yellow">🔨 ${r.fazendo.length} fazendo</span>`);
+  if(r.revisao.length) out.push(`<span class="statchip">🔍 ${r.revisao.length} em revisão</span>`);
+  if(r.backlog.length) out.push(`<span class="statchip">📥 ${r.backlog.length} no backlog</span>`);
+  return out.join("");
+}
+function renderReportDetails(r){
+  if(r.total === 0) return "";
+  const items = r.all.slice(0,6).map(c=>{
+    const tag = c.status === "feito"   ? "✅"
+              : c.status === "fazendo" ? "🔨"
+              : c.status === "revisao" ? "🔍"
+              : "📥";
+    return `<li>${tag} ${escapeHtml(c.title)}</li>`;
+  }).join("");
+  const more = r.all.length > 6 ? `<li style="opacity:.6">+ ${r.all.length-6} mais…</li>` : "";
+  return `<ul class="sprintlog">${items}${more}</ul>`;
+}
 
 async function fetchScheduleState(){
   const { data, error } = await sb.from("hackathon_schedule").select("*");
@@ -903,43 +934,61 @@ function liveChipFor(plannedMs, runningMs){
   return `<span class="statchip red">🔴 atrasada</span>`;
 }
 
-function renderStageRow(s){
+function renderSprintRow(s){
   const st = stageStatus(s.id);
   const rec = scheduleState[s.id] || {};
+  const nowMs = Date.now();
   let chkClass = "", chkIcon = "";
   if(st === "andamento"){ chkClass = "run"; chkIcon = "⏳"; }
   else if(st === "feito"){ chkClass = "done"; chkIcon = "✓"; }
 
   let stageClass = "stage";
-  if(s.pitch) stageClass += " pitch";
+  if(s.isPitch) stageClass += " pitch";
   if(st === "andamento") stageClass += " run";
   if(st === "feito") stageClass += " done";
 
-  // metaline
+  // janela para o relatório: usa marcação real se houver, senão usa a janela planejada
+  const startMs = rec.started_at ? new Date(rec.started_at).getTime() : s.start.getTime();
+  const endMs   = rec.done_at    ? new Date(rec.done_at).getTime()
+                                 : Math.min(nowMs, s.end.getTime());
+  const report = computeSprintReport(startMs, endMs);
+
+  // metaline (status do sprint)
   let info = "—", infoCls = "stinfo";
   let chip = "";
   if(st === "andamento"){
-    const startMs = new Date(rec.started_at).getTime();
-    const runMs = Date.now() - startMs;
+    const runMs = nowMs - new Date(rec.started_at).getTime();
     info = `⏳ iniciada ${fmtTimeShort(rec.started_at)} · rodando há ${fmtDur(runMs)}`;
     infoCls = "stinfo run";
     chip = liveChipFor(s.plannedMs, runMs);
   } else if(st === "feito"){
-    const startMs = new Date(rec.started_at).getTime();
-    const endMs = new Date(rec.done_at).getTime();
-    const dur = endMs - startMs;
-    info = `✅ ${fmtTimeShort(rec.done_at)} · ${fmtDateShort(rec.done_at)} · durou ${fmtDur(dur)}`;
+    const dur = new Date(rec.done_at).getTime() - new Date(rec.started_at).getTime();
+    info = `✅ fechada ${fmtTimeShort(rec.done_at)} · durou ${fmtDur(dur)}`;
     infoCls = "stinfo done";
     chip = chipFor(s.plannedMs, dur);
+  } else if(s.start.getTime() <= nowMs && s.end.getTime() > nowMs){
+    info = "🟦 sprint atual — clique para marcar início";
+    infoCls = "stinfo run";
+  } else if(s.end.getTime() <= nowMs){
+    info = "⏸ janela já passou — clique para registrar retrô";
   }
 
+  const timeLabel = `${pad(s.start.getHours())}:${pad(s.start.getMinutes())}–${pad(s.end.getHours())}:${pad(s.end.getMinutes())}`;
+  const title = s.isPitch
+    ? `🎤 Sprint #${s.num} — janela do PITCH (18h)`
+    : `Sprint #${s.num} — 30 min`;
   return (
-    `<div class="${stageClass}" data-sid="${s.id}" data-time="${s.t}">` +
-      `<div class="stime">${s.t}</div>` +
+    `<div class="${stageClass}" data-sid="${s.id}" data-time="${timeLabel}">` +
+      `<div class="stime">${timeLabel}</div>` +
       `<div class="stchk ${chkClass}" data-chk="${s.id}" title="Clique para avançar estado">${chkIcon}</div>` +
-      `<div class="stitle">${escapeHtml(s.label)}</div>` +
-      `<div class="stwho">${escapeHtml(s.who)}</div>` +
-      `<div class="stmeta"><span class="${infoCls}" data-info="${s.id}">${info}</span>${chip}</div>` +
+      `<div class="stitle">${escapeHtml(title)}</div>` +
+      `<div class="stwho">${report.total} ações</div>` +
+      `<div class="stmeta">` +
+        `<span class="${infoCls}" data-info="${s.id}">${info}</span>` +
+        chip +
+        renderReportInline(report) +
+        renderReportDetails(report) +
+      `</div>` +
     `</div>`
   );
 }
@@ -947,13 +996,27 @@ function renderStageRow(s){
 function renderSchedule(){
   const root = document.getElementById("sched");
   root.innerHTML = "";
-  SCHEDULE.forEach((day, idx)=>{
-    const done = day.items.filter(s=>stageStatus(s.id)==="feito").length;
-    const total = day.items.length;
+  const sprints = buildSprints();
+  if(sprints.length === 0){
+    root.innerHTML = `<div class="schday"><div class="dhead"><span>🎤 Pitch encerrado</span></div></div>`;
+    renderStats(); return;
+  }
+  // agrupa por data (Sáb 30/05, Dom 31/05)
+  const byDay = new Map();
+  sprints.forEach(s=>{
+    const k = `${pad(s.start.getDate())}/${pad(s.start.getMonth()+1)}`;
+    if(!byDay.has(k)) byDay.set(k, []);
+    byDay.get(k).push(s);
+  });
+  byDay.forEach((list, dateKey)=>{
+    const dayName = DAYS_PT[list[0].start.getDay()];
+    const done = list.filter(s=>stageStatus(s.id)==="feito").length;
     const wrap = document.createElement("div");
     wrap.className = "schday";
-    wrap.innerHTML = `<div class="dhead"><span>${day.day}</span><span class="dprog">${done}/${total} concluídas</span></div>` +
-      day.items.map(s=>renderStageRow(STAGE_BY_ID[s.id] || s)).join("");
+    wrap.innerHTML =
+      `<div class="dhead"><span>${dayName} ${dateKey}</span>` +
+      `<span class="dprog">${done}/${list.length} sprints fechadas</span></div>` +
+      list.map(renderSprintRow).join("");
     root.appendChild(wrap);
   });
   markCurrentStage();
@@ -966,21 +1029,23 @@ document.getElementById("sched").addEventListener("click", e=>{
 });
 
 function markCurrentStage(){
-  const now = new Date();
-  let cur = null, next = null;
-  for(let i=0;i<FLAT.length;i++){
-    if(FLAT[i].when <= now) cur = FLAT[i];
-    else { next = FLAT[i]; break; }
-  }
+  const now = Date.now();
+  const sprints = buildSprints();
+  const cur  = sprints.find(s => s.start.getTime() <= now && now < s.end.getTime());
+  const next = sprints.find(s => s.start.getTime() > now);
   document.querySelectorAll(".stage.now").forEach(el=>el.classList.remove("now"));
   if(cur){
     const el = document.querySelector(`.stage[data-sid="${cur.id}"]`);
     if(el && stageStatus(cur.id) !== "feito") el.classList.add("now");
   }
   const elStage = document.getElementById("clk-stage");
-  const elNext = document.getElementById("clk-next");
-  if(elStage) elStage.textContent = cur ? cur.label : "Antes do kickoff";
-  if(elNext) elNext.textContent = next ? `Próxima: ${next.t} · ${next.label}` : "Última etapa do hackathon";
+  const elNext  = document.getElementById("clk-next");
+  if(elStage) elStage.textContent = cur
+    ? (cur.isPitch ? `🎤 Sprint #${cur.num} — janela do PITCH` : `Sprint #${cur.num} (${pad(cur.start.getHours())}:${pad(cur.start.getMinutes())}–${pad(cur.end.getHours())}:${pad(cur.end.getMinutes())})`)
+    : "Pitch encerrado";
+  if(elNext) elNext.textContent = next
+    ? `Próxima: Sprint #${next.num} às ${pad(next.start.getHours())}:${pad(next.start.getMinutes())}`
+    : "Última sprint do hackathon";
 }
 
 function isSameDay(a, b){
@@ -989,6 +1054,7 @@ function isSameDay(a, b){
 
 function renderStats(){
   const today = new Date();
+  const sprintMap = Object.fromEntries(buildSprints().map(s=>[s.id, s]));
   let accMs = 0, doneCount = 0, runCount = 0, onTime = 0, measured = 0;
   Object.keys(scheduleState).forEach(id=>{
     const r = scheduleState[id];
@@ -999,10 +1065,10 @@ function renderStats(){
       const end   = new Date(r.done_at);
       if(isSameDay(end, today)) accMs += (end - start);
       doneCount++;
-      const stage = STAGE_BY_ID[id];
-      if(stage && stage.plannedMs){
+      const sprint = sprintMap[id];
+      if(sprint && sprint.plannedMs){
         measured++;
-        if((end - start) <= stage.plannedMs) onTime++;
+        if((end - start) <= sprint.plannedMs) onTime++;
       }
     }
   });
@@ -1049,16 +1115,41 @@ function tickClock(){
     }
   }
   tickRunningStages();
-  if(now.getSeconds() % 30 === 0) { markCurrentStage(); renderStats(); }
+  if(now.getSeconds() % 30 === 0){ markCurrentStage(); renderStats(); }
+  // a cada meia hora cheia, uma nova sprint começa — re-render completo
+  if(now.getSeconds() === 0 && (now.getMinutes() === 0 || now.getMinutes() === 30)){
+    renderSchedule();
+  }
 }
 
+// limpeza única dos timestamps com ids do schedule estático antigo (s01, s02, …)
+// — só rodam uma vez por navegador via flag de localStorage.
+async function migrateScheduleOnce(){
+  const KEY = "hackia_sched_migrated_v2";
+  if(localStorage.getItem(KEY) === "1") return;
+  const { error } = await sb.from("hackathon_schedule").delete().neq("id","__none__");
+  if(!error || /relation .* does not exist/i.test(error.message)){
+    localStorage.setItem(KEY, "1");
+  } else {
+    console.warn("[migrate schedule]", error.message);
+  }
+}
+
+(async ()=>{
+  await migrateScheduleOnce();
+  await fetchScheduleState();
+})();
 renderSchedule();
-fetchScheduleState();
 tickClock();
 setInterval(tickClock, 1000);
 
 sb.channel("hackathon_schedule_rt")
   .on("postgres_changes", {event:"*", schema:"public", table:"hackathon_schedule"}, fetchScheduleState)
+  .subscribe();
+
+// quando outros clientes mexerem nos cards, atualiza o cronograma também
+sb.channel("kanban_cards_rt_sched")
+  .on("postgres_changes", {event:"*", schema:"public", table:"kanban_cards"}, ()=>{ renderSchedule(); })
   .subscribe();
 </script>
 </body>
