@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kanban — Gestão à vista · Lançamento imobiliário</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0f24;--card:#141833;--card2:#1b2046;--cell:#10142e;
+    --line:rgba(255,255,255,.1);--brand:#7c83ff;--brand2:#a371ff;--accent:#ff7a45;
+    --ok:#46e6a0;--warn:#ffce5a;--no:#ff6b6b;
+    --mono:'JetBrains Mono',monospace;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:#e9eaf6;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1500px;margin:0 auto;padding:0 18px}
+
+  header{background:linear-gradient(150deg,#171a3d,#2b2570 60%,#3f2da0);padding:30px 0 26px;border-bottom:1px solid var(--line)}
+  .tagp{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.1);border:1px solid var(--line);padding:5px 13px;border-radius:999px;font-size:12.5px;font-weight:600;margin-bottom:12px}
+  header h1{font-size:28px;font-weight:800;line-height:1.1}
+  .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:16px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:#cdd0ee}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:3px}
+  .alert{margin-left:auto;font-family:var(--mono);font-size:13px;font-weight:600;background:rgba(255,107,107,.14);border:1px solid var(--no);color:#ffb3b3;padding:7px 13px;border-radius:9px}
+  .alert.ok{background:rgba(70,230,160,.14);border-color:var(--ok);color:#9af0cd}
+  .conn{font-family:var(--mono);font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:999px;border:1px solid var(--line);color:#9296bd;background:var(--card2)}
+  .conn.on{color:#9af0cd;border-color:var(--ok)}
+  .conn.off{color:#ffb3b3;border-color:var(--no)}
+  .btn{font-family:inherit;font-size:12.5px;font-weight:600;background:var(--card2);border:1px solid var(--line);color:#cfd2ef;padding:7px 13px;border-radius:9px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--brand)}
+
+  /* ADD FEATURE BAR */
+  .addbar{margin-top:24px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .addbar .atitle{font-size:13px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .addform{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.grow{flex:1 1 320px;min-width:220px}
+  .field label{font-size:11px;font-weight:700;color:#9296bd;letter-spacing:.3px;text-transform:uppercase}
+  .addform input[type=text],.addform select{font-family:inherit;font-size:13.5px;background:var(--cell);border:1px solid var(--line);color:#eef0ff;padding:10px 12px;border-radius:9px;outline:none;transition:.15s}
+  .addform input[type=text]:focus,.addform select:focus{border-color:var(--brand)}
+  .addform input[type=text]::placeholder{color:#6b7090}
+  .addbtn{font-family:inherit;font-size:13.5px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;padding:11px 18px;border-radius:9px;cursor:pointer;transition:.15s}
+  .addbtn:hover{filter:brightness(1.1)}
+  .ccard .del{float:right;margin-left:6px;color:#6b7090;font-weight:700;cursor:pointer;font-size:13px;line-height:1}
+  .ccard .del:hover{color:var(--no)}
+
+  /* TABS */
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:22px}
+  .tab{font-family:inherit;font-size:14px;font-weight:700;background:none;border:none;color:#9296bd;padding:11px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
+  .tab:hover{color:#cfd2ef}
+  .tab.on{color:#fff;border-bottom-color:var(--brand)}
+
+  /* LEGENDA MOSCOW */
+  .moscow-leg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+  @media(max-width:760px){.moscow-leg{grid-template-columns:1fr}}
+  .ml{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:11px;padding:13px 15px}
+  .ml.must{border-left-color:var(--ok)} .ml.should{border-left-color:var(--brand)} .ml.could{border-left-color:var(--accent)}
+  .ml h4{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .ml.must h4{color:var(--ok)} .ml.should h4{color:var(--brand)} .ml.could h4{color:var(--accent)}
+  .ml p{font-size:12.5px;color:#b9bce0;line-height:1.45}
+
+  /* PAINEL DA DOR */
+  .dor{margin-top:26px;display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+  @media(max-width:860px){.dor{grid-template-columns:1fr}}
+  .dor-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px}
+  .dor-card .eyebrow{color:var(--accent);font-weight:700;font-size:12px;letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
+  .dor-card h3{font-size:21px;font-weight:800;margin-bottom:12px;line-height:1.2}
+  .dor-card p{font-size:14.5px;color:#d3d5ee;margin-bottom:12px}
+  .dor-card p:last-child{margin-bottom:0}
+  .dor-card b{color:#fff}
+  .quote{background:var(--card2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 18px;font-size:14.5px;font-style:italic;color:#e7e9ff;margin:6px 0 16px}
+  .painlist{list-style:none;margin-top:6px}
+  .painlist li{position:relative;padding:8px 0 8px 26px;font-size:13.5px;color:#cfd2ef;border-bottom:1px dashed var(--line)}
+  .painlist li:last-child{border-bottom:0}
+  .painlist li::before{content:"⚠";position:absolute;left:0;top:8px;color:var(--warn);font-size:13px}
+  .metricbox{background:linear-gradient(135deg,rgba(255,122,69,.14),rgba(124,131,255,.10));border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:16px}
+  .metricbox .big{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent)}
+  .metricbox .sm{font-size:12.5px;color:#b9bce0;margin-top:4px}
+
+  .boardwrap{overflow-x:auto;padding:26px 0 40px}
+  .board{min-width:1180px;display:grid;grid-template-columns:170px repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+
+  .colhead{padding:13px 14px;background:var(--card2);border-bottom:1px solid var(--line);border-left:1px solid var(--line);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:sticky;top:0;z-index:2}
+  .colhead .cnt{font-family:var(--mono);font-size:12px;color:#9296bd;background:var(--cell);padding:2px 8px;border-radius:999px;font-weight:600}
+  .corner{background:var(--card);border-bottom:1px solid var(--line)}
+
+  .lane{padding:14px 12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;justify-content:center;background:var(--card)}
+  .lane .lname{font-size:13.5px;font-weight:800}
+  .lane .lwho{font-size:11px;color:#9296bd;font-weight:600}
+  .lane .lbar{width:26px;height:4px;border-radius:3px;margin-top:4px}
+
+  .cell{border-top:1px solid var(--line);border-left:1px solid var(--line);background:var(--cell);padding:9px;min-height:96px;display:flex;flex-direction:column;gap:8px;transition:.12s}
+  .cell.dragover{background:#171c3d;box-shadow:inset 0 0 0 2px var(--brand)}
+
+  .ccard{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:9px;padding:9px 10px;cursor:grab;transition:.12s;user-select:none}
+  .ccard:active{cursor:grabbing}
+  .ccard:hover{transform:translateY(-2px);border-color:var(--brand)}
+  .ccard.drag{opacity:.4}
+  .ccard .ct{font-size:12.5px;font-weight:600;color:#eef0ff;line-height:1.35}
+  .ccard .cm{display:inline-block;margin-top:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;letter-spacing:.4px}
+  .m-must{border-left-color:var(--ok)!important}   .cm.m-must{background:rgba(70,230,160,.16);color:var(--ok)}
+  .m-should{border-left-color:var(--brand)!important} .cm.m-should{background:rgba(124,131,255,.18);color:var(--brand)}
+  .m-could{border-left-color:var(--accent)!important} .cm.m-could{background:rgba(255,122,69,.18);color:var(--accent)}
+
+  footer{border-top:1px solid var(--line);padding:20px 0;color:#9296bd;font-size:12.5px;text-align:center}
+  footer b{color:#cfd2ef}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="tagp">📌 Gestão à vista · HackIA SC 2026 · equipe de 6</span>
+    <h1>Quadro Kanban — do CAD ao kit de venda</h1>
+    <div class="toolbar">
+      <div class="legend">
+        <span><span class="dot" style="background:var(--ok)"></span> Must</span>
+        <span><span class="dot" style="background:var(--brand)"></span> Should</span>
+        <span><span class="dot" style="background:var(--accent)"></span> Could</span>
+      </div>
+      <span class="conn" id="conn">● conectando…</span>
+      <button class="btn" id="reset">↺ Resetar quadro</button>
+      <div class="alert" id="alert">Must no backlog: —</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab on" data-view="board">📌 Quadro</button>
+    <button class="tab" data-view="dor">🎯 A Dor que tratamos</button>
+  </div>
+</div>
+
+<div id="view-board">
+
+<div class="wrap">
+  <div class="moscow-leg">
+    <div class="ml must">
+      <h4>● Must have</h4>
+      <p>Sem isto não há produto nem demo. Inegociável — é o caminho feliz que sobe ao palco. Se um Must falha, o pitch falha.</p>
+    </div>
+    <div class="ml should">
+      <h4>● Should have</h4>
+      <p>Importante e agrega muito valor, mas a demo sobrevive sem. Só entra depois que todos os Must estiverem rodando ponta a ponta.</p>
+    </div>
+    <div class="ml could">
+      <h4>○ Could have</h4>
+      <p>Desejável, o "nice to have". Diferencial de impacto, mas só se sobrar tempo — com a demo já congelada e ensaiada.</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="addbar">
+    <div class="atitle">➕ Adicionar feature ao backlog</div>
+    <form class="addform" id="addform">
+      <div class="field grow">
+        <label for="ftext">Ideia / descrição da feature</label>
+        <input type="text" id="ftext" placeholder="Ex.: gerar selo de QR code com link do empreendimento" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="flane">Raia</label>
+        <select id="flane"></select>
+      </div>
+      <div class="field">
+        <label for="fm">Prioridade</label>
+        <select id="fm">
+          <option value="must">Must</option>
+          <option value="should" selected>Should</option>
+          <option value="could">Could</option>
+        </select>
+      </div>
+      <button type="submit" class="addbtn">Adicionar</button>
+    </form>
+  </div>
+</div>
+
+<div class="boardwrap">
+  <div class="wrap">
+    <div class="board" id="board"></div>
+  </div>
+</div>
+
+</div><!-- /view-board -->
+
+<div id="view-dor" style="display:none">
+  <div class="wrap">
+    <div class="dor">
+      <div class="dor-card">
+        <div class="eyebrow">O problema que resolvemos</div>
+        <h3>O lançamento na planta fica parado esperando o material de marketing</h3>
+        <p>Vender imóvel <b>na planta</b> exige perspectivas, maquetes e peças de divulgação que <b>custam caro e demoram semanas</b>. O CAD do projeto já está pronto na arquitetura — mas o material de venda é sempre o gargalo.</p>
+        <p>Enquanto o kit não fica pronto, o empreendimento <b>não é anunciado e não vende</b>. Isso trava as vendas e o <b>fluxo de caixa da obra</b>, justamente na fase em que a construtora mais precisa de liquidez.</p>
+        <div class="quote">"Eu recebo o projeto pronto da arquitetura e fico semanas esperando o 3D e as peças pra poder anunciar. Enquanto isso, o lançamento não vende."<br><span style="font-style:normal;color:#9296bd;font-size:12.5px">— Marina, gerente de marketing de incorporadora · persona-alvo</span></div>
+        <p><b>Nossa solução:</b> do DWG ao kit de lançamento completo — planta humanizada, vistas dos ambientes, anúncio multicanal e encarte em PDF — em <b>minutos</b>, em PT/EN/ES, por uma fração do custo da agência. Posicionada como <b>acelerador</b>, não substituto do 3D premium do estande.</p>
+      </div>
+      <div>
+        <div class="dor-card">
+          <div class="eyebrow">Por que dói</div>
+          <ul class="painlist">
+            <li>Dependência de agência e artista 3D: caro e lento (semanas por lançamento).</li>
+            <li>Material sai desconexo entre as peças e exige refação.</li>
+            <li>Gargalo quando vários lançamentos coincidem no calendário.</li>
+            <li>Sem material em outros idiomas para atrair investidor estrangeiro.</li>
+          </ul>
+          <div class="metricbox">
+            <div class="big">Semanas → minutos</div>
+            <div class="sm">O número da validação ("quanto custa e quanto demora hoje o material de um lançamento?") vira o slide mais forte do pitch.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Arraste os cards entre as colunas. <b>Regra de ouro:</b> nenhum card sobe enquanto houver Must no Backlog. O estado é compartilhado pelo time em tempo real (Supabase).
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const COLS = [
+  {id:"backlog", label:"📥 Backlog"},
+  {id:"fazendo", label:"🔨 Fazendo"},
+  {id:"revisao", label:"🔍 Revisão / Integração"},
+  {id:"feito",   label:"✅ Feito"},
+];
+
+const LANES = [
+  {id:"front",       name:"Front / Produto",     who:"Front-end",        color:"#7c83ff"},
+  {id:"back",        name:"Back-end / Orquestr.", who:"Back-end",        color:"#46e6a0"},
+  {id:"imagem",      name:"IA-imagem",           who:"6ª pessoa (núcleo)",color:"#ff7a45"},
+  {id:"gestao",      name:"Gestão",              who:"Gestão",           color:"#ffce5a"},
+  {id:"cliente",     name:"Validação / Cliente", who:"Descoberta de dor",color:"#a371ff"},
+  {id:"especialista",name:"Especialista",        who:"Dono do projeto",  color:"#6fd3ff"},
+];
+
+// cards: id, lane, moscow, title. Status inicial = backlog.
+const CARDS = [
+  // FRONT
+  {id:"f1", lane:"front", m:"must",  t:"Upload da planta (PNG/PDF do DWG)"},
+  {id:"f2", lane:"front", m:"must",  t:"UI web: upload → resultado → download"},
+  {id:"f3", lane:"front", m:"must",  t:"Visualização + export do PDF no front"},
+  {id:"f4", lane:"front", m:"must",  t:"Deploy público (Vercel)"},
+  {id:"f5", lane:"front", m:"could", t:"Viewer do tour 360° (WebXR)"},
+  // BACK
+  {id:"b1", lane:"back", m:"must",  t:"Briefing/extrator por visão → JSON de contexto"},
+  {id:"b2", lane:"back", m:"must",  t:"Orquestração CrewAI + endpoint FastAPI"},
+  {id:"b3", lane:"back", m:"must",  t:"Copy multicanal (portal/IG/WhatsApp)"},
+  {id:"b4", lane:"back", m:"must",  t:"Multi-idioma PT / EN / ES"},
+  {id:"b5", lane:"back", m:"must",  t:"Montador de encarte (template → PDF)"},
+  {id:"b6", lane:"back", m:"should",t:"Extração de áreas/cômodos do DXF (ezdxf)"},
+  // IA-IMAGEM
+  {id:"i1", lane:"imagem", m:"must",  t:"Planta humanizada (risco nº 1)"},
+  {id:"i2", lane:"imagem", m:"must",  t:"Vistas dos ambientes (2–3 renders)"},
+  {id:"i3", lane:"imagem", m:"must",  t:"Coerência planta ↔ vistas (seed + referência)"},
+  {id:"i4", lane:"imagem", m:"should",t:"Provider de imagem plugável"},
+  {id:"i5", lane:"imagem", m:"should",t:"ControlNet de fallback (trava geometria)"},
+  {id:"i6", lane:"imagem", m:"could", t:"Estilos de decoração (escand./clean/industrial)"},
+  // GESTÃO
+  {id:"g1", lane:"gestao", m:"must",  t:"Manter este quadro / gestão à vista"},
+  {id:"g2", lane:"gestao", m:"must",  t:"Cronograma + ritmo Build-Measure-Learn"},
+  {id:"g3", lane:"gestao", m:"must",  t:"Demo à prova de falha (caminho feliz)"},
+  {id:"g4", lane:"gestao", m:"must",  t:"Gravar vídeo de fallback (domingo manhã)"},
+  {id:"g5", lane:"gestao", m:"should",t:"Congelar features + ensaiar pitch 3×"},
+  // CLIENTE
+  {id:"c1", lane:"cliente", m:"must",  t:"Validar dor com construtora real (BML nº 1)"},
+  {id:"c2", lane:"cliente", m:"must",  t:"Coletar número: custo/tempo do material hoje"},
+  {id:"c3", lane:"cliente", m:"must",  t:"Deck do pitch (3 min)"},
+  {id:"c4", lane:"cliente", m:"should",t:"Precificação por lançamento / assinatura"},
+  {id:"c5", lane:"cliente", m:"should",t:"2º BML — decisão pivot vs. perseverar"},
+  // ESPECIALISTA
+  {id:"e1", lane:"especialista", m:"must",  t:"Fornecer DWG + exportações PNG/PDF"},
+  {id:"e2", lane:"especialista", m:"must",  t:"Validar qualidade da planta humanizada"},
+  {id:"e3", lane:"especialista", m:"should",t:"Revisar cômodos/áreas e tom da copy (PT)"},
+  {id:"e4", lane:"especialista", m:"should",t:"Credibilidade técnica no pitch"},
+  {id:"e5", lane:"especialista", m:"could", t:"Narrativa por persona (família vs. investidor)"},
+];
+
+// ===== Supabase (backend compartilhado / tempo real) =====
+const SUPA_URL = "https://bwskqgrkptdcqetwxvhu.supabase.co";
+const SUPA_KEY = "sb_publishable_Wz8dIIU3UTXBDOlyi9W-Bg_dqCGHzB1";
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const board = document.getElementById("board");
+const MLABEL = {must:"MUST", should:"SHOULD", could:"COULD"};
+let cards = [];
+
+function setStatus(ok, msg){
+  const el = document.getElementById("conn");
+  if(!el) return;
+  el.className = "conn " + (ok ? "on" : "off");
+  el.textContent = ok ? "● ao vivo" : "● offline";
+  if(msg) el.title = msg;
+}
+function cardById(id){ return cards.find(c=>c.id===id); }
+
+async function fetchCards(){
+  const { data, error } = await sb.from("kanban_cards").select("*").order("position", {ascending:true});
+  if(error){ setStatus(false, error.message); console.error(error); return; }
+  cards = data || [];
+  setStatus(true);
+  render();
+}
+
+function render(){
+  board.innerHTML = "";
+  const corner = document.createElement("div");
+  corner.className = "colhead corner";
+  corner.textContent = "Raia ▸ / Status ▾";
+  corner.style.borderLeft = "0";
+  board.appendChild(corner);
+  COLS.forEach(col=>{
+    const h = document.createElement("div");
+    h.className = "colhead";
+    const cnt = cards.filter(c=>c.status===col.id).length;
+    h.innerHTML = `<span>${col.label}</span><span class="cnt">${cnt}</span>`;
+    board.appendChild(h);
+  });
+  LANES.forEach(lane=>{
+    const lc = document.createElement("div");
+    lc.className = "lane";
+    lc.innerHTML = `<div class="lname">${lane.name}</div><div class="lwho">${lane.who}</div><div class="lbar" style="background:${lane.color}"></div>`;
+    board.appendChild(lc);
+    COLS.forEach(col=>{
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.lane = lane.id;
+      cell.dataset.status = col.id;
+      cell.addEventListener("dragover", e=>{e.preventDefault();cell.classList.add("dragover");});
+      cell.addEventListener("dragleave", ()=>cell.classList.remove("dragover"));
+      cell.addEventListener("drop", e=>{
+        e.preventDefault(); cell.classList.remove("dragover");
+        const id = e.dataTransfer.getData("text/plain");
+        if(!id) return;
+        moveCard(id, cell.dataset.lane, cell.dataset.status);
+      });
+      cards.filter(c=>c.lane===lane.id && c.status===col.id).forEach(c=>{
+        const card = document.createElement("div");
+        card.className = `ccard m-${c.moscow}`;
+        card.draggable = true;
+        const del = c.is_custom ? `<span class="del" data-del="${c.id}" title="Remover">✕</span>` : "";
+        card.innerHTML = `<div class="ct">${del}${escapeHtml(c.title)}</div><span class="cm m-${c.moscow}">${MLABEL[c.moscow]}</span>`;
+        card.addEventListener("dragstart", e=>{e.dataTransfer.setData("text/plain",c.id);card.classList.add("drag");});
+        card.addEventListener("dragend", ()=>card.classList.remove("drag"));
+        cell.appendChild(card);
+      });
+      board.appendChild(cell);
+    });
+  });
+  updateAlert();
+}
+
+async function moveCard(id, lane, status){
+  const c = cardById(id); if(!c) return;
+  c.lane = lane; c.status = status;            // atualização otimista
+  render();
+  const { error } = await sb.from("kanban_cards")
+    .update({lane, status, updated_at:new Date().toISOString()}).eq("id", id);
+  if(error){ setStatus(false, error.message); fetchCards(); }
+}
+
+function updateAlert(){
+  const mustBacklog = cards.filter(c=>c.moscow==="must" && c.status==="backlog").length;
+  const mustDone = cards.filter(c=>c.moscow==="must" && c.status==="feito").length;
+  const mustTotal = cards.filter(c=>c.moscow==="must").length;
+  const a = document.getElementById("alert");
+  if(mustBacklog>0){ a.className="alert"; a.textContent=`⚠ Must no backlog: ${mustBacklog}`; }
+  else{ a.className="alert ok"; a.textContent=`✓ Must concluídos: ${mustDone}/${mustTotal}`; }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
+// select de raias
+const flane = document.getElementById("flane");
+LANES.forEach(l=>{ const o=document.createElement("option"); o.value=l.id; o.textContent=l.name; flane.appendChild(o); });
+
+// adicionar feature
+document.getElementById("addform").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const input = document.getElementById("ftext");
+  const t = input.value.trim(); if(!t) return;
+  const lane = document.getElementById("flane").value;
+  const m = document.getElementById("fm").value;
+  const id = "x" + Date.now().toString(36);
+  input.value = ""; input.focus();
+  const row = {id, lane, moscow:m, title:t, status:"backlog", is_custom:true, position:9999};
+  cards.push(row); render();
+  const { error } = await sb.from("kanban_cards").insert(row);
+  if(error){ setStatus(false, error.message); fetchCards(); }
+});
+
+// remover card customizado
+board.addEventListener("click", async e=>{
+  const id = e.target.dataset && e.target.dataset.del; if(!id) return;
+  if(!confirm("Remover esta feature?")) return;
+  cards = cards.filter(c=>c.id!==id); render();
+  const { error } = await sb.from("kanban_cards").delete().eq("id", id);
+  if(error){ setStatus(false, error.message); fetchCards(); }
+});
+
+// troca de abas
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+    tab.classList.add("on");
+    const v = tab.dataset.view;
+    document.getElementById("view-board").style.display = (v==="board") ? "" : "none";
+    document.getElementById("view-dor").style.display   = (v==="dor")   ? "" : "none";
+  });
+});
+
+// resetar: tudo volta ao backlog (mantém as features adicionadas)
+document.getElementById("reset").addEventListener("click", async ()=>{
+  if(!confirm("Resetar o quadro? Todos os cards voltam para o Backlog (as features adicionadas são mantidas).")) return;
+  cards.forEach(c=>c.status="backlog"); render();
+  const { error } = await sb.from("kanban_cards").update({status:"backlog"}).neq("id","__none__");
+  if(error){ setStatus(false, error.message); fetchCards(); }
+});
+
+// realtime: qualquer mudança no banco recarrega o quadro de todos
+sb.channel("kanban_cards_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"kanban_cards"}, ()=>{ fetchCards(); })
+  .subscribe((st)=>{ if(st==="SUBSCRIBED") setStatus(true); });
+
+fetchCards();
+</script>
+</body>
+</html>
