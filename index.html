@@ -207,6 +207,7 @@
       </div>
       <span class="conn" id="conn">● conectando…</span>
       <button class="btn" id="reset">↺ Voltar tudo ao backlog</button>
+      <button class="btn" id="wipe" title="Apaga TODOS os cards (sem repor nada)">🧹 Limpar tudo</button>
       <button class="btn" id="reseed" title="Apaga tudo e planta o backlog do MVP">🔥 Re-seed MVP</button>
       <div class="alert" id="alert">Must no backlog: —</div>
     </div>
@@ -621,6 +622,25 @@ document.getElementById("reset").addEventListener("click", async ()=>{
   cards.forEach(c=>c.status="backlog"); render();
   const { error } = await sb.from("kanban_cards").update({status:"backlog"}).neq("id","__none__");
   if(error){ setStatus(false, error.message); fetchCards(); }
+});
+
+// wipe: APAGA todos os cards do quadro (não toca no cronograma)
+document.getElementById("wipe").addEventListener("click", async ()=>{
+  const ok = confirm(
+    "⚠ Limpar TODO o quadro?\n\n" +
+    "Vai apagar TODOS os cards (inclusive os do MVP, os adicionados pelo time e os \"feitos\"). " +
+    "O cronograma e os timestamps NÃO são apagados.\n\n" +
+    "Depois disso o backlog fica vazio — você pode adicionar cards manualmente ou usar o \"Re-seed MVP\" para plantar o backlog do MoSCoW."
+  );
+  if(!ok) return;
+  const really = prompt("Para confirmar, digite LIMPAR:");
+  if(really !== "LIMPAR"){ alert("Cancelado."); return; }
+
+  const { error } = await sb.from("kanban_cards").delete().neq("id","__none__");
+  if(error){ alert("Erro ao limpar cards: " + error.message); return; }
+  cards = [];
+  render();
+  alert("✓ Quadro limpo. Adicione cards pelo formulário ou plante o MVP com 🔥 Re-seed.");
 });
 
 // re-seed: APAGA tudo e planta o backlog do MVP "Combinado Não Sai Caro"

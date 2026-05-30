@@ -67,11 +67,15 @@ Estado dos timestamps é compartilhado em tempo real via Supabase (tabela `hacka
 
 Os responsáveis disponíveis nos cards e no cronograma são: **Victor, Vitão, Monica, Gustavo, Nicolas**.
 
-## Re-seed do MVP
+## Botões destrutivos do header
 
-O header tem um botão **🔥 Re-seed MVP** que **APAGA todos os cards** (inclusive os adicionados pelo time) e os timestamps do cronograma, e planta o backlog do MoSCoW do zero. Para confirmar, é preciso digitar `RESET MVP` no prompt.
+| Botão                       | O que faz                                                                                                | Confirma com    |
+|-----------------------------|----------------------------------------------------------------------------------------------------------|-----------------|
+| ↺ Voltar tudo ao backlog    | Move todos os cards para o Backlog. Nada é apagado.                                                      | OK do `confirm` |
+| 🧹 Limpar tudo               | **APAGA** todos os cards (inclusive os "feitos" e os adicionados pelo time). Não toca no cronograma.    | Digite `LIMPAR` |
+| 🔥 Re-seed MVP               | **APAGA** todos os cards **e** os timestamps do cronograma, depois planta o backlog do MoSCoW do zero.   | Digite `RESET MVP` |
 
-Como atalho equivalente via SQL, rode `seed-mvp-contratos.sql` no Supabase SQL Editor.
+Como atalho equivalente via SQL para o Re-seed, rode `seed-mvp-contratos.sql` no Supabase SQL Editor.
 
 ## Arquivos
 
