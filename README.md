@@ -54,7 +54,14 @@ Aba **⏱ Cronograma** mostra:
 - relógio em tempo real e a data de hoje;
 - contagem regressiva até o pitch (domingo 31/05 às 18:00);
 - etapa **atual** destacada conforme a hora;
-- checklist por dia (Sáb 30/05 e Dom 31/05). As marcações ficam em `localStorage` do navegador.
+- checklist por dia (Sáb 30/05 e Dom 31/05) com **3 estados por clique**:
+  - ⚪ pendente → ⏳ em andamento (grava `started_at`) → ✅ feito (grava `done_at`);
+  - re-clique em ✅ pede confirmação e reabre a etapa.
+- linha mono mostra "iniciada HH:MM · rodando há …" enquanto roda e "✅ HH:MM · DD/MM · durou …" depois;
+- chip **previsto vs real** por etapa: 🟢 no prazo / 🟡 estourou até 30% / 🔴 atrasada;
+- pills no topo: **acumulado hoje**, **% no prazo**, **feitas**, **em andamento**.
+
+Estado dos timestamps é compartilhado em tempo real via Supabase (tabela `hackathon_schedule`). Para habilitar, rode o `supabase-setup.sql` no SQL Editor.
 
 Os responsáveis disponíveis nos cards e no cronograma são: **Victor, Vitão, Monica, Gustavo, Nicolas**.
 

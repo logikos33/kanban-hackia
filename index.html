@@ -158,21 +158,36 @@
   .schday{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
   .schday .dhead{padding:14px 18px;background:var(--card2);border-bottom:1px solid var(--line);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
   .schday .dhead .dprog{font-family:var(--mono);font-size:12px;color:#9296bd;font-weight:600}
-  .stage{display:grid;grid-template-columns:90px 28px 1fr auto;gap:12px;padding:13px 18px;border-top:1px solid var(--line);align-items:center;transition:.15s}
+  .stage{display:grid;grid-template-columns:90px 28px 1fr auto;gap:12px 12px;padding:13px 18px;border-top:1px solid var(--line);align-items:center;transition:.15s}
   .stage:first-child{border-top:0}
   .stage:hover{background:var(--cell)}
-  .stage.done{opacity:.55}
+  .stage.done{opacity:.7}
   .stage.done .stitle{text-decoration:line-through}
-  .stage.now{background:rgba(124,131,255,.10);border-left:3px solid var(--brand);padding-left:15px}
+  .stage.now,.stage.run{background:rgba(124,131,255,.10);border-left:3px solid var(--brand);padding-left:15px}
+  .stage.run{background:rgba(255,206,90,.10);border-left-color:var(--warn)}
   .stage .stime{font-family:var(--mono);font-size:13px;font-weight:700;color:#9296bd}
   .stage.now .stime{color:var(--brand)}
+  .stage.run .stime{color:var(--warn)}
   .stage.pitch .stime{color:var(--accent)}
-  .stchk{width:20px;height:20px;border-radius:5px;border:2px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--cell);transition:.15s}
+  .stchk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--cell);transition:.15s;font-size:12px;font-weight:900}
   .stchk:hover{border-color:var(--brand)}
-  .stchk.on{background:var(--ok);border-color:var(--ok);color:#0c0f24;font-weight:900;font-size:12px}
+  .stchk.run{background:var(--warn);border-color:var(--warn);color:#0c0f24}
+  .stchk.done{background:var(--ok);border-color:var(--ok);color:#0c0f24}
   .stitle{font-size:13.5px;font-weight:600;color:#eef0ff}
   .stage.pitch .stitle{color:var(--accent);font-weight:800}
   .stwho{font-family:var(--mono);font-size:10.5px;color:#9296bd;font-weight:600;background:var(--cell);padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
+  .stmeta{grid-column:3 / 5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+  .stinfo{font-family:var(--mono);font-size:11px;color:#9296bd;font-weight:600}
+  .stinfo.run{color:#ffe19a}
+  .stinfo.done{color:#9af0cd}
+  .statchip{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--line);letter-spacing:.3px}
+  .statchip.green{background:rgba(70,230,160,.18);color:#9af0cd;border-color:rgba(70,230,160,.45)}
+  .statchip.yellow{background:rgba(255,206,90,.20);color:#ffe19a;border-color:rgba(255,206,90,.45)}
+  .statchip.red{background:rgba(255,107,107,.20);color:#ffb3b3;border-color:rgba(255,107,107,.45)}
+  .schstats{margin-top:14px;display:flex;flex-wrap:wrap;gap:12px}
+  .schstats .pill{font-family:var(--mono);font-size:12px;font-weight:700;background:var(--card2);border:1px solid var(--line);padding:8px 14px;border-radius:999px;color:#cfd2ef;display:flex;gap:8px;align-items:center}
+  .schstats .pill b{color:#fff;font-weight:800}
+  .schstats .pill .k{color:#9296bd;font-weight:600}
 </style>
 </head>
 <body>
@@ -302,6 +317,13 @@
         <div class="val" id="clk-stage" style="font-size:18px;line-height:1.25">—</div>
         <div class="lbl" id="clk-next" style="color:#cdd0ee;font-weight:600;letter-spacing:.2px">—</div>
       </div>
+    </div>
+
+    <div class="schstats" id="schstats">
+      <div class="pill"><span class="k">⏱ acumulado hoje</span><b id="st-acc">0m</b></div>
+      <div class="pill"><span class="k">🎯 no prazo</span><b id="st-rate">—</b></div>
+      <div class="pill"><span class="k">✅ feitas</span><b id="st-done">0</b></div>
+      <div class="pill"><span class="k">⏳ em andamento</span><b id="st-run">0</b></div>
     </div>
 
     <div class="sched" id="sched"></div>
@@ -684,90 +706,257 @@ async function saveCardDetails(){
 mdSave.addEventListener("click", saveCardDetails);
 
 // ============================================================
-// CRONOGRAMA — relógio, contagem regressiva e checklist
+// CRONOGRAMA — relógio, contagem regressiva, checklist com timestamps
+// Estados por etapa: pendente → em andamento → feito
+// Persistência: Supabase (tabela hackathon_schedule) + realtime
 // ============================================================
-const LS_DONE_KEY = "hackia_sched_done_v1";
-function loadDone(){
-  try { return JSON.parse(localStorage.getItem(LS_DONE_KEY) || "[]"); }
-  catch { return []; }
-}
-function saveDone(arr){ localStorage.setItem(LS_DONE_KEY, JSON.stringify(arr)); }
-let doneSet = new Set(loadDone());
-
-function renderSchedule(){
-  const root = document.getElementById("sched");
-  root.innerHTML = "";
-  SCHEDULE.forEach(day=>{
-    const done = day.items.filter(s=>doneSet.has(s.id)).length;
-    const total = day.items.length;
-    const wrap = document.createElement("div");
-    wrap.className = "schday";
-    wrap.innerHTML = `<div class="dhead"><span>${day.day}</span><span class="dprog">${done}/${total} concluídas</span></div>`;
-    day.items.forEach(s=>{
-      const row = document.createElement("div");
-      const isDone = doneSet.has(s.id);
-      row.className = "stage" + (isDone?" done":"") + (s.pitch?" pitch":"");
-      row.dataset.sid = s.id;
-      row.dataset.time = s.t;
-      row.innerHTML =
-        `<div class="stime">${s.t}</div>` +
-        `<div class="stchk ${isDone?"on":""}" data-chk="${s.id}">${isDone?"✓":""}</div>` +
-        `<div class="stitle">${escapeHtml(s.label)}</div>` +
-        `<div class="stwho">${escapeHtml(s.who)}</div>`;
-      wrap.appendChild(row);
-    });
-    root.appendChild(wrap);
-  });
-  // marcar etapa atual
-  markCurrentStage();
-}
-document.getElementById("sched").addEventListener("click", e=>{
-  const chk = e.target.closest(".stchk"); if(!chk) return;
-  const id = chk.dataset.chk;
-  if(doneSet.has(id)) doneSet.delete(id); else doneSet.add(id);
-  saveDone(Array.from(doneSet));
-  renderSchedule();
-});
 
 function pad(n){ return String(n).padStart(2,"0"); }
 const DAYS_PT = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
-const MONTHS_PT = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+// scheduleState[id] = {started_at: ISO|null, done_at: ISO|null}
+let scheduleState = {};
+let scheduleReady = false;
+
+function stageStatus(id){
+  const r = scheduleState[id];
+  if(!r || !r.started_at) return "pendente";
+  if(!r.done_at) return "andamento";
+  return "feito";
+}
+
+function fmtTimeShort(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function fmtDateShort(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}`;
+}
+function fmtDur(ms){
+  if(ms < 0) ms = 0;
+  const s = Math.floor(ms/1000);
+  if(s < 60) return `${s}s`;
+  const m = Math.floor(s/60);
+  if(m < 60) return `${m}m ${pad(s%60)}s`;
+  const h = Math.floor(m/60);
+  return `${h}h ${pad(m%60)}m`;
+}
+function fmtDurShort(ms){
+  if(ms < 60000) return `${Math.floor(ms/1000)}s`;
+  const m = Math.floor(ms/60000);
+  if(m < 60) return `${m}m`;
+  return `${Math.floor(m/60)}h ${pad(m%60)}m`;
+}
 
 function flatSchedule(){
-  // retorna [{date, ...stage}] em ordem
   const out = [];
   SCHEDULE.forEach((day, idx)=>{
     const dayDate = idx===0 ? new Date(2026,4,30) : new Date(2026,4,31);
     day.items.forEach(s=>{
       const [h,m] = s.t.split(":").map(Number);
       const d = new Date(dayDate); d.setHours(h, m, 0, 0);
-      out.push({...s, when:d});
+      out.push({...s, when:d, dayIdx:idx});
     });
   });
-  return out.sort((a,b)=>a.when-b.when);
+  out.sort((a,b)=>a.when-b.when);
+  // calcula janela prevista (próxima etapa - esta)
+  for(let i=0;i<out.length;i++){
+    out[i].nextWhen = (i+1 < out.length) ? out[i+1].when : null;
+    out[i].plannedMs = out[i].nextWhen ? (out[i].nextWhen - out[i].when) : null;
+  }
+  return out;
 }
+const FLAT = flatSchedule();
+const STAGE_BY_ID = Object.fromEntries(FLAT.map(s=>[s.id, s]));
+
+async function fetchScheduleState(){
+  const { data, error } = await sb.from("hackathon_schedule").select("*");
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      console.warn("[cronograma] tabela hackathon_schedule ausente — rode supabase-setup.sql");
+    } else {
+      console.error(error);
+    }
+    scheduleReady = true; renderSchedule(); return;
+  }
+  scheduleState = {};
+  (data||[]).forEach(r=>{ scheduleState[r.id] = {started_at:r.started_at, done_at:r.done_at}; });
+  scheduleReady = true;
+  renderSchedule();
+}
+
+async function onStageClick(id){
+  const cur = stageStatus(id);
+  const nowIso = new Date().toISOString();
+  let payload, optimistic;
+  if(cur === "pendente"){
+    payload = {id, started_at: nowIso, done_at: null, updated_at: nowIso};
+    optimistic = {started_at: nowIso, done_at: null};
+  } else if(cur === "andamento"){
+    payload = {id, started_at: scheduleState[id].started_at, done_at: nowIso, updated_at: nowIso};
+    optimistic = {started_at: scheduleState[id].started_at, done_at: nowIso};
+  } else { // feito
+    if(!confirm("Reabrir esta etapa? Os horários serão apagados.")) return;
+    payload = {id, started_at: null, done_at: null, updated_at: nowIso};
+    optimistic = {started_at: null, done_at: null};
+  }
+  scheduleState[id] = optimistic;
+  renderSchedule();
+  const { error } = await sb.from("hackathon_schedule").upsert(payload, {onConflict:"id"});
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      alert("Faltam tabelas no Supabase. Rode supabase-setup.sql no SQL Editor.");
+    } else {
+      console.error(error);
+    }
+    fetchScheduleState();
+  }
+}
+
+function chipFor(plannedMs, actualMs){
+  if(!plannedMs || plannedMs <= 0) return "";
+  const ratio = actualMs / plannedMs;
+  const delta = actualMs - plannedMs;
+  const sign = delta >= 0 ? "+" : "−";
+  if(ratio <= 1) return `<span class="statchip green">🟢 no prazo · ${fmtDurShort(actualMs)}</span>`;
+  if(ratio <= 1.3) return `<span class="statchip yellow">🟡 ${sign}${fmtDurShort(Math.abs(delta))}</span>`;
+  return `<span class="statchip red">🔴 ${sign}${fmtDurShort(Math.abs(delta))}</span>`;
+}
+
+function liveChipFor(plannedMs, runningMs){
+  if(!plannedMs || plannedMs <= 0) return "";
+  const ratio = runningMs / plannedMs;
+  if(ratio <= 1) return `<span class="statchip green">🟢 dentro da janela</span>`;
+  if(ratio <= 1.3) return `<span class="statchip yellow">🟡 estourando</span>`;
+  return `<span class="statchip red">🔴 atrasada</span>`;
+}
+
+function renderStageRow(s){
+  const st = stageStatus(s.id);
+  const rec = scheduleState[s.id] || {};
+  let chkClass = "", chkIcon = "";
+  if(st === "andamento"){ chkClass = "run"; chkIcon = "⏳"; }
+  else if(st === "feito"){ chkClass = "done"; chkIcon = "✓"; }
+
+  let stageClass = "stage";
+  if(s.pitch) stageClass += " pitch";
+  if(st === "andamento") stageClass += " run";
+  if(st === "feito") stageClass += " done";
+
+  // metaline
+  let info = "—", infoCls = "stinfo";
+  let chip = "";
+  if(st === "andamento"){
+    const startMs = new Date(rec.started_at).getTime();
+    const runMs = Date.now() - startMs;
+    info = `⏳ iniciada ${fmtTimeShort(rec.started_at)} · rodando há ${fmtDur(runMs)}`;
+    infoCls = "stinfo run";
+    chip = liveChipFor(s.plannedMs, runMs);
+  } else if(st === "feito"){
+    const startMs = new Date(rec.started_at).getTime();
+    const endMs = new Date(rec.done_at).getTime();
+    const dur = endMs - startMs;
+    info = `✅ ${fmtTimeShort(rec.done_at)} · ${fmtDateShort(rec.done_at)} · durou ${fmtDur(dur)}`;
+    infoCls = "stinfo done";
+    chip = chipFor(s.plannedMs, dur);
+  }
+
+  return (
+    `<div class="${stageClass}" data-sid="${s.id}" data-time="${s.t}">` +
+      `<div class="stime">${s.t}</div>` +
+      `<div class="stchk ${chkClass}" data-chk="${s.id}" title="Clique para avançar estado">${chkIcon}</div>` +
+      `<div class="stitle">${escapeHtml(s.label)}</div>` +
+      `<div class="stwho">${escapeHtml(s.who)}</div>` +
+      `<div class="stmeta"><span class="${infoCls}" data-info="${s.id}">${info}</span>${chip}</div>` +
+    `</div>`
+  );
+}
+
+function renderSchedule(){
+  const root = document.getElementById("sched");
+  root.innerHTML = "";
+  SCHEDULE.forEach((day, idx)=>{
+    const done = day.items.filter(s=>stageStatus(s.id)==="feito").length;
+    const total = day.items.length;
+    const wrap = document.createElement("div");
+    wrap.className = "schday";
+    wrap.innerHTML = `<div class="dhead"><span>${day.day}</span><span class="dprog">${done}/${total} concluídas</span></div>` +
+      day.items.map(s=>renderStageRow(STAGE_BY_ID[s.id] || s)).join("");
+    root.appendChild(wrap);
+  });
+  markCurrentStage();
+  renderStats();
+}
+
+document.getElementById("sched").addEventListener("click", e=>{
+  const chk = e.target.closest(".stchk"); if(!chk) return;
+  onStageClick(chk.dataset.chk);
+});
 
 function markCurrentStage(){
   const now = new Date();
-  const flat = flatSchedule();
   let cur = null, next = null;
-  for(let i=0;i<flat.length;i++){
-    if(flat[i].when <= now) cur = flat[i];
-    else { next = flat[i]; break; }
+  for(let i=0;i<FLAT.length;i++){
+    if(FLAT[i].when <= now) cur = FLAT[i];
+    else { next = FLAT[i]; break; }
   }
   document.querySelectorAll(".stage.now").forEach(el=>el.classList.remove("now"));
   if(cur){
     const el = document.querySelector(`.stage[data-sid="${cur.id}"]`);
-    if(el && !doneSet.has(cur.id)) el.classList.add("now");
+    if(el && stageStatus(cur.id) !== "feito") el.classList.add("now");
   }
   const elStage = document.getElementById("clk-stage");
   const elNext = document.getElementById("clk-next");
-  if(elStage){
-    elStage.textContent = cur ? cur.label : "Antes do kickoff";
-  }
-  if(elNext){
-    elNext.textContent = next ? `Próxima: ${next.t} · ${next.label}` : "Última etapa do hackathon";
-  }
+  if(elStage) elStage.textContent = cur ? cur.label : "Antes do kickoff";
+  if(elNext) elNext.textContent = next ? `Próxima: ${next.t} · ${next.label}` : "Última etapa do hackathon";
+}
+
+function isSameDay(a, b){
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
+
+function renderStats(){
+  const today = new Date();
+  let accMs = 0, doneCount = 0, runCount = 0, onTime = 0, measured = 0;
+  Object.keys(scheduleState).forEach(id=>{
+    const r = scheduleState[id];
+    if(!r) return;
+    if(r.started_at && !r.done_at) runCount++;
+    if(r.started_at && r.done_at){
+      const start = new Date(r.started_at);
+      const end   = new Date(r.done_at);
+      if(isSameDay(end, today)) accMs += (end - start);
+      doneCount++;
+      const stage = STAGE_BY_ID[id];
+      if(stage && stage.plannedMs){
+        measured++;
+        if((end - start) <= stage.plannedMs) onTime++;
+      }
+    }
+  });
+  const elAcc = document.getElementById("st-acc");
+  const elRate = document.getElementById("st-rate");
+  const elDone = document.getElementById("st-done");
+  const elRun  = document.getElementById("st-run");
+  if(elAcc) elAcc.textContent = accMs ? fmtDur(accMs) : "0m";
+  if(elRate) elRate.textContent = measured ? `${Math.round(onTime*100/measured)}% (${onTime}/${measured})` : "—";
+  if(elDone) elDone.textContent = doneCount;
+  if(elRun)  elRun.textContent  = runCount;
+}
+
+function tickRunningStages(){
+  // atualiza só as linhas "em andamento" sem rerender completo
+  Object.keys(scheduleState).forEach(id=>{
+    const r = scheduleState[id];
+    if(!r || !r.started_at || r.done_at) return;
+    const el = document.querySelector(`.stinfo[data-info="${id}"]`);
+    if(!el) return;
+    const runMs = Date.now() - new Date(r.started_at).getTime();
+    el.textContent = `⏳ iniciada ${fmtTimeShort(r.started_at)} · rodando há ${fmtDur(runMs)}`;
+  });
 }
 
 function tickClock(){
@@ -790,12 +979,18 @@ function tickClock(){
       elCD.className = "val" + (h<1?" danger":(h<3?" warn":""));
     }
   }
-  // remarcar etapa só a cada 30s para não recalcular toa
-  if(now.getSeconds() % 30 === 0) markCurrentStage();
+  tickRunningStages();
+  if(now.getSeconds() % 30 === 0) { markCurrentStage(); renderStats(); }
 }
+
 renderSchedule();
+fetchScheduleState();
 tickClock();
 setInterval(tickClock, 1000);
+
+sb.channel("hackathon_schedule_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"hackathon_schedule"}, fetchScheduleState)
+  .subscribe();
 </script>
 </body>
 </html>
