@@ -192,6 +192,26 @@
   .schstats .pill .k{color:#9296bd;font-weight:600}
   .sprintlog{list-style:none;margin:8px 0 0;padding:0;width:100%;display:flex;flex-direction:column;gap:3px}
   .sprintlog li{font-size:11.5px;color:#cfd2ef;background:var(--cell);border:1px solid var(--line);padding:5px 9px;border-radius:8px;font-weight:500}
+
+  /* SETTINGS — time & raias */
+  .setgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px;padding-bottom:40px}
+  @media(max-width:900px){.setgrid{grid-template-columns:1fr}}
+  .setcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+  .setcard h4{font-size:15px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .sethint{font-size:12.5px;color:#9296bd;margin-bottom:14px;line-height:1.45}
+  .setlist{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;min-height:34px}
+  .setpill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;background:var(--cell);border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:#cfd2ef}
+  .setpill b{font-weight:700;color:#eef0ff}
+  .setpill .muted{color:#9296bd;font-weight:500;font-family:var(--mono);font-size:11px}
+  .setpill button{background:none;border:none;color:#9296bd;font-weight:700;cursor:pointer;font-size:13px;padding:0 2px;line-height:1}
+  .setpill button:hover{color:var(--no)}
+  .setform{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .setform input[type=text]{flex:1 1 180px;font-family:inherit;font-size:13.5px;background:var(--cell);border:1px solid var(--line);color:#eef0ff;padding:9px 11px;border-radius:9px;outline:none;transition:.15s}
+  .setform input[type=text]:focus{border-color:var(--brand)}
+  .setform input[type=color]{width:42px;height:42px;background:var(--cell);border:1px solid var(--line);border-radius:9px;cursor:pointer;padding:2px}
+  .setform .addbtn{padding:9px 16px;font-size:13px}
+  .setwarn{margin-top:12px;font-family:var(--mono);font-size:11.5px;color:#ffb3b3;background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.35);border-radius:8px;padding:8px 10px;display:none}
+  .setwarn.on{display:block}
 </style>
 </head>
 <body>
@@ -220,6 +240,7 @@
     <button class="tab on" data-view="board">📌 Quadro</button>
     <button class="tab" data-view="cron">⏱ Cronograma</button>
     <button class="tab" data-view="dor">🎯 A Dor que tratamos</button>
+    <button class="tab" data-view="settings">⚙ Time &amp; Raias</button>
   </div>
 </div>
 
@@ -310,6 +331,12 @@
   </div>
 </div>
 
+<div id="view-settings" style="display:none">
+  <div class="wrap">
+    <div id="view-settings-body"></div>
+  </div>
+</div>
+
 <div id="view-cron" style="display:none">
   <div class="wrap">
     <div class="clockbar">
@@ -378,7 +405,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const TEAM = ["Victor","Vitão","Monica","Gustavo","Nicolas"];
+const DEFAULT_TEAM = ["Victor","Vitão","Monica","Gustavo","Nicolas"];
+let TEAM = [...DEFAULT_TEAM];
 
 const COLS = [
   {id:"backlog", label:"📥 Backlog"},
@@ -394,12 +422,13 @@ const PITCH_AT = new Date(2026, 4, 31, 18, 0, 0); // mês 0-indexed (4 = maio)
 // Cada sprint vira um checkpoint do que o time mexeu no backlog na janela.
 const SPRINT_MS = 30 * 60 * 1000;
 
-const LANES = [
+const DEFAULT_LANES = [
   {id:"front",    name:"Front / UX",          who:"Front-end",          color:"#7c83ff"},
   {id:"back",     name:"Back / IA-LLM",       who:"Back + LLM",         color:"#46e6a0"},
   {id:"juridico", name:"Curadoria jurídica",  who:"Cláusulas + RAG",    color:"#ff7a45"},
   {id:"gestao",   name:"Gestão",              who:"Gestão / pitch",     color:"#ffce5a"},
 ];
+let LANES = DEFAULT_LANES.map(l => ({...l}));
 
 // cards do MVP "Combinado Não Sai Caro" — espelha o arquivo
 // "Moskow Combinado nao sai caro.md".
@@ -573,9 +602,16 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 }
 
-// select de raias
-const flane = document.getElementById("flane");
-LANES.forEach(l=>{ const o=document.createElement("option"); o.value=l.id; o.textContent=l.name; flane.appendChild(o); });
+// select de raias (re-renderizado quando LANES muda via Supabase)
+function renderLaneSelect(){
+  const flane = document.getElementById("flane");
+  if(!flane) return;
+  const cur = flane.value;
+  flane.innerHTML = "";
+  LANES.forEach(l=>{ const o=document.createElement("option"); o.value=l.id; o.textContent=l.name; flane.appendChild(o); });
+  if(cur && LANES.find(l=>l.id===cur)) flane.value = cur;
+}
+renderLaneSelect();
 
 // adicionar feature
 document.getElementById("addform").addEventListener("submit", async e=>{
@@ -607,9 +643,11 @@ document.querySelectorAll(".tab").forEach(tab=>{
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
     tab.classList.add("on");
     const v = tab.dataset.view;
-    document.getElementById("view-board").style.display = (v==="board") ? "" : "none";
-    document.getElementById("view-cron").style.display  = (v==="cron")  ? "" : "none";
-    document.getElementById("view-dor").style.display   = (v==="dor")   ? "" : "none";
+    document.getElementById("view-board").style.display    = (v==="board")    ? "" : "none";
+    document.getElementById("view-cron").style.display     = (v==="cron")     ? "" : "none";
+    document.getElementById("view-dor").style.display      = (v==="dor")      ? "" : "none";
+    document.getElementById("view-settings").style.display = (v==="settings") ? "" : "none";
+    if(v === "settings") renderSettings();
   });
 });
 
@@ -676,6 +714,205 @@ sb.channel("kanban_cards_rt")
   .subscribe((st)=>{ if(st==="SUBSCRIBED") setStatus(true); });
 
 fetchCards();
+
+// ============================================================
+// TIME (responsáveis) + RAIAS — gerenciados via Supabase com fallback
+// ============================================================
+let teamTableOk = true;
+let lanesTableOk = true;
+
+async function fetchTeam(){
+  const { data, error } = await sb.from("kanban_team").select("*").order("position",{ascending:true});
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      teamTableOk = false;
+      console.warn("[team] tabela kanban_team ausente — rode supabase-setup.sql");
+    } else { console.error(error); }
+    renderSettings();
+    return;
+  }
+  teamTableOk = true;
+  if(!data || data.length === 0){
+    const seed = DEFAULT_TEAM.map((n,i)=>({name:n, position:i}));
+    const r = await sb.from("kanban_team").upsert(seed, {onConflict:"name", ignoreDuplicates:true});
+    if(r.error){ console.warn("[team seed]", r.error.message); }
+    TEAM = [...DEFAULT_TEAM];
+  } else {
+    TEAM = data.map(r=>r.name);
+  }
+  renderSettings();
+}
+
+async function fetchLanes(){
+  const { data, error } = await sb.from("kanban_lanes").select("*").order("position",{ascending:true});
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      lanesTableOk = false;
+      console.warn("[lanes] tabela kanban_lanes ausente — rode supabase-setup.sql");
+    } else { console.error(error); }
+    renderSettings();
+    return;
+  }
+  lanesTableOk = true;
+  if(!data || data.length === 0){
+    const seed = DEFAULT_LANES.map((l,i)=>({...l, position:i}));
+    const r = await sb.from("kanban_lanes").upsert(seed, {onConflict:"id", ignoreDuplicates:true});
+    if(r.error){ console.warn("[lanes seed]", r.error.message); }
+    LANES = DEFAULT_LANES.map(l=>({...l}));
+  } else {
+    LANES = data.map(r=>({id:r.id, name:r.name, who:r.who||"", color:r.color||"#7c83ff"}));
+  }
+  renderLaneSelect();
+  render();
+  renderSettings();
+}
+
+function slugify(s){
+  const base = String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"").slice(0,24);
+  return base || ("raia"+Date.now().toString(36));
+}
+
+async function addTeamMember(rawName){
+  const name = (rawName||"").trim();
+  if(!name) return;
+  if(TEAM.includes(name)){ alert(`"${name}" já está na lista.`); return; }
+  TEAM.push(name); renderSettings();
+  if(!teamTableOk){ alert("⚠ Mudança não foi salva no Supabase — tabela kanban_team ausente. Rode supabase-setup.sql para sincronizar pelo time."); return; }
+  const { error } = await sb.from("kanban_team").insert({name, position:TEAM.length-1});
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      teamTableOk = false;
+      alert("⚠ Faltam tabelas — rode supabase-setup.sql no SQL Editor.");
+    } else {
+      alert("Erro: " + error.message);
+    }
+    fetchTeam();
+  }
+}
+
+async function removeTeamMember(name){
+  if(!confirm(`Remover "${name}" da lista de responsáveis?\nCards já atribuídos a ele mantêm o nome até serem editados.`)) return;
+  TEAM = TEAM.filter(n=>n!==name); renderSettings();
+  if(!teamTableOk) return;
+  const { error } = await sb.from("kanban_team").delete().eq("name", name);
+  if(error){ alert("Erro: " + error.message); fetchTeam(); }
+}
+
+async function addLane(rawName, rawWho, rawColor){
+  const name = (rawName||"").trim();
+  if(!name){ alert("Nome da raia obrigatório."); return; }
+  const who = (rawWho||"").trim();
+  const color = (rawColor||"#7c83ff").trim();
+  const baseId = slugify(name);
+  let id = baseId, n = 1;
+  while(LANES.find(l=>l.id===id)){ id = baseId + "_" + (++n); }
+  const lane = {id, name, who, color, position:LANES.length};
+  LANES.push(lane); renderLaneSelect(); render(); renderSettings();
+  if(!lanesTableOk){ alert("⚠ Mudança não foi salva no Supabase — tabela kanban_lanes ausente. Rode supabase-setup.sql para sincronizar pelo time."); return; }
+  const { error } = await sb.from("kanban_lanes").insert(lane);
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      lanesTableOk = false;
+      alert("⚠ Faltam tabelas — rode supabase-setup.sql no SQL Editor.");
+    } else {
+      alert("Erro: " + error.message);
+    }
+    fetchLanes();
+  }
+}
+
+async function removeLane(id){
+  const used = cards.filter(c=>c.lane===id).length;
+  if(used > 0){
+    alert(`Esta raia tem ${used} card${used>1?"s":""}. Mova-os para outra raia antes de remover.`);
+    return;
+  }
+  const lane = LANES.find(l=>l.id===id);
+  if(!confirm(`Remover a raia "${lane ? lane.name : id}"?`)) return;
+  LANES = LANES.filter(l=>l.id!==id); renderLaneSelect(); render(); renderSettings();
+  if(!lanesTableOk) return;
+  const { error } = await sb.from("kanban_lanes").delete().eq("id", id);
+  if(error){ alert("Erro: " + error.message); fetchLanes(); }
+}
+
+function renderSettings(){
+  const root = document.getElementById("view-settings-body");
+  if(!root) return;
+  const teamWarn = !teamTableOk
+    ? `<div class="setwarn on">⚠ Tabela <b>kanban_team</b> ausente — mudanças ficam só nesta sessão. Rode <b>supabase-setup.sql</b> no SQL Editor para sincronizar pelo time.</div>` : "";
+  const lanesWarn = !lanesTableOk
+    ? `<div class="setwarn on">⚠ Tabela <b>kanban_lanes</b> ausente — mudanças ficam só nesta sessão. Rode <b>supabase-setup.sql</b> no SQL Editor.</div>` : "";
+
+  const teamPills = TEAM.length
+    ? TEAM.map(n=>`<span class="setpill"><b>${escapeHtml(n)}</b><button data-rmteam="${escapeHtml(n)}" title="Remover">✕</button></span>`).join("")
+    : `<em style="color:#9296bd;font-size:13px">Nenhum responsável cadastrado.</em>`;
+
+  const lanePills = LANES.length
+    ? LANES.map(l=>{
+        const used = cards.filter(c=>c.lane===l.id).length;
+        return `<span class="setpill" style="border-left:4px solid ${escapeHtml(l.color)}"><b>${escapeHtml(l.name)}</b><span class="muted">· ${escapeHtml(l.who||"—")} · ${used} card${used!==1?"s":""}</span><button data-rmlane="${escapeHtml(l.id)}" title="Remover">✕</button></span>`;
+      }).join("")
+    : `<em style="color:#9296bd;font-size:13px">Nenhuma raia cadastrada.</em>`;
+
+  root.innerHTML = `
+    <div class="setgrid">
+      <div class="setcard">
+        <h4>👥 Responsáveis</h4>
+        <p class="sethint">Quem pode ser atribuído aos cards. Mudanças sincronizam pelo time em tempo real.</p>
+        <div class="setlist">${teamPills}</div>
+        <form id="addteamform" class="setform" autocomplete="off">
+          <input type="text" id="newteam" placeholder="Nome do novo responsável" required>
+          <button type="submit" class="addbtn">Adicionar</button>
+        </form>
+        ${teamWarn}
+      </div>
+      <div class="setcard">
+        <h4>🛤 Raias do quadro</h4>
+        <p class="sethint">Cada raia é uma linha horizontal do Kanban. Para remover uma raia, primeiro mova os cards dela para outra.</p>
+        <div class="setlist">${lanePills}</div>
+        <form id="addlaneform" class="setform" autocomplete="off">
+          <input type="text" id="newlane-name" placeholder="Nome da raia (ex.: Design)" required>
+          <input type="text" id="newlane-who" placeholder="Subtítulo (ex.: UI/UX)">
+          <input type="color" id="newlane-color" value="#7c83ff" title="Cor da raia">
+          <button type="submit" class="addbtn">Adicionar raia</button>
+        </form>
+        ${lanesWarn}
+      </div>
+    </div>
+  `;
+}
+
+// delegação de eventos para a aba Settings
+document.getElementById("view-settings-body").addEventListener("click", e=>{
+  const rt = e.target.dataset && e.target.dataset.rmteam;
+  if(rt){ removeTeamMember(rt); return; }
+  const rl = e.target.dataset && e.target.dataset.rmlane;
+  if(rl){ removeLane(rl); return; }
+});
+document.getElementById("view-settings-body").addEventListener("submit", e=>{
+  e.preventDefault();
+  if(e.target.id === "addteamform"){
+    const inp = document.getElementById("newteam");
+    addTeamMember(inp.value); inp.value = ""; inp.focus();
+  } else if(e.target.id === "addlaneform"){
+    const n = document.getElementById("newlane-name");
+    const w = document.getElementById("newlane-who");
+    const c = document.getElementById("newlane-color");
+    addLane(n.value, w.value, c.value);
+    n.value = ""; w.value = ""; n.focus();
+  }
+});
+
+fetchTeam();
+fetchLanes();
+
+sb.channel("kanban_team_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"kanban_team"}, fetchTeam)
+  .subscribe();
+sb.channel("kanban_lanes_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"kanban_lanes"}, fetchLanes)
+  .subscribe();
 
 // ============================================================
 // MODAL — clique em card abre detalhes (descrição + responsáveis)
