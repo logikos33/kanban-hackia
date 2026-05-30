@@ -1,6 +1,8 @@
-# Quadro Kanban — Gestão à vista (HackIA SC 2026)
+# Combinado Não Sai Caro — Kanban do MVP (HackIA SC 2026)
 
-Quadro compartilhado do time, sincronizado em tempo real via Supabase. Site estático (um `index.html`), sem build — perfeito para GitHub Pages.
+Quadro compartilhado do time para o MVP **"Combinado Não Sai Caro"** (gerador de contratos por IA para freelancers, devs e prestadores de serviço). Backlog espelhado do arquivo `Moskow Combinado nao sai caro.md`, sincronizado em tempo real via Supabase. Site estático (um `index.html`), sem build — perfeito para GitHub Pages.
+
+**Produto em uma frase:** conversa curta → contrato sólido em linguagem clara, com cláusulas de proteção, explicação de cada cláusula e sinalização de red flags, pronto pra assinar.
 
 ## Publicar no GitHub Pages (passo a passo)
 
@@ -65,9 +67,17 @@ Estado dos timestamps é compartilhado em tempo real via Supabase (tabela `hacka
 
 Os responsáveis disponíveis nos cards e no cronograma são: **Victor, Vitão, Monica, Gustavo, Nicolas**.
 
+## Re-seed do MVP
+
+O header tem um botão **🔥 Re-seed MVP** que **APAGA todos os cards** (inclusive os adicionados pelo time) e os timestamps do cronograma, e planta o backlog do MoSCoW do zero. Para confirmar, é preciso digitar `RESET MVP` no prompt.
+
+Como atalho equivalente via SQL, rode `seed-mvp-contratos.sql` no Supabase SQL Editor.
+
 ## Arquivos
 
 - `index.html` — o quadro completo (UI + lógica + conexão Supabase).
-- `supabase-setup.sql` — migração das colunas `description` e `assignees`.
+- `Moskow Combinado nao sai caro.md` — backlog-fonte (MUST / SHOULD / COULD / WON'T).
+- `supabase-setup.sql` — migrações: colunas `description`/`assignees` em `kanban_cards` e tabela `hackathon_schedule`.
+- `seed-mvp-contratos.sql` — TRUNCATE + INSERT dos 23 cards do MVP.
 - `.nojekyll` — desliga o processamento Jekyll do Pages.
 - `.gitignore`.

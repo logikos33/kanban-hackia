@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kanban — Gestão à vista · Lançamento imobiliário</title>
+<title>Kanban — Combinado Não Sai Caro · MVP HackIA SC 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -55,12 +55,13 @@
   .tab.on{color:#fff;border-bottom-color:var(--brand)}
 
   /* LEGENDA MOSCOW */
-  .moscow-leg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
-  @media(max-width:760px){.moscow-leg{grid-template-columns:1fr}}
+  .moscow-leg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+  @media(max-width:1100px){.moscow-leg{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.moscow-leg{grid-template-columns:1fr}}
   .ml{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:11px;padding:13px 15px}
-  .ml.must{border-left-color:var(--ok)} .ml.should{border-left-color:var(--brand)} .ml.could{border-left-color:var(--accent)}
+  .ml.must{border-left-color:var(--ok)} .ml.should{border-left-color:var(--brand)} .ml.could{border-left-color:var(--accent)} .ml.wont{border-left-color:#7a809f}
   .ml h4{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:5px}
-  .ml.must h4{color:var(--ok)} .ml.should h4{color:var(--brand)} .ml.could h4{color:var(--accent)}
+  .ml.must h4{color:var(--ok)} .ml.should h4{color:var(--brand)} .ml.could h4{color:var(--accent)} .ml.wont h4{color:#9296bd}
   .ml p{font-size:12.5px;color:#b9bce0;line-height:1.45}
 
   /* PAINEL DA DOR */
@@ -105,6 +106,7 @@
   .m-must{border-left-color:var(--ok)!important}   .cm.m-must{background:rgba(70,230,160,.16);color:var(--ok)}
   .m-should{border-left-color:var(--brand)!important} .cm.m-should{background:rgba(124,131,255,.18);color:var(--brand)}
   .m-could{border-left-color:var(--accent)!important} .cm.m-could{background:rgba(255,122,69,.18);color:var(--accent)}
+  .m-wont{border-left-color:#7a809f!important; opacity:.85} .cm.m-wont{background:rgba(122,128,159,.18);color:#a5a9c5}
 
   footer{border-top:1px solid var(--line);padding:20px 0;color:#9296bd;font-size:12.5px;text-align:center}
   footer b{color:#cfd2ef}
@@ -194,16 +196,18 @@
 
 <header>
   <div class="wrap">
-    <span class="tagp">📌 Gestão à vista · HackIA SC 2026 · equipe de 6</span>
-    <h1>Quadro Kanban — do CAD ao kit de venda</h1>
+    <span class="tagp">📌 Combinado Não Sai Caro · HackIA SC 2026 · equipe de 5</span>
+    <h1>Quadro Kanban — do briefing ao contrato pronto pra assinar</h1>
     <div class="toolbar">
       <div class="legend">
         <span><span class="dot" style="background:var(--ok)"></span> Must</span>
         <span><span class="dot" style="background:var(--brand)"></span> Should</span>
         <span><span class="dot" style="background:var(--accent)"></span> Could</span>
+        <span><span class="dot" style="background:#7a809f"></span> Won't</span>
       </div>
       <span class="conn" id="conn">● conectando…</span>
-      <button class="btn" id="reset">↺ Resetar quadro</button>
+      <button class="btn" id="reset">↺ Voltar tudo ao backlog</button>
+      <button class="btn" id="reseed" title="Apaga tudo e planta o backlog do MVP">🔥 Re-seed MVP</button>
       <div class="alert" id="alert">Must no backlog: —</div>
     </div>
   </div>
@@ -223,15 +227,19 @@
   <div class="moscow-leg">
     <div class="ml must">
       <h4>● Must have</h4>
-      <p>Sem isto não há produto nem demo. Inegociável — é o caminho feliz que sobe ao palco. Se um Must falha, o pitch falha.</p>
+      <p>Sem isto não há MVP nem demo. Forma o fluxo central ponta a ponta e a credibilidade jurídica. Se um Must falha, o pitch falha.</p>
     </div>
     <div class="ml should">
       <h4>● Should have</h4>
-      <p>Importante e agrega muito valor, mas a demo sobrevive sem. Só entra depois que todos os Must estiverem rodando ponta a ponta.</p>
+      <p>Reforça confiança e qualidade, mas o MVP demonstra valor sem ele. Só entra depois que todos os Must estiverem rodando.</p>
     </div>
     <div class="ml could">
       <h4>○ Could have</h4>
-      <p>Desejável, o "nice to have". Diferencial de impacto, mas só se sobrar tempo — com a demo já congelada e ensaiada.</p>
+      <p>Bons diferenciais virais ou de funil, mas opcionais. Só se sobrar tempo, com a demo já congelada e ensaiada.</p>
+    </div>
+    <div class="ml wont">
+      <h4>◌ Won't have (agora)</h4>
+      <p>Roadmap pós-hackathon. Explicitamente fora do MVP para proteger o foco — não puxar para esta sprint.</p>
     </div>
   </div>
 </div>
@@ -254,6 +262,7 @@
           <option value="must">Must</option>
           <option value="should" selected>Should</option>
           <option value="could">Could</option>
+          <option value="wont">Won't (roadmap)</option>
         </select>
       </div>
       <button type="submit" class="addbtn">Adicionar</button>
@@ -274,24 +283,24 @@
     <div class="dor">
       <div class="dor-card">
         <div class="eyebrow">O problema que resolvemos</div>
-        <h3>O lançamento na planta fica parado esperando o material de marketing</h3>
-        <p>Vender imóvel <b>na planta</b> exige perspectivas, maquetes e peças de divulgação que <b>custam caro e demoram semanas</b>. O CAD do projeto já está pronto na arquitetura — mas o material de venda é sempre o gargalo.</p>
-        <p>Enquanto o kit não fica pronto, o empreendimento <b>não é anunciado e não vende</b>. Isso trava as vendas e o <b>fluxo de caixa da obra</b>, justamente na fase em que a construtora mais precisa de liquidez.</p>
-        <div class="quote">"Eu recebo o projeto pronto da arquitetura e fico semanas esperando o 3D e as peças pra poder anunciar. Enquanto isso, o lançamento não vende."<br><span style="font-style:normal;color:#9296bd;font-size:12.5px">— Marina, gerente de marketing de incorporadora · persona-alvo</span></div>
-        <p><b>Nossa solução:</b> do DWG ao kit de lançamento completo — planta humanizada, vistas dos ambientes, anúncio multicanal e encarte em PDF — em <b>minutos</b>, em PT/EN/ES, por uma fração do custo da agência. Posicionada como <b>acelerador</b>, não substituto do 3D premium do estande.</p>
+        <h3>Freelancer, dev e prestador fecham serviço sem contrato — ou com contrato genérico baixado da internet</h3>
+        <p>Hoje quem presta serviço por conta própria <b>não tem dinheiro nem paciência</b> para pagar advogado a cada job. Resultado: combina por WhatsApp, copia um modelo do Google, ou simplesmente confia. Quando dá ruim — escopo expandindo, cliente atrasando pagamento, propriedade intelectual disputada — <b>não há nada para sustentar a negociação</b>.</p>
+        <p>O contrato que existe não protege porque tem <b>cláusulas faltando, juridiquês incompreensível e zero explicação</b> sobre o que cada parte realmente significa. O profissional assina sem entender e descobre só quando o problema já estourou.</p>
+        <div class="quote">"Eu nunca sei se o contrato que mandam pra mim me protege. Leio, parece tudo certo, mas quando o cliente fala que o escopo era outro eu não tenho como provar nada."<br><span style="font-style:normal;color:#9296bd;font-size:12.5px">— freelancer dev · persona-alvo</span></div>
+        <p><b>Nossa solução — Combinado Não Sai Caro:</b> conversa curta → contrato sólido em <b>linguagem clara</b>, com cláusulas de proteção curadas, <b>explicação leiga de cada cláusula</b> e <b>sinalização de red flags</b>, pronto pra assinar em PDF/DOC. Custo zero comparado ao escritório de advocacia, foco em <b>proteger quem presta serviço</b>.</p>
       </div>
       <div>
         <div class="dor-card">
           <div class="eyebrow">Por que dói</div>
           <ul class="painlist">
-            <li>Dependência de agência e artista 3D: caro e lento (semanas por lançamento).</li>
-            <li>Material sai desconexo entre as peças e exige refação.</li>
-            <li>Gargalo quando vários lançamentos coincidem no calendário.</li>
-            <li>Sem material em outros idiomas para atrair investidor estrangeiro.</li>
+            <li>Advogado custa caro e é desproporcional ao ticket do job.</li>
+            <li>Modelo da internet vem com cláusulas erradas ou faltando — e o usuário não tem como saber.</li>
+            <li>Juridiquês esconde armadilhas (multa, foro, PI) que só explodem depois.</li>
+            <li>Sem registro escrito, qualquer disputa vira "minha palavra contra a sua".</li>
           </ul>
           <div class="metricbox">
-            <div class="big">Semanas → minutos</div>
-            <div class="sm">O número da validação ("quanto custa e quanto demora hoje o material de um lançamento?") vira o slide mais forte do pitch.</div>
+            <div class="big">Conversa → contrato em minutos</div>
+            <div class="sm">Sem alucinação de lei (RAG sobre Código Civil + Direito Autoral) e com guardrails testados em 2–3 contratos reais. É esse o slide forte do pitch.</div>
           </div>
         </div>
       </div>
@@ -382,86 +391,77 @@ const PITCH_AT = new Date(2026, 4, 31, 18, 0, 0); // mês 0-indexed (4 = maio)
 // Cronograma do hackathon (do agora até o pitch)
 const SCHEDULE = [
   {day:"Sábado 30/05 — Dia 1", items:[
-    {id:"s01", t:"09:00", who:"Todos",       label:"Kickoff + alinhamento do problema (BML #0)"},
-    {id:"s02", t:"10:00", who:"Cliente",     label:"Validar dor com construtora real — coletar custo/tempo"},
-    {id:"s03", t:"11:00", who:"Back",        label:"Setup FastAPI + CrewAI + endpoint base"},
-    {id:"s04", t:"11:00", who:"Front",       label:"Setup Next.js/Vite + UI upload → resultado"},
-    {id:"s05", t:"12:30", who:"Todos",       label:"Almoço + revisão de escopo (cortar tudo que não é Must)"},
-    {id:"s06", t:"14:00", who:"IA-imagem",   label:"Planta humanizada — prova de conceito (risco nº 1)"},
-    {id:"s07", t:"14:00", who:"Back",        label:"Extrator/briefing por visão → JSON de contexto"},
-    {id:"s08", t:"15:30", who:"Front",       label:"Tela de upload + chamada da API funcionando"},
-    {id:"s09", t:"17:00", who:"Todos",       label:"Sync rápido — bloqueios e ajustes"},
-    {id:"s10", t:"18:00", who:"IA-imagem",   label:"Vistas dos ambientes (2–3 renders) — primeira versão"},
-    {id:"s11", t:"19:30", who:"Todos",       label:"Jantar + decisão pivot vs. perseverar (BML #1)"},
-    {id:"s12", t:"21:00", who:"Back",        label:"Copy multicanal (portal/IG/WhatsApp) PT"},
-    {id:"s13", t:"22:30", who:"Front",       label:"Montagem do PDF no front (download)"},
-    {id:"s14", t:"23:59", who:"Gestão",      label:"Demo end-to-end andando (caminho feliz)"},
+    {id:"s01", t:"09:00", who:"Todos",    label:"Kickoff + escopo congelado do MVP \"Combinado Não Sai Caro\""},
+    {id:"s02", t:"10:00", who:"Gestão",   label:"Validar dor com freelancer/dev real — coletar quanto custa hoje sem contrato"},
+    {id:"s03", t:"11:00", who:"Back",     label:"Setup do backend + chaves de API (Claude/GPT) + endpoint base"},
+    {id:"s04", t:"11:00", who:"Front",    label:"Setup do front + tela única (intake → resultado)"},
+    {id:"s05", t:"12:30", who:"Todos",    label:"Almoço + cortar tudo que não é Must do MoSCoW"},
+    {id:"s06", t:"14:00", who:"Jurídico", label:"Biblioteca de cláusulas curadas — 1ª versão (pgto, multa, escopo, PI)"},
+    {id:"s07", t:"14:00", who:"Back",     label:"Intake conversacional — coletar tipo, valor, prazo, entregáveis, revisões"},
+    {id:"s08", t:"15:30", who:"Front",    label:"Fluxo intake → contrato chamando a API"},
+    {id:"s09", t:"17:00", who:"Todos",    label:"Sync rápido — bloqueios e ajustes"},
+    {id:"s10", t:"18:00", who:"Back",     label:"Geração de contrato end-to-end (intake + cláusulas → texto)"},
+    {id:"s11", t:"19:30", who:"Todos",    label:"Jantar + decisão pivot vs. perseverar (BML #1)"},
+    {id:"s12", t:"21:00", who:"Jurídico", label:"RAG sobre Código Civil + Lei de Direito Autoral indexado"},
+    {id:"s13", t:"22:30", who:"Back",     label:"Explicação leiga por cláusula + sinalização de red flags"},
+    {id:"s14", t:"23:59", who:"Gestão",   label:"Demo end-to-end andando (caminho feliz da apresentação)"},
   ]},
   {day:"Domingo 31/05 — Dia do Pitch", items:[
-    {id:"s20", t:"08:00", who:"Todos",       label:"Café + checklist de bloqueios"},
-    {id:"s21", t:"09:00", who:"Back",        label:"Multi-idioma PT/EN/ES + ajustes finais na orquestração"},
-    {id:"s22", t:"09:00", who:"IA-imagem",   label:"Coerência planta ↔ vistas (seed + referência)"},
-    {id:"s23", t:"10:30", who:"Front",       label:"Deploy público (Vercel) + polimento da UI"},
-    {id:"s24", t:"11:30", who:"Gestão",      label:"GRAVAR vídeo de fallback (demo à prova de falha)"},
-    {id:"s25", t:"12:30", who:"Todos",       label:"Almoço + congelar features (feature freeze)"},
-    {id:"s26", t:"14:00", who:"Cliente",     label:"Finalizar deck do pitch (3 min) + storytelling"},
-    {id:"s27", t:"15:00", who:"Todos",       label:"Ensaio do pitch — rodada 1"},
-    {id:"s28", t:"16:00", who:"Todos",       label:"Ensaio do pitch — rodada 2 (cronometrado)"},
-    {id:"s29", t:"17:00", who:"Todos",       label:"Ensaio final + checagem do backup (vídeo)"},
-    {id:"s30", t:"17:30", who:"Todos",       label:"Última passada nos slides + respiração"},
-    {id:"s99", t:"18:00", who:"Especialista",label:"🎤 PITCH — apresentação", pitch:true},
+    {id:"s20", t:"08:00", who:"Todos",    label:"Café + checklist de bloqueios"},
+    {id:"s21", t:"09:00", who:"Back",     label:"Guardrails anti-alucinação + teste de stress com 2–3 contratos reais"},
+    {id:"s22", t:"09:00", who:"Front",    label:"Export do contrato em PDF/DOC pronto pra assinar"},
+    {id:"s23", t:"10:30", who:"Front",    label:"Deploy público + polimento final da UI"},
+    {id:"s24", t:"11:30", who:"Gestão",   label:"GRAVAR vídeo de fallback (demo à prova de falha)"},
+    {id:"s25", t:"12:30", who:"Todos",    label:"Almoço + feature freeze"},
+    {id:"s26", t:"14:00", who:"Gestão",   label:"Deck do pitch (3 min) + storytelling do problema"},
+    {id:"s27", t:"15:00", who:"Todos",    label:"Ensaio do pitch — rodada 1"},
+    {id:"s28", t:"16:00", who:"Todos",    label:"Ensaio do pitch — rodada 2 (cronometrado)"},
+    {id:"s29", t:"17:00", who:"Todos",    label:"Ensaio final + checagem do backup (vídeo)"},
+    {id:"s30", t:"17:30", who:"Todos",    label:"Última passada nos slides + respiração"},
+    {id:"s99", t:"18:00", who:"Todos",    label:"🎤 PITCH — apresentação", pitch:true},
   ]},
 ];
 
 const LANES = [
-  {id:"front",       name:"Front / Produto",     who:"Front-end",        color:"#7c83ff"},
-  {id:"back",        name:"Back-end / Orquestr.", who:"Back-end",        color:"#46e6a0"},
-  {id:"imagem",      name:"IA-imagem",           who:"6ª pessoa (núcleo)",color:"#ff7a45"},
-  {id:"gestao",      name:"Gestão",              who:"Gestão",           color:"#ffce5a"},
-  {id:"cliente",     name:"Validação / Cliente", who:"Descoberta de dor",color:"#a371ff"},
-  {id:"especialista",name:"Especialista",        who:"Dono do projeto",  color:"#6fd3ff"},
+  {id:"front",    name:"Front / UX",          who:"Front-end",          color:"#7c83ff"},
+  {id:"back",     name:"Back / IA-LLM",       who:"Back + LLM",         color:"#46e6a0"},
+  {id:"juridico", name:"Curadoria jurídica",  who:"Cláusulas + RAG",    color:"#ff7a45"},
+  {id:"gestao",   name:"Gestão",              who:"Gestão / pitch",     color:"#ffce5a"},
 ];
 
-// cards: id, lane, moscow, title. Status inicial = backlog.
+// cards do MVP "Combinado Não Sai Caro" — espelha o arquivo
+// "Moskow Combinado nao sai caro.md".
 const CARDS = [
-  // FRONT
-  {id:"f1", lane:"front", m:"must",  t:"Upload da planta (PNG/PDF do DWG)"},
-  {id:"f2", lane:"front", m:"must",  t:"UI web: upload → resultado → download"},
-  {id:"f3", lane:"front", m:"must",  t:"Visualização + export do PDF no front"},
-  {id:"f4", lane:"front", m:"must",  t:"Deploy público (Vercel)"},
-  {id:"f5", lane:"front", m:"could", t:"Viewer do tour 360° (WebXR)"},
-  // BACK
-  {id:"b1", lane:"back", m:"must",  t:"Briefing/extrator por visão → JSON de contexto"},
-  {id:"b2", lane:"back", m:"must",  t:"Orquestração CrewAI + endpoint FastAPI"},
-  {id:"b3", lane:"back", m:"must",  t:"Copy multicanal (portal/IG/WhatsApp)"},
-  {id:"b4", lane:"back", m:"must",  t:"Multi-idioma PT / EN / ES"},
-  {id:"b5", lane:"back", m:"must",  t:"Montador de encarte (template → PDF)"},
-  {id:"b6", lane:"back", m:"should",t:"Extração de áreas/cômodos do DXF (ezdxf)"},
-  // IA-IMAGEM
-  {id:"i1", lane:"imagem", m:"must",  t:"Planta humanizada (risco nº 1)"},
-  {id:"i2", lane:"imagem", m:"must",  t:"Vistas dos ambientes (2–3 renders)"},
-  {id:"i3", lane:"imagem", m:"must",  t:"Coerência planta ↔ vistas (seed + referência)"},
-  {id:"i4", lane:"imagem", m:"should",t:"Provider de imagem plugável"},
-  {id:"i5", lane:"imagem", m:"should",t:"ControlNet de fallback (trava geometria)"},
-  {id:"i6", lane:"imagem", m:"could", t:"Estilos de decoração (escand./clean/industrial)"},
-  // GESTÃO
-  {id:"g1", lane:"gestao", m:"must",  t:"Manter este quadro / gestão à vista"},
-  {id:"g2", lane:"gestao", m:"must",  t:"Cronograma + ritmo Build-Measure-Learn"},
-  {id:"g3", lane:"gestao", m:"must",  t:"Demo à prova de falha (caminho feliz)"},
-  {id:"g4", lane:"gestao", m:"must",  t:"Gravar vídeo de fallback (domingo manhã)"},
-  {id:"g5", lane:"gestao", m:"should",t:"Congelar features + ensaiar pitch 3×"},
-  // CLIENTE
-  {id:"c1", lane:"cliente", m:"must",  t:"Validar dor com construtora real (BML nº 1)"},
-  {id:"c2", lane:"cliente", m:"must",  t:"Coletar número: custo/tempo do material hoje"},
-  {id:"c3", lane:"cliente", m:"must",  t:"Deck do pitch (3 min)"},
-  {id:"c4", lane:"cliente", m:"should",t:"Precificação por lançamento / assinatura"},
-  {id:"c5", lane:"cliente", m:"should",t:"2º BML — decisão pivot vs. perseverar"},
-  // ESPECIALISTA
-  {id:"e1", lane:"especialista", m:"must",  t:"Fornecer DWG + exportações PNG/PDF"},
-  {id:"e2", lane:"especialista", m:"must",  t:"Validar qualidade da planta humanizada"},
-  {id:"e3", lane:"especialista", m:"should",t:"Revisar cômodos/áreas e tom da copy (PT)"},
-  {id:"e4", lane:"especialista", m:"should",t:"Credibilidade técnica no pitch"},
-  {id:"e5", lane:"especialista", m:"could", t:"Narrativa por persona (família vs. investidor)"},
+  // ==================== MUST (10) ====================
+  {id:"m01", lane:"gestao",   m:"must", t:"Setup do projeto e ambiente — repo, stack, chaves de API, escopo congelado", d:"Repositório, stack (front simples + backend), chaves Claude/GPT e escopo congelado."},
+  {id:"m02", lane:"juridico", m:"must", t:"Biblioteca de cláusulas curadas",                                            d:"Pagamento, multa por atraso, escopo, revisões, propriedade intelectual, rescisão e foro. Base do guardrail anti-alucinação."},
+  {id:"m03", lane:"juridico", m:"must", t:"RAG sobre fontes legais (Código Civil + Lei de Direito Autoral)",            d:"Indexar Código Civil e Lei de Direito Autoral para validar/ancorar cláusulas — o LLM monta/preenche, não inventa lei."},
+  {id:"m04", lane:"back",     m:"must", t:"Intake conversacional (tipo, valor, prazo, entregáveis, revisões)",          d:"Conversa curta + formulário guiado com LLM interpretando para coletar dados do serviço."},
+  {id:"m05", lane:"back",     m:"must", t:"Geração do contrato pelo LLM (intake + cláusulas)",                          d:"LLM monta o contrato em português claro a partir do intake e da biblioteca curada."},
+  {id:"m06", lane:"back",     m:"must", t:"Explicação leiga de cada cláusula",                                          d:"Para cada cláusula, um texto curto de \"por que isto te protege\" em linguagem do dia a dia."},
+  {id:"m07", lane:"back",     m:"must", t:"Sinalização de red flags no contrato",                                       d:"Destacar pontos de risco no contrato (escopo aberto, ausência de multa, foro desfavorável etc.)."},
+  {id:"m08", lane:"back",     m:"must", t:"Guardrails anti-alucinação + teste de stress (2–3 contratos reais)",         d:"Validação por código + cláusulas curadas para o LLM não errar lei. Stress-test com 2–3 contratos reais."},
+  {id:"m09", lane:"front",    m:"must", t:"Front mínimo do fluxo (intake → contrato → explicação → download)",          d:"Tela única ponta a ponta, suficiente para a demo ao vivo do pitch."},
+  {id:"m10", lane:"front",    m:"must", t:"Export pronto pra assinar (PDF/DOC)",                                        d:"Saída final do contrato em PDF/DOC, pronta para o usuário enviar e assinar."},
+
+  // ==================== SHOULD (4) ====================
+  {id:"s01", lane:"juridico", m:"should", t:"Validação jurídica via API/MCP (camada extra)",                 d:"Checagem adicional contra fontes legais além do RAG básico."},
+  {id:"s02", lane:"back",     m:"should", t:"Tradução de juridiquês refinada",                              d:"Desmistifica linguagem jurídica para o leigo com dicas contextuais."},
+  {id:"s03", lane:"front",    m:"should", t:"Dicas contextuais durante o intake",                           d:"Sugestões enquanto o usuário responde (ex.: \"recomendamos sinal antecipado\")."},
+  {id:"s04", lane:"gestao",   m:"should", t:"Documentar testes de stress para defender no pitch",           d:"Registrar os 2–3 contratos de prova: o que foi pedido, o que saiu, onde o guardrail segurou."},
+
+  // ==================== COULD (3) ====================
+  {id:"c01", lane:"front", m:"could", t:"Calculadoras de estimativa (valor / prazo / nº de revisões)",      d:"Isca de topo de funil e alimenta o contrato com números base."},
+  {id:"c02", lane:"front", m:"could", t:"Gerador grátis de cláusula única (freemium → upsell)",             d:"Isca freemium que puxa o usuário para o contrato completo."},
+  {id:"c03", lane:"front", m:"could", t:"Marca d'água da ferramenta no contrato",                           d:"Rodapé discreto no contrato gerado como gancho viral."},
+
+  // ==================== WON'T (6) — roadmap pós-MVP ====================
+  {id:"w01", lane:"front",  m:"wont", t:"Assinatura / aceite digital integrado (link de assinatura)",       d:"Fora do MVP — entra depois."},
+  {id:"w02", lane:"back",   m:"wont", t:"Sinal via Pix embutido no contrato",                               d:"Fora do MVP — depende de integração de pagamento."},
+  {id:"w03", lane:"front",  m:"wont", t:"Aditivo de escopo em 1 clique (scope creep)",                      d:"Fora do MVP — feature de gestão pós-fechamento."},
+  {id:"w04", lane:"back",   m:"wont", t:"Cobrança / lembrete automático de parcelas e multa",               d:"Fora do MVP — pertence a um módulo financeiro futuro."},
+  {id:"w05", lane:"gestao", m:"wont", t:"Expansão B2C (aluguel, serviços domésticos, venda entre pessoas)", d:"Fora do MVP — depende de validação B2B primeiro."},
+  {id:"w06", lane:"gestao", m:"wont", t:"Definir modelo de cobrança (freemium / sob demanda / assinatura)", d:"Pendente — não bloqueia o MVP técnico, mas precisa ser decidido antes do go-to-market."},
 ];
 
 // ===== Supabase (backend compartilhado / tempo real) =====
@@ -470,7 +470,7 @@ const SUPA_KEY = "sb_publishable_Wz8dIIU3UTXBDOlyi9W-Bg_dqCGHzB1";
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const board = document.getElementById("board");
-const MLABEL = {must:"MUST", should:"SHOULD", could:"COULD"};
+const MLABEL = {must:"MUST", should:"SHOULD", could:"COULD", wont:"WON'T"};
 let cards = [];
 
 function setStatus(ok, msg){
@@ -617,10 +617,59 @@ document.querySelectorAll(".tab").forEach(tab=>{
 
 // resetar: tudo volta ao backlog (mantém as features adicionadas)
 document.getElementById("reset").addEventListener("click", async ()=>{
-  if(!confirm("Resetar o quadro? Todos os cards voltam para o Backlog (as features adicionadas são mantidas).")) return;
+  if(!confirm("Voltar todos os cards para o Backlog? (as features adicionadas são mantidas)")) return;
   cards.forEach(c=>c.status="backlog"); render();
   const { error } = await sb.from("kanban_cards").update({status:"backlog"}).neq("id","__none__");
   if(error){ setStatus(false, error.message); fetchCards(); }
+});
+
+// re-seed: APAGA tudo e planta o backlog do MVP "Combinado Não Sai Caro"
+document.getElementById("reseed").addEventListener("click", async ()=>{
+  const ok = confirm(
+    "⚠ ATENÇÃO — Re-seed do MVP\n\n" +
+    "Isto VAI APAGAR todos os cards atuais (inclusive os adicionados pelo time) e plantar o backlog do MVP \"Combinado Não Sai Caro\" do zero.\n\n" +
+    "Também vai apagar os timestamps do cronograma (started_at / done_at).\n\n" +
+    "Tem certeza?"
+  );
+  if(!ok) return;
+  const really = prompt("Para confirmar, digite RESET MVP:");
+  if(really !== "RESET MVP"){ alert("Cancelado."); return; }
+
+  // 1) limpa cards
+  let r = await sb.from("kanban_cards").delete().neq("id","__none__");
+  if(r.error){ alert("Erro ao limpar cards: " + r.error.message); return; }
+
+  // 2) limpa cronograma (se a tabela existir)
+  r = await sb.from("hackathon_schedule").delete().neq("id","__none__");
+  if(r.error && !/relation .* does not exist/i.test(r.error.message)){
+    console.warn("[reseed] hackathon_schedule:", r.error.message);
+  }
+
+  // 3) planta CARDS do MVP no backlog
+  const seed = CARDS.map((c,i)=>({
+    id: c.id,
+    lane: c.lane,
+    moscow: c.m,
+    title: c.t,
+    status: "backlog",
+    is_custom: false,
+    position: i,
+    description: c.d || "",
+    assignees: []
+  }));
+  r = await sb.from("kanban_cards").insert(seed);
+  if(r.error){
+    // se faltarem colunas description/assignees, tenta sem elas
+    if(/column .* does not exist/i.test(r.error.message)){
+      const lean = seed.map(({description, assignees, ...rest})=>rest);
+      r = await sb.from("kanban_cards").insert(lean);
+    }
+    if(r.error){ alert("Erro ao plantar MVP: " + r.error.message); return; }
+  }
+
+  await fetchCards();
+  if(typeof fetchScheduleState === "function") await fetchScheduleState();
+  alert("✓ Backlog do MVP plantado. Bom hack!");
 });
 
 // realtime: qualquer mudança no banco recarrega o quadro de todos
