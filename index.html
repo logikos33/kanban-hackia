@@ -108,6 +108,71 @@
 
   footer{border-top:1px solid var(--line);padding:20px 0;color:#9296bd;font-size:12.5px;text-align:center}
   footer b{color:#cfd2ef}
+
+  /* ASSIGNEES nos cards */
+  .ccard .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+  .chip{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:#cfd2ef}
+  .chip[data-p="Victor"]{background:rgba(124,131,255,.20);color:#bfc3ff;border-color:rgba(124,131,255,.45)}
+  .chip[data-p="Vitão"]{background:rgba(70,230,160,.18);color:#9af0cd;border-color:rgba(70,230,160,.45)}
+  .chip[data-p="Monica"]{background:rgba(255,122,69,.18);color:#ffc4a8;border-color:rgba(255,122,69,.45)}
+  .chip[data-p="Gustavo"]{background:rgba(255,206,90,.18);color:#ffe19a;border-color:rgba(255,206,90,.45)}
+  .chip[data-p="Nicolas"]{background:rgba(163,113,255,.18);color:#d2bbff;border-color:rgba(163,113,255,.45)}
+  .ccard .has-desc{font-size:10.5px;color:#9296bd;margin-top:4px;display:flex;align-items:center;gap:4px}
+
+  /* MODAL */
+  .modal-bg{position:fixed;inset:0;background:rgba(6,8,20,.72);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.on{display:flex}
+  .modal{width:min(640px,100%);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;box-shadow:0 24px 60px rgba(0,0,0,.55)}
+  .modal h3{font-size:18px;font-weight:800;margin-bottom:4px;line-height:1.25}
+  .modal .mhead{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+  .modal .mhead .ml{flex:1}
+  .modal .mclose{background:none;border:none;color:#9296bd;font-size:20px;cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px}
+  .modal .mclose:hover{background:var(--cell);color:#fff}
+  .modal .row{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#9296bd;margin-bottom:14px}
+  .modal .row b{color:#cfd2ef}
+  .modal label.flbl{display:block;font-size:11px;font-weight:700;color:#9296bd;letter-spacing:.3px;text-transform:uppercase;margin:14px 0 6px}
+  .modal input[type=text], .modal textarea, .modal select{width:100%;font-family:inherit;font-size:14px;background:var(--cell);border:1px solid var(--line);color:#eef0ff;padding:10px 12px;border-radius:9px;outline:none;transition:.15s;resize:vertical}
+  .modal input[type=text]:focus, .modal textarea:focus, .modal select:focus{border-color:var(--brand)}
+  .modal textarea{min-height:120px;font-family:inherit;line-height:1.5}
+  .who-list{display:flex;flex-wrap:wrap;gap:6px}
+  .who-btn{font-family:inherit;font-size:12px;font-weight:700;background:var(--cell);border:1px solid var(--line);color:#9296bd;padding:7px 12px;border-radius:999px;cursor:pointer;transition:.15s}
+  .who-btn:hover{border-color:var(--brand)}
+  .who-btn.on{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent}
+  .mfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  .mfoot .savestate{font-family:var(--mono);font-size:11px;color:#9296bd}
+  .mfoot .savestate.ok{color:#9af0cd}
+  .mfoot .savestate.err{color:#ffb3b3}
+  .save-btn{font-family:inherit;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;padding:9px 18px;border-radius:9px;cursor:pointer}
+  .save-btn:hover{filter:brightness(1.1)}
+
+  /* CRONOGRAMA */
+  .clockbar{background:linear-gradient(135deg,#1a1f47,#2a2370);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-top:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+  @media(max-width:760px){.clockbar{grid-template-columns:1fr}}
+  .clockcell{display:flex;flex-direction:column;gap:4px}
+  .clockcell .lbl{font-size:11px;font-weight:700;color:#9296bd;letter-spacing:.6px;text-transform:uppercase}
+  .clockcell .val{font-family:var(--mono);font-size:26px;font-weight:700;color:#fff}
+  .clockcell.cd .val{color:var(--accent)}
+  .clockcell.cd .val.warn{color:var(--warn)}
+  .clockcell.cd .val.danger{color:var(--no)}
+  .sched{margin-top:22px;display:flex;flex-direction:column;gap:14px;padding-bottom:40px}
+  .schday{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .schday .dhead{padding:14px 18px;background:var(--card2);border-bottom:1px solid var(--line);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+  .schday .dhead .dprog{font-family:var(--mono);font-size:12px;color:#9296bd;font-weight:600}
+  .stage{display:grid;grid-template-columns:90px 28px 1fr auto;gap:12px;padding:13px 18px;border-top:1px solid var(--line);align-items:center;transition:.15s}
+  .stage:first-child{border-top:0}
+  .stage:hover{background:var(--cell)}
+  .stage.done{opacity:.55}
+  .stage.done .stitle{text-decoration:line-through}
+  .stage.now{background:rgba(124,131,255,.10);border-left:3px solid var(--brand);padding-left:15px}
+  .stage .stime{font-family:var(--mono);font-size:13px;font-weight:700;color:#9296bd}
+  .stage.now .stime{color:var(--brand)}
+  .stage.pitch .stime{color:var(--accent)}
+  .stchk{width:20px;height:20px;border-radius:5px;border:2px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--cell);transition:.15s}
+  .stchk:hover{border-color:var(--brand)}
+  .stchk.on{background:var(--ok);border-color:var(--ok);color:#0c0f24;font-weight:900;font-size:12px}
+  .stitle{font-size:13.5px;font-weight:600;color:#eef0ff}
+  .stage.pitch .stitle{color:var(--accent);font-weight:800}
+  .stwho{font-family:var(--mono);font-size:10.5px;color:#9296bd;font-weight:600;background:var(--cell);padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -132,6 +197,7 @@
 <div class="wrap">
   <div class="tabs">
     <button class="tab on" data-view="board">📌 Quadro</button>
+    <button class="tab" data-view="cron">⏱ Cronograma</button>
     <button class="tab" data-view="dor">🎯 A Dor que tratamos</button>
   </div>
 </div>
@@ -218,17 +284,111 @@
   </div>
 </div>
 
+<div id="view-cron" style="display:none">
+  <div class="wrap">
+    <div class="clockbar">
+      <div class="clockcell">
+        <div class="lbl">Agora</div>
+        <div class="val" id="clk-now">--:--:--</div>
+        <div class="lbl" id="clk-date" style="color:#cdd0ee;font-weight:600;letter-spacing:.2px">—</div>
+      </div>
+      <div class="clockcell cd">
+        <div class="lbl">Faltam para o Pitch</div>
+        <div class="val" id="clk-cd">--h --m --s</div>
+        <div class="lbl" style="color:#cdd0ee;font-weight:600;letter-spacing:.2px">Pitch: domingo 31/05 · 18:00</div>
+      </div>
+      <div class="clockcell">
+        <div class="lbl">Etapa atual</div>
+        <div class="val" id="clk-stage" style="font-size:18px;line-height:1.25">—</div>
+        <div class="lbl" id="clk-next" style="color:#cdd0ee;font-weight:600;letter-spacing:.2px">—</div>
+      </div>
+    </div>
+
+    <div class="sched" id="sched"></div>
+  </div>
+</div>
+
+<!-- MODAL DE CARD -->
+<div class="modal-bg" id="modalbg">
+  <div class="modal" id="modal">
+    <div class="mhead">
+      <div class="ml">
+        <h3 id="md-title">—</h3>
+      </div>
+      <button class="mclose" id="md-close" title="Fechar">✕</button>
+    </div>
+    <div class="row">
+      <span>Raia <b id="md-lane">—</b></span>
+      <span>· Prioridade <b id="md-moscow">—</b></span>
+      <span>· Status <b id="md-status">—</b></span>
+    </div>
+
+    <label class="flbl" for="md-titletxt">Título</label>
+    <input type="text" id="md-titletxt">
+
+    <label class="flbl" for="md-desc">Possíveis features / descrição / acceptance</label>
+    <textarea id="md-desc" placeholder="Detalhe a feature, requisitos, sub-tarefas, links, observações…"></textarea>
+
+    <label class="flbl">Responsáveis</label>
+    <div class="who-list" id="md-who"></div>
+
+    <div class="mfoot">
+      <span class="savestate" id="md-state">—</span>
+      <button class="save-btn" id="md-save">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <footer>
-  Arraste os cards entre as colunas. <b>Regra de ouro:</b> nenhum card sobe enquanto houver Must no Backlog. O estado é compartilhado pelo time em tempo real (Supabase).
+  Arraste os cards entre as colunas. <b>Regra de ouro:</b> nenhum card sobe enquanto houver Must no Backlog. <b>Clique</b> em um card para editar descrição e responsáveis. O estado é compartilhado pelo time em tempo real (Supabase).
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const TEAM = ["Victor","Vitão","Monica","Gustavo","Nicolas"];
+
 const COLS = [
   {id:"backlog", label:"📥 Backlog"},
   {id:"fazendo", label:"🔨 Fazendo"},
   {id:"revisao", label:"🔍 Revisão / Integração"},
   {id:"feito",   label:"✅ Feito"},
+];
+
+// PITCH: domingo 31/05/2026 às 18:00 (horário local)
+const PITCH_AT = new Date(2026, 4, 31, 18, 0, 0); // mês 0-indexed (4 = maio)
+
+// Cronograma do hackathon (do agora até o pitch)
+const SCHEDULE = [
+  {day:"Sábado 30/05 — Dia 1", items:[
+    {id:"s01", t:"09:00", who:"Todos",       label:"Kickoff + alinhamento do problema (BML #0)"},
+    {id:"s02", t:"10:00", who:"Cliente",     label:"Validar dor com construtora real — coletar custo/tempo"},
+    {id:"s03", t:"11:00", who:"Back",        label:"Setup FastAPI + CrewAI + endpoint base"},
+    {id:"s04", t:"11:00", who:"Front",       label:"Setup Next.js/Vite + UI upload → resultado"},
+    {id:"s05", t:"12:30", who:"Todos",       label:"Almoço + revisão de escopo (cortar tudo que não é Must)"},
+    {id:"s06", t:"14:00", who:"IA-imagem",   label:"Planta humanizada — prova de conceito (risco nº 1)"},
+    {id:"s07", t:"14:00", who:"Back",        label:"Extrator/briefing por visão → JSON de contexto"},
+    {id:"s08", t:"15:30", who:"Front",       label:"Tela de upload + chamada da API funcionando"},
+    {id:"s09", t:"17:00", who:"Todos",       label:"Sync rápido — bloqueios e ajustes"},
+    {id:"s10", t:"18:00", who:"IA-imagem",   label:"Vistas dos ambientes (2–3 renders) — primeira versão"},
+    {id:"s11", t:"19:30", who:"Todos",       label:"Jantar + decisão pivot vs. perseverar (BML #1)"},
+    {id:"s12", t:"21:00", who:"Back",        label:"Copy multicanal (portal/IG/WhatsApp) PT"},
+    {id:"s13", t:"22:30", who:"Front",       label:"Montagem do PDF no front (download)"},
+    {id:"s14", t:"23:59", who:"Gestão",      label:"Demo end-to-end andando (caminho feliz)"},
+  ]},
+  {day:"Domingo 31/05 — Dia do Pitch", items:[
+    {id:"s20", t:"08:00", who:"Todos",       label:"Café + checklist de bloqueios"},
+    {id:"s21", t:"09:00", who:"Back",        label:"Multi-idioma PT/EN/ES + ajustes finais na orquestração"},
+    {id:"s22", t:"09:00", who:"IA-imagem",   label:"Coerência planta ↔ vistas (seed + referência)"},
+    {id:"s23", t:"10:30", who:"Front",       label:"Deploy público (Vercel) + polimento da UI"},
+    {id:"s24", t:"11:30", who:"Gestão",      label:"GRAVAR vídeo de fallback (demo à prova de falha)"},
+    {id:"s25", t:"12:30", who:"Todos",       label:"Almoço + congelar features (feature freeze)"},
+    {id:"s26", t:"14:00", who:"Cliente",     label:"Finalizar deck do pitch (3 min) + storytelling"},
+    {id:"s27", t:"15:00", who:"Todos",       label:"Ensaio do pitch — rodada 1"},
+    {id:"s28", t:"16:00", who:"Todos",       label:"Ensaio do pitch — rodada 2 (cronometrado)"},
+    {id:"s29", t:"17:00", who:"Todos",       label:"Ensaio final + checagem do backup (vídeo)"},
+    {id:"s30", t:"17:30", who:"Todos",       label:"Última passada nos slides + respiração"},
+    {id:"s99", t:"18:00", who:"Especialista",label:"🎤 PITCH — apresentação", pitch:true},
+  ]},
 ];
 
 const LANES = [
@@ -344,10 +504,25 @@ function render(){
         const card = document.createElement("div");
         card.className = `ccard m-${c.moscow}`;
         card.draggable = true;
+        card.dataset.cardid = c.id;
         const del = c.is_custom ? `<span class="del" data-del="${c.id}" title="Remover">✕</span>` : "";
-        card.innerHTML = `<div class="ct">${del}${escapeHtml(c.title)}</div><span class="cm m-${c.moscow}">${MLABEL[c.moscow]}</span>`;
-        card.addEventListener("dragstart", e=>{e.dataTransfer.setData("text/plain",c.id);card.classList.add("drag");});
-        card.addEventListener("dragend", ()=>card.classList.remove("drag"));
+        const assignees = Array.isArray(c.assignees) ? c.assignees : [];
+        const chips = assignees.length
+          ? `<div class="chips">${assignees.map(a=>`<span class="chip" data-p="${escapeHtml(a)}">${escapeHtml(a)}</span>`).join("")}</div>`
+          : "";
+        const hasDesc = c.description && c.description.trim().length
+          ? `<div class="has-desc">📝 nota</div>` : "";
+        card.innerHTML =
+          `<div class="ct">${del}${escapeHtml(c.title)}</div>` +
+          `<span class="cm m-${c.moscow}">${MLABEL[c.moscow]}</span>` +
+          chips + hasDesc;
+        card.addEventListener("dragstart", e=>{e.dataTransfer.setData("text/plain",c.id);card.classList.add("drag");card._dragged=true;});
+        card.addEventListener("dragend", ()=>{card.classList.remove("drag");setTimeout(()=>card._dragged=false,50);});
+        card.addEventListener("click", e=>{
+          if(card._dragged) return;
+          if(e.target.dataset && e.target.dataset.del) return;
+          openModal(c.id);
+        });
         cell.appendChild(card);
       });
       board.appendChild(cell);
@@ -413,6 +588,7 @@ document.querySelectorAll(".tab").forEach(tab=>{
     tab.classList.add("on");
     const v = tab.dataset.view;
     document.getElementById("view-board").style.display = (v==="board") ? "" : "none";
+    document.getElementById("view-cron").style.display  = (v==="cron")  ? "" : "none";
     document.getElementById("view-dor").style.display   = (v==="dor")   ? "" : "none";
   });
 });
@@ -431,6 +607,195 @@ sb.channel("kanban_cards_rt")
   .subscribe((st)=>{ if(st==="SUBSCRIBED") setStatus(true); });
 
 fetchCards();
+
+// ============================================================
+// MODAL — clique em card abre detalhes (descrição + responsáveis)
+// ============================================================
+const modalBg = document.getElementById("modalbg");
+const mdTitle = document.getElementById("md-title");
+const mdLane = document.getElementById("md-lane");
+const mdMos = document.getElementById("md-moscow");
+const mdStatus = document.getElementById("md-status");
+const mdTitleTxt = document.getElementById("md-titletxt");
+const mdDesc = document.getElementById("md-desc");
+const mdWho = document.getElementById("md-who");
+const mdState = document.getElementById("md-state");
+const mdSave = document.getElementById("md-save");
+let editingId = null;
+
+function openModal(id){
+  const c = cardById(id); if(!c) return;
+  editingId = id;
+  const lane = LANES.find(l=>l.id===c.lane);
+  const col  = COLS.find(x=>x.id===c.status);
+  mdTitle.textContent = c.title;
+  mdLane.textContent = lane ? lane.name : c.lane;
+  mdMos.textContent = MLABEL[c.moscow] || c.moscow;
+  mdStatus.textContent = col ? col.label : c.status;
+  mdTitleTxt.value = c.title || "";
+  mdDesc.value = c.description || "";
+  const sel = new Set(Array.isArray(c.assignees) ? c.assignees : []);
+  mdWho.innerHTML = TEAM.map(p =>
+    `<button type="button" class="who-btn ${sel.has(p)?"on":""}" data-p="${p}">${p}</button>`
+  ).join("");
+  mdState.className = "savestate";
+  mdState.textContent = "—";
+  modalBg.classList.add("on");
+  setTimeout(()=>mdDesc.focus(), 50);
+}
+function closeModal(){
+  modalBg.classList.remove("on");
+  editingId = null;
+}
+document.getElementById("md-close").addEventListener("click", closeModal);
+modalBg.addEventListener("click", e=>{ if(e.target===modalBg) closeModal(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && modalBg.classList.contains("on")) closeModal(); });
+
+mdWho.addEventListener("click", e=>{
+  const b = e.target.closest(".who-btn"); if(!b) return;
+  b.classList.toggle("on");
+});
+
+async function saveCardDetails(){
+  if(!editingId) return;
+  const c = cardById(editingId); if(!c) return;
+  const title = mdTitleTxt.value.trim() || c.title;
+  const description = mdDesc.value;
+  const assignees = Array.from(mdWho.querySelectorAll(".who-btn.on")).map(b=>b.dataset.p);
+  c.title = title; c.description = description; c.assignees = assignees;
+  render();
+  mdState.className = "savestate"; mdState.textContent = "salvando…";
+  const payload = {title, description, assignees, updated_at:new Date().toISOString()};
+  let { error } = await sb.from("kanban_cards").update(payload).eq("id", editingId);
+  if(error && /column .* does not exist/i.test(error.message)){
+    // fallback: tenta sem as novas colunas (Supabase ainda não migrado)
+    mdState.className = "savestate err";
+    mdState.textContent = "⚠ rode supabase-setup.sql (faltam colunas description/assignees)";
+    return;
+  }
+  if(error){
+    mdState.className = "savestate err";
+    mdState.textContent = "erro: " + error.message;
+    return;
+  }
+  mdState.className = "savestate ok";
+  mdState.textContent = "✓ salvo";
+}
+mdSave.addEventListener("click", saveCardDetails);
+
+// ============================================================
+// CRONOGRAMA — relógio, contagem regressiva e checklist
+// ============================================================
+const LS_DONE_KEY = "hackia_sched_done_v1";
+function loadDone(){
+  try { return JSON.parse(localStorage.getItem(LS_DONE_KEY) || "[]"); }
+  catch { return []; }
+}
+function saveDone(arr){ localStorage.setItem(LS_DONE_KEY, JSON.stringify(arr)); }
+let doneSet = new Set(loadDone());
+
+function renderSchedule(){
+  const root = document.getElementById("sched");
+  root.innerHTML = "";
+  SCHEDULE.forEach(day=>{
+    const done = day.items.filter(s=>doneSet.has(s.id)).length;
+    const total = day.items.length;
+    const wrap = document.createElement("div");
+    wrap.className = "schday";
+    wrap.innerHTML = `<div class="dhead"><span>${day.day}</span><span class="dprog">${done}/${total} concluídas</span></div>`;
+    day.items.forEach(s=>{
+      const row = document.createElement("div");
+      const isDone = doneSet.has(s.id);
+      row.className = "stage" + (isDone?" done":"") + (s.pitch?" pitch":"");
+      row.dataset.sid = s.id;
+      row.dataset.time = s.t;
+      row.innerHTML =
+        `<div class="stime">${s.t}</div>` +
+        `<div class="stchk ${isDone?"on":""}" data-chk="${s.id}">${isDone?"✓":""}</div>` +
+        `<div class="stitle">${escapeHtml(s.label)}</div>` +
+        `<div class="stwho">${escapeHtml(s.who)}</div>`;
+      wrap.appendChild(row);
+    });
+    root.appendChild(wrap);
+  });
+  // marcar etapa atual
+  markCurrentStage();
+}
+document.getElementById("sched").addEventListener("click", e=>{
+  const chk = e.target.closest(".stchk"); if(!chk) return;
+  const id = chk.dataset.chk;
+  if(doneSet.has(id)) doneSet.delete(id); else doneSet.add(id);
+  saveDone(Array.from(doneSet));
+  renderSchedule();
+});
+
+function pad(n){ return String(n).padStart(2,"0"); }
+const DAYS_PT = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const MONTHS_PT = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+function flatSchedule(){
+  // retorna [{date, ...stage}] em ordem
+  const out = [];
+  SCHEDULE.forEach((day, idx)=>{
+    const dayDate = idx===0 ? new Date(2026,4,30) : new Date(2026,4,31);
+    day.items.forEach(s=>{
+      const [h,m] = s.t.split(":").map(Number);
+      const d = new Date(dayDate); d.setHours(h, m, 0, 0);
+      out.push({...s, when:d});
+    });
+  });
+  return out.sort((a,b)=>a.when-b.when);
+}
+
+function markCurrentStage(){
+  const now = new Date();
+  const flat = flatSchedule();
+  let cur = null, next = null;
+  for(let i=0;i<flat.length;i++){
+    if(flat[i].when <= now) cur = flat[i];
+    else { next = flat[i]; break; }
+  }
+  document.querySelectorAll(".stage.now").forEach(el=>el.classList.remove("now"));
+  if(cur){
+    const el = document.querySelector(`.stage[data-sid="${cur.id}"]`);
+    if(el && !doneSet.has(cur.id)) el.classList.add("now");
+  }
+  const elStage = document.getElementById("clk-stage");
+  const elNext = document.getElementById("clk-next");
+  if(elStage){
+    elStage.textContent = cur ? cur.label : "Antes do kickoff";
+  }
+  if(elNext){
+    elNext.textContent = next ? `Próxima: ${next.t} · ${next.label}` : "Última etapa do hackathon";
+  }
+}
+
+function tickClock(){
+  const now = new Date();
+  const elN = document.getElementById("clk-now");
+  const elD = document.getElementById("clk-date");
+  const elCD = document.getElementById("clk-cd");
+  if(elN) elN.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  if(elD) elD.textContent = `${DAYS_PT[now.getDay()]}, ${pad(now.getDate())}/${pad(now.getMonth()+1)}`;
+  if(elCD){
+    const diff = PITCH_AT - now;
+    if(diff <= 0){
+      elCD.textContent = "🎤 É AGORA";
+      elCD.className = "val danger";
+    } else {
+      const h = Math.floor(diff/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      elCD.textContent = `${h}h ${pad(m)}m ${pad(s)}s`;
+      elCD.className = "val" + (h<1?" danger":(h<3?" warn":""));
+    }
+  }
+  // remarcar etapa só a cada 30s para não recalcular toa
+  if(now.getSeconds() % 30 === 0) markCurrentStage();
+}
+renderSchedule();
+tickClock();
+setInterval(tickClock, 1000);
 </script>
 </body>
 </html>

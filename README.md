@@ -36,8 +36,31 @@ Quadro compartilhado do time, sincronizado em tempo real via Supabase. Site est�
 
 A chave embutida é a **publishable** do Supabase (uso normal no front). As políticas (RLS) hoje permitem **leitura e escrita a qualquer pessoa com a URL** — proporcional a um quadro interno de hackathon. Não coloque dados sensíveis. Para restringir depois: Supabase Auth + políticas mais estritas.
 
+## Migração do banco (rodar uma vez no Supabase)
+
+O modal de card guarda **descrição** e **responsáveis** em duas colunas novas. Antes da primeira edição, abra o **Supabase → SQL Editor** e rode `supabase-setup.sql`:
+
+```sql
+ALTER TABLE kanban_cards
+  ADD COLUMN IF NOT EXISTS description TEXT,
+  ADD COLUMN IF NOT EXISTS assignees   JSONB DEFAULT '[]'::jsonb;
+```
+
+Sem isso o quadro continua funcionando, mas o botão "Salvar" do modal vai avisar que faltam as colunas.
+
+## Cronograma
+
+Aba **⏱ Cronograma** mostra:
+- relógio em tempo real e a data de hoje;
+- contagem regressiva até o pitch (domingo 31/05 às 18:00);
+- etapa **atual** destacada conforme a hora;
+- checklist por dia (Sáb 30/05 e Dom 31/05). As marcações ficam em `localStorage` do navegador.
+
+Os responsáveis disponíveis nos cards e no cronograma são: **Victor, Vitão, Monica, Gustavo, Nicolas**.
+
 ## Arquivos
 
 - `index.html` — o quadro completo (UI + lógica + conexão Supabase).
+- `supabase-setup.sql` — migração das colunas `description` e `assignees`.
 - `.nojekyll` — desliga o processamento Jekyll do Pages.
 - `.gitignore`.
