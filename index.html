@@ -578,7 +578,6 @@
       </div>
       <span class="conn" id="conn">● conectando…</span>
       <button class="btn" id="reset">↺ Voltar tudo ao backlog</button>
-      <button class="btn" id="reseed" title="Apaga TODOS os cards e replanta o MVP — exige digitar APAGAR TUDO">🧨 Apagar tudo</button>
       <div class="alert" id="alert">Must no backlog: —</div>
     </div>
   </div>
@@ -1352,54 +1351,8 @@ document.getElementById("reset").addEventListener("click", async ()=>{
   if(error){ setStatus(false, error.message); fetchCards(); }
 });
 
-// re-seed: APAGA tudo e planta o backlog do MVP "Combinado Não Sai Caro"
-document.getElementById("reseed").addEventListener("click", async ()=>{
-  const ok = confirm(
-    "⚠ ATENÇÃO — APAGAR TUDO\n\n" +
-    "Isto VAI APAGAR todos os cards atuais (inclusive os adicionados pelo time) e replantar o backlog do MVP \"Combinado Não Sai Caro\" do zero.\n\n" +
-    "Também vai apagar os timestamps do cronograma (started_at / done_at).\n\n" +
-    "Tem certeza?"
-  );
-  if(!ok) return;
-  const really = prompt("Para confirmar, digite EXATAMENTE: APAGAR TUDO");
-  if(really !== "APAGAR TUDO"){ alert("Cancelado — texto não conferiu."); return; }
-
-  // 1) limpa cards
-  let r = await sb.from("kanban_cards").delete().neq("id","__none__");
-  if(r.error){ alert("Erro ao limpar cards: " + r.error.message); return; }
-
-  // 2) limpa cronograma (se a tabela existir)
-  r = await sb.from("hackathon_schedule").delete().neq("id","__none__");
-  if(r.error && !/relation .* does not exist/i.test(r.error.message)){
-    console.warn("[reseed] hackathon_schedule:", r.error.message);
-  }
-
-  // 3) planta CARDS do MVP no backlog
-  const seed = CARDS.map((c,i)=>({
-    id: c.id,
-    lane: c.lane,
-    moscow: c.m,
-    title: c.t,
-    status: "backlog",
-    is_custom: false,
-    position: i,
-    description: c.d || "",
-    assignees: []
-  }));
-  r = await sb.from("kanban_cards").insert(seed);
-  if(r.error){
-    // se faltarem colunas description/assignees, tenta sem elas
-    if(/column .* does not exist/i.test(r.error.message)){
-      const lean = seed.map(({description, assignees, ...rest})=>rest);
-      r = await sb.from("kanban_cards").insert(lean);
-    }
-    if(r.error){ alert("Erro ao plantar MVP: " + r.error.message); return; }
-  }
-
-  await fetchCards();
-  if(typeof fetchScheduleState === "function") await fetchScheduleState();
-  alert("✓ Backlog do MVP plantado. Bom hack!");
-});
+// Botão de "Apagar tudo" removido permanentemente — única forma de apagar
+// agora é deletar um card por vez. Não há atalho de delete em massa.
 
 // realtime: qualquer mudança no banco recarrega o quadro de todos
 sb.channel("kanban_cards_rt")

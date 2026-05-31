@@ -76,15 +76,13 @@ Quando o quadro está vazio no Supabase, o backlog do MVP "Combinado Não Sai Ca
 | Botão                       | O que faz                                                                                                | Confirma com    |
 |-----------------------------|----------------------------------------------------------------------------------------------------------|-----------------|
 | ↺ Voltar tudo ao backlog    | Move todos os cards para o Backlog. Nada é apagado.                                                      | OK do `confirm` |
-| 🔥 Re-seed MVP               | **APAGA** todos os cards **e** os timestamps do cronograma, depois planta o backlog do MoSCoW do zero.   | Digite `RESET MVP` |
 
-Como atalho equivalente via SQL para o Re-seed, rode `seed-mvp-contratos.sql` no Supabase SQL Editor.
+> Não existe mais botão de "Apagar tudo" / re-seed em massa. A única forma de apagar é remover um card por vez (X no canto do card).
 
 ## Arquivos
 
 - `index.html` — o quadro completo (UI + lógica + conexão Supabase).
 - `Moskow Combinado nao sai caro.md` — backlog-fonte (MUST / SHOULD / COULD / WON'T).
 - `supabase-setup.sql` — migrações: colunas `description`/`assignees` em `kanban_cards` e tabela `hackathon_schedule`.
-- `seed-mvp-contratos.sql` — TRUNCATE + INSERT dos 23 cards do MVP.
 - `.nojekyll` — desliga o processamento Jekyll do Pages.
 - `.gitignore`.
