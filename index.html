@@ -398,6 +398,42 @@
   .plan-form button{font-family:inherit;font-size:12.5px;font-weight:700;border:none;padding:7px 14px;border-radius:8px;cursor:pointer}
   .plan-form .btn-cancel{background:var(--card2);color:#cfd2ef;border:1px solid var(--line)}
   .plan-form .btn-save{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+
+  /* Rumo à Solução */
+  .plan-solution{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;margin-top:24px;margin-bottom:-6px}
+  .plan-solution .ps-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap}
+  .plan-solution .ps-title{font-size:14px;font-weight:800;color:#eef0ff}
+  .plan-solution .ps-pct{font-family:var(--mono);font-size:12px;color:#9296bd;font-weight:700}
+  .plan-solution .ps-segments{display:flex;gap:4px;height:14px;border-radius:999px;overflow:hidden;background:var(--cell);border:1px solid var(--line)}
+  .plan-solution .ps-seg{flex:1;position:relative;background:rgba(255,255,255,.04);transition:.2s}
+  .plan-solution .ps-seg .fill{position:absolute;left:0;top:0;bottom:0;background:var(--stcolor,#7c83ff);transition:width .25s}
+  .plan-solution .ps-labels{display:flex;gap:4px;margin-top:6px}
+  .plan-solution .ps-labels .lbl{flex:1;font-family:var(--mono);font-size:10px;font-weight:700;color:#9296bd;text-transform:uppercase;letter-spacing:.4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+  .plan-solution .ps-labels .lbl.full{color:var(--ok)}
+  .plan-solution.is-done .ps-title::after{content:" — Solução pronta ✅";color:var(--ok)}
+
+  /* Pool agrupado por etapa */
+  .stage-group{border:1px solid var(--line);border-left:3px solid var(--stcolor,#7c83ff);border-radius:9px;background:var(--cell);margin-bottom:10px;overflow:hidden}
+  .stage-group-head{display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:pointer;user-select:none;background:rgba(255,255,255,.02)}
+  .stage-group-head:hover{background:rgba(255,255,255,.05)}
+  .stage-group-head .caret{font-family:var(--mono);font-size:10px;color:#9296bd;width:10px}
+  .stage-group-head .st-title{flex:1;font-size:12.5px;font-weight:700;color:#eef0ff;line-height:1.2}
+  .stage-group-head .st-counter{font-family:var(--mono);font-size:10.5px;color:#9296bd;font-weight:700}
+  .stage-group-head .st-actions{display:flex;gap:3px;margin-left:4px}
+  .stage-group-head .st-btn{background:none;border:none;color:#6b7090;cursor:pointer;font-size:11px;padding:2px 5px;border-radius:5px}
+  .stage-group-head .st-btn:hover{color:#cfd2ef;background:var(--card2)}
+  .stage-group .st-bar{height:5px;background:var(--card2)}
+  .stage-group .st-bar .st-fill{height:100%;background:var(--stcolor,#7c83ff);transition:width .2s}
+  .stage-group .st-body{padding:8px 9px}
+  .stage-group.collapsed .st-body{display:none}
+  .stage-group .st-empty{font-size:11.5px;color:#6b7090;font-style:italic;padding:4px 6px}
+  .stage-group.no-stage{border-left-color:#6b7090}
+  .stage-newbtn{font-family:inherit;font-size:11.5px;font-weight:700;background:var(--card2);border:1px dashed var(--line);color:#cfd2ef;padding:7px 10px;border-radius:8px;cursor:pointer;width:100%;margin-bottom:10px}
+  .stage-newbtn:hover{border-color:var(--brand);color:#fff}
+
+  /* Tag de cor na peça */
+  .ptask .pt-stage{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:1px 7px 1px 5px;border-radius:999px;border:1px solid var(--line);background:var(--card)}
+  .ptask .pt-stage .dot{width:7px;height:7px;border-radius:50%;background:var(--stcolor,#7c83ff)}
 </style>
 </head>
 <body>
@@ -1749,9 +1785,14 @@ fetchCanvas();
 // ============================================================
 let planSlots = [];
 let planTasks = [];
+let planStages = [];
 let deliverables = [];
 let planFormOpen = false;
-let planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"" };
+let planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"", stage_id:"" };
+let stageFormOpen = false;
+let stageFormDraft = { id:null, title:"", description:"", color:"#7c83ff", deliverable_id:"" };
+let stageCollapsed = {}; // { stage_id: true|false }
+const STAGE_COLORS = ["#7c83ff","#46e6a0","#ffce5a","#ff8ad6","#ff6b6b","#5be1ff","#c084fc","#ffa45c"];
 const PLAN_DEADLINE = new Date(2026, 4, 31, 17, 30, 0); // 31/05/2026 17:30 local
 
 function fmtSlotRange(s){
@@ -1779,6 +1820,24 @@ async function fetchDeliverables(){
   if(error){ console.error("[deliverables]", error); return; }
   deliverables = data || [];
   renderPlan();
+}
+async function fetchPlanStages(){
+  const { data, error } = await sb.from("planning_stages").select("*").order("order_index",{ascending:true});
+  if(error){ console.error("[plan stages]", error); return; }
+  planStages = data || [];
+  renderPlan();
+}
+
+function stageById(id){ return planStages.find(s => s.id === id); }
+function tasksByStage(stageId){
+  if(stageId === null || stageId === undefined) return planTasks.filter(t => !t.stage_id);
+  return planTasks.filter(t => t.stage_id === stageId);
+}
+function stageProgress(stageId){
+  const ts = tasksByStage(stageId);
+  const total = ts.length;
+  const done  = ts.filter(t => t.status === "done").length;
+  return { done, total, pct: total ? Math.round(done*100/total) : 0 };
 }
 
 function planAvailableMin(){
@@ -1826,13 +1885,19 @@ function renderPlanTaskHtml(t, draggable){
   const owner = (t.owner||"").trim();
   const avatar = owner ? avatarHtml(owner, 18) : "";
   const delivLabel = (deliverables.find(d => d.id === t.deliverable)||{}).label || "";
+  const stage = t.stage_id ? stageById(t.stage_id) : null;
+  const stageStyle = stage ? `style="--stcolor:${escapeHtml(stage.color||'#7c83ff')}"` : "";
+  const stageTag = stage
+    ? `<span class="pt-stage" ${stageStyle}><span class="dot"></span>${escapeHtml(stage.title)}</span>`
+    : "";
   return `<div class="ptask ${t.status==="done"?"done":""} ${t.status==="doing"?"doing":""}"
-              draggable="${draggable?"true":"false"}" data-tid="${escapeHtml(t.id)}">
+              draggable="${draggable?"true":"false"}" data-tid="${escapeHtml(t.id)}" ${stageStyle}>
     <div class="pt-title">${escapeHtml(t.title)}</div>
     <div class="pt-meta">
       ${avatar}
       ${owner ? `<span>${escapeHtml(owner)}</span>` : ""}
       <span class="pt-dur">${t.duration_min||0}min</span>
+      ${stageTag}
       ${delivLabel ? `<span class="pt-deliv">→ ${escapeHtml(delivLabel)}</span>` : ""}
     </div>
     <div class="pt-row">
@@ -1869,6 +1934,7 @@ function renderPlan(){
   // Form de nova atividade
   const delivOpts = deliverables.map(d => `<option value="${escapeHtml(d.id)}"${planFormDraft.deliverable===d.id?" selected":""}>${escapeHtml(d.label)}</option>`).join("");
   const teamOpts = TEAM.map(p => `<option value="${escapeHtml(p)}"${planFormDraft.owner===p?" selected":""}>${escapeHtml(p)}</option>`).join("");
+  const stageOpts = planStages.map(st => `<option value="${escapeHtml(st.id)}"${planFormDraft.stage_id===st.id?" selected":""}>${escapeHtml(st.title)}</option>`).join("");
   const formHtml = planFormOpen ? `
     <div class="plan-form" id="plan-form">
       <input type="text" id="pf-title" placeholder="O que precisa ser feito?" value="${escapeHtml(planFormDraft.title)}" required>
@@ -1877,6 +1943,7 @@ function renderPlan(){
         <select id="pf-owner"><option value="">Dono…</option>${teamOpts}</select>
         <input type="number" id="pf-dur" min="5" step="5" placeholder="Duração (min)" value="${planFormDraft.duration_min||30}">
       </div>
+      <select id="pf-stage"><option value="">Sem etapa</option>${stageOpts}</select>
       <select id="pf-deliv"><option value="">→ Entregável final (opcional)</option>${delivOpts}</select>
       <div class="actions">
         <button class="btn-cancel" id="pf-cancel">Cancelar</button>
@@ -1884,6 +1951,22 @@ function renderPlan(){
       </div>
     </div>
   ` : `<button class="plan-newbtn" id="plan-new">＋ Nova atividade do plano</button>`;
+
+  // Form de nova/edit etapa
+  const stageDelivOpts = deliverables.map(d => `<option value="${escapeHtml(d.id)}"${stageFormDraft.deliverable_id===d.id?" selected":""}>${escapeHtml(d.label)}</option>`).join("");
+  const stageColorChips = STAGE_COLORS.map(c => `<button type="button" class="st-color-chip ${stageFormDraft.color===c?"sel":""}" data-color="${c}" style="background:${c};width:22px;height:22px;border-radius:50%;border:2px solid ${stageFormDraft.color===c?'#fff':'transparent'};cursor:pointer;margin-right:6px"></button>`).join("");
+  const stageFormHtml = stageFormOpen ? `
+    <div class="plan-form" id="stage-form">
+      <input type="text" id="sf-title" placeholder="Nome da etapa" value="${escapeHtml(stageFormDraft.title)}" required>
+      <textarea id="sf-desc" placeholder="Descrição (opcional)" rows="2">${escapeHtml(stageFormDraft.description||"")}</textarea>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">${stageColorChips}</div>
+      <select id="sf-deliv"><option value="">→ Entregável final (opcional)</option>${stageDelivOpts}</select>
+      <div class="actions">
+        <button class="btn-cancel" id="sf-cancel">Cancelar</button>
+        <button class="btn-save" id="sf-save">${stageFormDraft.id?"Salvar etapa":"Criar etapa"}</button>
+      </div>
+    </div>
+  ` : `<button class="stage-newbtn" id="stage-new">＋ Nova etapa</button>`;
 
   // Timeline com linha NOW
   const showNowLine = now < PLAN_DEADLINE.getTime();
@@ -1943,12 +2026,72 @@ function renderPlan(){
     </div>
   </li>`).join("");
 
+  // Pool agrupado por etapa
+  const poolGroupsHtml = (() => {
+    const groups = planStages.map(st => ({ stage: st, items: pool.filter(t => t.stage_id === st.id) }));
+    groups.push({ stage: null, items: pool.filter(t => !t.stage_id) });
+    return groups.map(({stage, items}) => {
+      const id = stage ? stage.id : "__nostage__";
+      const color = stage ? (stage.color || "#7c83ff") : "#6b7090";
+      const prog = stage ? stageProgress(stage.id) : { done:0, total:items.length, pct:0 };
+      const title = stage ? stage.title : "Sem etapa";
+      const collapsed = !!stageCollapsed[id];
+      const actions = stage
+        ? `<div class="st-actions">
+             <button class="st-btn" data-stage-edit="${escapeHtml(stage.id)}" title="Editar">✎</button>
+             <button class="st-btn" data-stage-del="${escapeHtml(stage.id)}" title="Excluir">✕</button>
+           </div>`
+        : "";
+      const body = items.length
+        ? items.map(t => renderPlanTaskHtml(t, true)).join("")
+        : `<div class="st-empty">Sem atividades nesta etapa ainda.</div>`;
+      return `<div class="stage-group ${collapsed?"collapsed":""} ${stage?"":"no-stage"}" style="--stcolor:${color}" data-stage-group="${escapeHtml(id)}">
+        <div class="stage-group-head" data-stage-toggle="${escapeHtml(id)}">
+          <span class="caret">${collapsed?"▸":"▾"}</span>
+          <span class="st-title">${escapeHtml(title)}</span>
+          <span class="st-counter">${prog.done}/${prog.total||items.length}</span>
+          ${actions}
+        </div>
+        ${stage ? `<div class="st-bar"><div class="st-fill" style="width:${prog.pct}%"></div></div>` : ""}
+        <div class="st-body">${body}</div>
+      </div>`;
+    }).join("");
+  })();
+
+  // Barra "Rumo à Solução"
+  const solutionSegments = planStages.map(st => {
+    const p = stageProgress(st.id);
+    return `<div class="ps-seg" style="--stcolor:${escapeHtml(st.color||'#7c83ff')}" title="${escapeHtml(st.title)} — ${p.done}/${p.total} (${p.pct}%)">
+      <div class="fill" style="width:${p.pct}%"></div>
+    </div>`;
+  }).join("");
+  const solutionLabels = planStages.map(st => {
+    const p = stageProgress(st.id);
+    return `<div class="lbl ${p.pct===100?"full":""}">${escapeHtml(st.title)}</div>`;
+  }).join("");
+  const overallTotal = planTasks.length;
+  const overallDone  = planTasks.filter(t => t.status === "done").length;
+  const overallPct   = overallTotal ? Math.round(overallDone*100/overallTotal) : 0;
+  const allDone = planStages.length && planStages.every(st => stageProgress(st.id).pct === 100);
+  const solutionHtml = planStages.length ? `
+    <div class="plan-solution ${allDone?"is-done":""}">
+      <div class="ps-head">
+        <div class="ps-title">🧭 Rumo à Solução</div>
+        <div class="ps-pct">${overallDone}/${overallTotal} tarefas · ${overallPct}%</div>
+      </div>
+      <div class="ps-segments">${solutionSegments}</div>
+      <div class="ps-labels">${solutionLabels}</div>
+    </div>
+  ` : "";
+
   root.innerHTML = `
+    ${solutionHtml}
     <div class="plan-grid">
       <div class="plan-col">
         <h3>🧩 Pool <span class="badge">${pool.length} peça${pool.length===1?"":"s"}</span></h3>
         ${formHtml}
-        <div id="plan-pool">${pool.length ? pool.map(t => renderPlanTaskHtml(t, true)).join("") : `<div style="color:#9296bd;font-size:12.5px;font-style:italic">Sem atividades. Adicione e arraste para um bloco de trabalho na timeline.</div>`}</div>
+        ${stageFormHtml}
+        <div id="plan-pool">${pool.length || planStages.length ? poolGroupsHtml : `<div style="color:#9296bd;font-size:12.5px;font-style:italic">Sem atividades. Adicione e arraste para um bloco de trabalho na timeline.</div>`}</div>
       </div>
       <div class="plan-col plan-timeline">
         <h3>📅 Timeline — domingo 31/05 <span class="badge">${avail}min livres · ${plan}min planejado</span></h3>
@@ -1984,7 +2127,7 @@ function bindPlanHandlers(){
     planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"" };
     renderPlan();
   });
-  ["pf-title","pf-desc","pf-owner","pf-dur","pf-deliv"].forEach(id=>{
+  ["pf-title","pf-desc","pf-owner","pf-dur","pf-deliv","pf-stage"].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.addEventListener("input", ()=>{
@@ -1993,10 +2136,75 @@ function bindPlanHandlers(){
       planFormDraft.owner       = (document.getElementById("pf-owner")||{}).value || "";
       planFormDraft.duration_min= parseInt((document.getElementById("pf-dur")||{}).value || "30", 10) || 30;
       planFormDraft.deliverable = (document.getElementById("pf-deliv")||{}).value || "";
+      planFormDraft.stage_id    = (document.getElementById("pf-stage")||{}).value || "";
+    });
+    el.addEventListener("change", ()=>{
+      planFormDraft.deliverable = (document.getElementById("pf-deliv")||{}).value || "";
+      planFormDraft.stage_id    = (document.getElementById("pf-stage")||{}).value || "";
+      planFormDraft.owner       = (document.getElementById("pf-owner")||{}).value || "";
     });
   });
   const fSave = document.getElementById("pf-save");
   if(fSave) fSave.addEventListener("click", createPlanTask);
+
+  // Stage form
+  const stageNew = document.getElementById("stage-new");
+  if(stageNew) stageNew.addEventListener("click", ()=>{
+    stageFormOpen = true;
+    stageFormDraft = { id:null, title:"", description:"", color: STAGE_COLORS[planStages.length % STAGE_COLORS.length], deliverable_id:"" };
+    renderPlan();
+  });
+  const sfCancel = document.getElementById("sf-cancel");
+  if(sfCancel) sfCancel.addEventListener("click", ()=>{
+    stageFormOpen = false;
+    stageFormDraft = { id:null, title:"", description:"", color:"#7c83ff", deliverable_id:"" };
+    renderPlan();
+  });
+  ["sf-title","sf-desc","sf-deliv"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const sync = ()=>{
+      stageFormDraft.title         = (document.getElementById("sf-title")||{}).value || "";
+      stageFormDraft.description   = (document.getElementById("sf-desc") ||{}).value || "";
+      stageFormDraft.deliverable_id= (document.getElementById("sf-deliv")||{}).value || "";
+    };
+    el.addEventListener("input", sync);
+    el.addEventListener("change", sync);
+  });
+  root.querySelectorAll(".st-color-chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      stageFormDraft.color = chip.dataset.color;
+      renderPlan();
+    });
+  });
+  const sfSave = document.getElementById("sf-save");
+  if(sfSave) sfSave.addEventListener("click", savePlanStage);
+
+  // Toggle/edit/delete grupos de etapa
+  root.querySelectorAll("[data-stage-toggle]").forEach(head=>{
+    head.addEventListener("click", e=>{
+      if(e.target.closest(".st-actions")) return;
+      const id = head.dataset.stageToggle;
+      stageCollapsed[id] = !stageCollapsed[id];
+      renderPlan();
+    });
+  });
+  root.querySelectorAll("[data-stage-edit]").forEach(b=>{
+    b.addEventListener("click", e=>{
+      e.stopPropagation();
+      const st = stageById(b.dataset.stageEdit);
+      if(!st) return;
+      stageFormOpen = true;
+      stageFormDraft = { id: st.id, title: st.title||"", description: st.description||"", color: st.color||"#7c83ff", deliverable_id: st.deliverable_id||"" };
+      renderPlan();
+    });
+  });
+  root.querySelectorAll("[data-stage-del]").forEach(b=>{
+    b.addEventListener("click", e=>{
+      e.stopPropagation();
+      deletePlanStage(b.dataset.stageDel);
+    });
+  });
 
   // Drag & drop
   root.querySelectorAll(".ptask[draggable=true]").forEach(el=>{
@@ -2078,6 +2286,7 @@ async function createPlanTask(){
     owner: t.owner || null,
     duration_min: t.duration_min || 30,
     deliverable: t.deliverable || null,
+    stage_id: t.stage_id || null,
     slot_id: null,
     order_index: order,
     status: "todo",
@@ -2086,8 +2295,56 @@ async function createPlanTask(){
   const { error } = await sb.from("planning_tasks").insert(payload);
   if(error){ alert("Erro ao criar atividade: " + error.message); return; }
   planFormOpen = false;
-  planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"" };
+  planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"", stage_id:"" };
   await fetchPlanTasks();
+}
+
+async function savePlanStage(){
+  const s = stageFormDraft;
+  const title = (s.title||"").trim();
+  if(!title){ alert("Dá um nome pra etapa."); return; }
+  const isEdit = !!s.id;
+  if(isEdit){
+    const payload = {
+      title,
+      description: s.description || null,
+      color: s.color || "#7c83ff",
+      deliverable_id: s.deliverable_id || null
+    };
+    const { error } = await sb.from("planning_stages").update(payload).eq("id", s.id);
+    if(error){ alert("Erro ao salvar etapa: " + error.message); return; }
+  } else {
+    const id = "stg-" + Date.now().toString(36);
+    const order = planStages.length ? Math.max(...planStages.map(x => x.order_index||0)) + 1 : 1;
+    const payload = {
+      id, title,
+      description: s.description || null,
+      color: s.color || "#7c83ff",
+      deliverable_id: s.deliverable_id || null,
+      order_index: order
+    };
+    const { error } = await sb.from("planning_stages").insert(payload);
+    if(error){ alert("Erro ao criar etapa: " + error.message); return; }
+  }
+  stageFormOpen = false;
+  stageFormDraft = { id:null, title:"", description:"", color:"#7c83ff", deliverable_id:"" };
+  await fetchPlanStages();
+}
+
+async function deletePlanStage(stageId){
+  const st = stageById(stageId);
+  if(!st) return;
+  const count = planTasks.filter(t => t.stage_id === stageId).length;
+  const msg = count
+    ? `Excluir a etapa "${st.title}"? As ${count} atividade(s) vinculadas ficarão em "Sem etapa".`
+    : `Excluir a etapa "${st.title}"?`;
+  if(!confirm(msg)) return;
+  // optimistic: desvincula localmente
+  planTasks.forEach(t => { if(t.stage_id === stageId) t.stage_id = null; });
+  planStages = planStages.filter(s => s.id !== stageId);
+  renderPlan();
+  const { error } = await sb.from("planning_stages").delete().eq("id", stageId);
+  if(error){ alert("Erro ao excluir etapa: " + error.message); fetchPlanStages(); fetchPlanTasks(); }
 }
 
 async function movePlanTask(taskId, slotId){
@@ -2157,9 +2414,13 @@ sb.channel("planning_tasks_rt")
 sb.channel("final_deliverables_rt")
   .on("postgres_changes", {event:"*", schema:"public", table:"final_deliverables"}, fetchDeliverables)
   .subscribe();
+sb.channel("planning_stages_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"planning_stages"}, fetchPlanStages)
+  .subscribe();
 
 fetchPlanSlots();
 fetchPlanTasks();
+fetchPlanStages();
 fetchDeliverables();
 
 // countdown a cada segundo se a aba do plano está visível
