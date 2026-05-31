@@ -305,6 +305,92 @@
   .hitem .hauthor{background:var(--card2);border:1px solid var(--line);color:#cfd2ef;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700}
   .hitem .hdor{font-size:13.5px;color:#e9eaf6;line-height:1.45}
   .hitem .hempty{color:#9296bd;font-size:12.5px;font-style:italic}
+
+  /* PLANO DE ENTREGA */
+  .plan-grid{display:grid;grid-template-columns:300px 1fr 320px;gap:18px;margin-top:24px;padding-bottom:40px}
+  @media(max-width:1100px){.plan-grid{grid-template-columns:1fr}}
+  .plan-col{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;min-height:200px}
+  .plan-col h3{font-size:14px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .plan-col h3 .badge{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--cell);border:1px solid var(--line);color:#9296bd;padding:2px 8px;border-radius:999px}
+
+  .plan-newbtn{font-family:inherit;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;padding:9px 14px;border-radius:9px;cursor:pointer;width:100%;margin-bottom:12px}
+  .plan-newbtn:hover{filter:brightness(1.1)}
+
+  .ptask{background:var(--cell);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:9px;padding:10px 12px;margin-bottom:8px;cursor:grab;user-select:none;transition:.12s}
+  .ptask:hover{border-color:var(--brand);transform:translateY(-1px)}
+  .ptask:active{cursor:grabbing}
+  .ptask.drag{opacity:.4}
+  .ptask.done{opacity:.7;border-left-color:var(--ok)}
+  .ptask.doing{border-left-color:var(--warn)}
+  .ptask .pt-title{font-size:13px;font-weight:600;color:#eef0ff;line-height:1.35}
+  .ptask.done .pt-title{text-decoration:line-through}
+  .ptask .pt-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-family:var(--mono);font-size:10.5px;color:#9296bd;align-items:center}
+  .ptask .pt-dur{background:var(--card2);border:1px solid var(--line);padding:1px 7px;border-radius:999px;font-weight:700}
+  .ptask .pt-deliv{font-size:10px;font-style:italic;color:#bfc3ff}
+  .ptask .pt-row{display:flex;gap:6px;margin-top:6px;align-items:center}
+  .ptask select{font-family:inherit;font-size:11px;background:var(--card2);border:1px solid var(--line);color:#cfd2ef;padding:3px 6px;border-radius:6px;cursor:pointer}
+  .ptask button.pt-del{background:none;border:none;color:#6b7090;font-weight:700;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:6px;margin-left:auto}
+  .ptask button.pt-del:hover{color:var(--no);background:var(--card2)}
+
+  .plan-timeline{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .plan-timeline h3{margin-bottom:12px}
+  .pslot{position:relative;border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px;background:var(--cell);transition:.12s}
+  .pslot.locked{background:rgba(122,128,159,.10);border-color:rgba(122,128,159,.35)}
+  .pslot.deadline{background:rgba(255,107,107,.10);border:1px solid var(--no);box-shadow:0 0 0 1px rgba(255,107,107,.25)}
+  .pslot.working{border-style:dashed;border-color:rgba(124,131,255,.45)}
+  .pslot.working.dragover{background:rgba(124,131,255,.12);border-color:var(--brand);box-shadow:inset 0 0 0 2px var(--brand)}
+  .pslot .ps-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .pslot .ps-time{font-family:var(--mono);font-size:12.5px;font-weight:700;color:#cfd2ef}
+  .pslot.deadline .ps-time{color:var(--no)}
+  .pslot.locked .ps-time{color:#9296bd}
+  .pslot .ps-label{font-size:13.5px;font-weight:600;color:#eef0ff}
+  .pslot.deadline .ps-label{color:#ffb3b3;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+  .pslot.locked .ps-label{color:#9296bd}
+  .pslot .ps-lock{font-size:14px;color:#9296bd}
+  .pslot .ps-cap{font-family:var(--mono);font-size:11px;color:#9296bd}
+  .pslot .ps-tasks{margin-top:8px;display:flex;flex-direction:column;gap:6px;min-height:8px}
+  .pslot.past{opacity:.55}
+
+  .now-line{position:relative;height:0;border-top:2px solid var(--no);margin:6px 0;display:flex;align-items:center;gap:6px}
+  .now-line::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--no);margin-left:-4px;margin-top:-5px}
+  .now-line .nowlbl{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--no);margin-top:-9px;margin-left:8px;background:var(--bg);padding:0 6px}
+
+  /* Painel de entregáveis */
+  .plan-deliver .countdown{background:linear-gradient(135deg,#1a1f47,#2a2370);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:14px;text-align:center}
+  .plan-deliver .countdown .lbl{font-size:11px;font-weight:700;color:#9296bd;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px}
+  .plan-deliver .countdown .val{font-family:var(--mono);font-size:24px;font-weight:800;color:#fff}
+  .plan-deliver .countdown .val.warn{color:var(--warn)}
+  .plan-deliver .countdown .val.danger{color:var(--no)}
+
+  .plan-health{padding:11px 13px;border-radius:11px;margin-bottom:14px;font-family:var(--mono);font-size:12px;font-weight:700;line-height:1.45}
+  .plan-health.ok{background:rgba(70,230,160,.12);border:1px solid var(--ok);color:#9af0cd}
+  .plan-health.warn{background:rgba(255,206,90,.14);border:1px solid var(--warn);color:#ffe19a}
+  .plan-health.danger{background:rgba(255,107,107,.14);border:1px solid var(--no);color:#ffb3b3}
+  .plan-health b{display:block;font-size:13.5px;margin-bottom:4px}
+
+  .deliv-progress{height:8px;background:var(--cell);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:10px}
+  .deliv-progress .bar{height:100%;background:linear-gradient(90deg,var(--ok),var(--brand));transition:width .2s}
+  .deliv-pct{font-family:var(--mono);font-size:11px;color:#9296bd;text-align:right;margin-bottom:12px;font-weight:700}
+
+  .deliv-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .deliv-item{display:flex;gap:8px;align-items:flex-start;background:var(--cell);border:1px solid var(--line);border-radius:9px;padding:9px 11px;cursor:pointer;transition:.12s}
+  .deliv-item:hover{border-color:var(--brand)}
+  .deliv-item.done{opacity:.75}
+  .deliv-item .dx{flex-shrink:0;width:18px;height:18px;border-radius:5px;border:2px solid var(--line);background:var(--cell);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;margin-top:1px}
+  .deliv-item.done .dx{background:var(--ok);border-color:var(--ok);color:#0c0f24}
+  .deliv-item .dlabel{font-size:13px;font-weight:700;color:#eef0ff;line-height:1.35}
+  .deliv-item.done .dlabel{text-decoration:line-through}
+  .deliv-item .ddetail{font-size:11.5px;color:#9296bd;margin-top:2px;line-height:1.4}
+
+  /* Modal de criar atividade do plano */
+  .plan-form{display:flex;flex-direction:column;gap:10px;background:var(--cell);border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:14px}
+  .plan-form input,.plan-form select,.plan-form textarea{font-family:inherit;font-size:13px;background:var(--card);border:1px solid var(--line);color:#eef0ff;padding:8px 10px;border-radius:8px;outline:none}
+  .plan-form input:focus,.plan-form select:focus,.plan-form textarea:focus{border-color:var(--brand)}
+  .plan-form .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .plan-form .actions{display:flex;gap:8px;justify-content:flex-end}
+  .plan-form button{font-family:inherit;font-size:12.5px;font-weight:700;border:none;padding:7px 14px;border-radius:8px;cursor:pointer}
+  .plan-form .btn-cancel{background:var(--card2);color:#cfd2ef;border:1px solid var(--line)}
+  .plan-form .btn-save{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
 </style>
 </head>
 <body>
@@ -333,6 +419,7 @@
     <button class="tab on" data-view="board">📌 Quadro</button>
     <button class="tab" data-view="cron">⏱ Cronograma</button>
     <button class="tab" data-view="dor">🎯 Dor &amp; Persona</button>
+    <button class="tab" data-view="plan">📦 Plano de Entrega</button>
     <button class="tab" data-view="settings">⚙ Time &amp; Raias</button>
   </div>
 </div>
@@ -401,6 +488,12 @@
 <div id="view-dor" style="display:none">
   <div class="wrap">
     <div id="view-dor-body"></div>
+  </div>
+</div>
+
+<div id="view-plan" style="display:none">
+  <div class="wrap">
+    <div id="view-plan-body"></div>
   </div>
 </div>
 
@@ -819,8 +912,10 @@ document.querySelectorAll(".tab").forEach(tab=>{
     document.getElementById("view-cron").style.display     = (v==="cron")     ? "" : "none";
     document.getElementById("view-dor").style.display      = (v==="dor")      ? "" : "none";
     document.getElementById("view-settings").style.display = (v==="settings") ? "" : "none";
+    document.getElementById("view-plan").style.display     = (v==="plan")     ? "" : "none";
     if(v === "settings") renderSettings();
     if(v === "dor")      renderCanvas();
+    if(v === "plan")     renderPlan();
   });
 });
 
@@ -1641,6 +1736,373 @@ sb.channel("problem_canvas_history_rt")
   .subscribe();
 
 fetchCanvas();
+
+// ============================================================
+// PLANO DE ENTREGA — timeline + pool + checklist
+// ============================================================
+let planSlots = [];
+let planTasks = [];
+let deliverables = [];
+let planFormOpen = false;
+let planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"" };
+const PLAN_DEADLINE = new Date(2026, 4, 31, 17, 30, 0); // 31/05/2026 17:30 local
+
+function fmtSlotRange(s){
+  const a = new Date(s.start_at), b = new Date(s.end_at);
+  return `${pad(a.getHours())}:${pad(a.getMinutes())}–${pad(b.getHours())}:${pad(b.getMinutes())}`;
+}
+function slotDurMin(s){
+  const d = (new Date(s.end_at).getTime() - new Date(s.start_at).getTime()) / 60000;
+  return Math.max(0, Math.round(d));
+}
+async function fetchPlanSlots(){
+  const { data, error } = await sb.from("planning_slots").select("*").order("start_at",{ascending:true});
+  if(error){ console.error("[plan slots]", error); return; }
+  planSlots = data || [];
+  renderPlan();
+}
+async function fetchPlanTasks(){
+  const { data, error } = await sb.from("planning_tasks").select("*").order("order_index",{ascending:true});
+  if(error){ console.error("[plan tasks]", error); return; }
+  planTasks = data || [];
+  renderPlan();
+}
+async function fetchDeliverables(){
+  const { data, error } = await sb.from("final_deliverables").select("*").order("order_index",{ascending:true});
+  if(error){ console.error("[deliverables]", error); return; }
+  deliverables = data || [];
+  renderPlan();
+}
+
+function planAvailableMin(){
+  const now = Date.now();
+  return planSlots
+    .filter(s => s.type === "working" && new Date(s.end_at).getTime() > now)
+    .reduce((acc,s) => {
+      const start = Math.max(new Date(s.start_at).getTime(), now);
+      const end = Math.min(new Date(s.end_at).getTime(), PLAN_DEADLINE.getTime());
+      return acc + Math.max(0, Math.round((end - start) / 60000));
+    }, 0);
+}
+function planPlannedMin(){
+  return planTasks
+    .filter(t => t.slot_id && t.status !== "done")
+    .reduce((acc,t) => acc + (t.duration_min || 0), 0);
+}
+
+function deliverablesByPct(){
+  if(deliverables.length === 0) return 0;
+  const done = deliverables.filter(d => d.done).length;
+  return Math.round(done * 100 / deliverables.length);
+}
+
+function planCountdownText(){
+  const diff = PLAN_DEADLINE.getTime() - Date.now();
+  if(diff <= 0) return { txt:"🎯 ENTREGA AGORA", cls:"danger" };
+  const h = Math.floor(diff/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  const s = Math.floor((diff%60000)/1000);
+  const cls = h < 1 ? "danger" : (h < 3 ? "warn" : "");
+  return { txt:`${h}h ${pad(m)}m ${pad(s)}s`, cls };
+}
+
+function renderPlanTaskHtml(t, draggable){
+  const owner = (t.owner||"").trim();
+  const avatar = owner ? avatarHtml(owner, 18) : "";
+  const delivLabel = (deliverables.find(d => d.id === t.deliverable)||{}).label || "";
+  return `<div class="ptask ${t.status==="done"?"done":""} ${t.status==="doing"?"doing":""}"
+              draggable="${draggable?"true":"false"}" data-tid="${escapeHtml(t.id)}">
+    <div class="pt-title">${escapeHtml(t.title)}</div>
+    <div class="pt-meta">
+      ${avatar}
+      ${owner ? `<span>${escapeHtml(owner)}</span>` : ""}
+      <span class="pt-dur">${t.duration_min||0}min</span>
+      ${delivLabel ? `<span class="pt-deliv">→ ${escapeHtml(delivLabel)}</span>` : ""}
+    </div>
+    <div class="pt-row">
+      <select data-tstatus="${escapeHtml(t.id)}">
+        <option value="todo"${t.status==="todo"?" selected":""}>A fazer</option>
+        <option value="doing"${t.status==="doing"?" selected":""}>Em andamento</option>
+        <option value="done"${t.status==="done"?" selected":""}>Concluído</option>
+      </select>
+      <button class="pt-del" data-tdel="${escapeHtml(t.id)}" title="Apagar atividade">✕</button>
+    </div>
+  </div>`;
+}
+
+function renderPlan(){
+  const root = document.getElementById("view-plan-body");
+  if(!root) return;
+  const now = Date.now();
+  const pool = planTasks.filter(t => !t.slot_id);
+  const cd = planCountdownText();
+  const avail = planAvailableMin();
+  const plan = planPlannedMin();
+  const delta = avail - plan;
+  let healthCls = "ok", healthTitle = "✅ Plano cabe no tempo disponível", healthBody = `Sobram ${delta} min de folga.`;
+  if(plan > avail){
+    healthCls = "danger";
+    healthTitle = "⚠ O plano não fecha no tempo";
+    healthBody = `Faltam ${plan - avail} min — corte ou realoque atividades.`;
+  } else if(delta < 30){
+    healthCls = "warn";
+    healthTitle = "🟡 Margem apertada";
+    healthBody = `Só ${delta} min de folga total.`;
+  }
+
+  // Form de nova atividade
+  const delivOpts = deliverables.map(d => `<option value="${escapeHtml(d.id)}"${planFormDraft.deliverable===d.id?" selected":""}>${escapeHtml(d.label)}</option>`).join("");
+  const teamOpts = TEAM.map(p => `<option value="${escapeHtml(p)}"${planFormDraft.owner===p?" selected":""}>${escapeHtml(p)}</option>`).join("");
+  const formHtml = planFormOpen ? `
+    <div class="plan-form" id="plan-form">
+      <input type="text" id="pf-title" placeholder="O que precisa ser feito?" value="${escapeHtml(planFormDraft.title)}" required>
+      <textarea id="pf-desc" placeholder="Detalhes (opcional)" rows="2">${escapeHtml(planFormDraft.description||"")}</textarea>
+      <div class="row2">
+        <select id="pf-owner"><option value="">Dono…</option>${teamOpts}</select>
+        <input type="number" id="pf-dur" min="5" step="5" placeholder="Duração (min)" value="${planFormDraft.duration_min||30}">
+      </div>
+      <select id="pf-deliv"><option value="">→ Entregável final (opcional)</option>${delivOpts}</select>
+      <div class="actions">
+        <button class="btn-cancel" id="pf-cancel">Cancelar</button>
+        <button class="btn-save" id="pf-save">Adicionar ao pool</button>
+      </div>
+    </div>
+  ` : `<button class="plan-newbtn" id="plan-new">＋ Nova atividade do plano</button>`;
+
+  // Timeline com linha NOW
+  const showNowLine = now < PLAN_DEADLINE.getTime();
+  const slotsHtml = planSlots.map((s, idx) => {
+    const startMs = new Date(s.start_at).getTime();
+    const endMs = new Date(s.end_at).getTime();
+    const isPast = endMs < now;
+    const isCurrent = startMs <= now && now < endMs;
+    const classes = ["pslot", s.type, s.locked?"locked":""];
+    if(isPast) classes.push("past");
+    const slotTasks = planTasks
+      .filter(t => t.slot_id === s.id)
+      .sort((a,b) => (a.order_index||0)-(b.order_index||0));
+    const cap = s.type === "working" ? `<span class="ps-cap">${slotDurMin(s)} min · ${slotTasks.reduce((a,t)=>a+(t.duration_min||0),0)} planejado</span>` : "";
+
+    // inserção da linha NOW entre slots, antes do primeiro slot futuro
+    let nowMark = "";
+    if(showNowLine && !isCurrent){
+      const prev = planSlots[idx-1];
+      const prevEnd = prev ? new Date(prev.end_at).getTime() : 0;
+      if(prev && prevEnd <= now && now < startMs){
+        nowMark = `<div class="now-line"><span class="nowlbl">AGORA · ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}</span></div>`;
+      }
+    }
+    const currentMark = isCurrent ? `<div class="now-line" style="border-color:var(--ok)"><span class="nowlbl" style="color:var(--ok)">AGORA NESTE BLOCO · ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}</span></div>` : "";
+
+    return nowMark + `<div class="${classes.filter(Boolean).join(" ")}" data-sid="${escapeHtml(s.id)}">
+      <div class="ps-head">
+        <span class="ps-time">${escapeHtml(fmtSlotRange(s))}</span>
+        <span class="ps-label">${escapeHtml(s.label)}</span>
+        ${s.locked ? `<span class="ps-lock" title="Bloco fixo">🔒</span>` : ""}
+      </div>
+      ${cap}
+      ${currentMark}
+      <div class="ps-tasks">${slotTasks.map(t => renderPlanTaskHtml(t, true)).join("")}</div>
+    </div>`;
+  }).join("");
+
+  // Entregáveis
+  const pct = deliverablesByPct();
+  const delivItems = deliverables.map(d => `<li class="deliv-item ${d.done?"done":""}" data-did="${escapeHtml(d.id)}">
+    <span class="dx">${d.done?"✓":""}</span>
+    <div>
+      <div class="dlabel">${escapeHtml(d.label)}</div>
+      ${d.detail ? `<div class="ddetail">${escapeHtml(d.detail)}</div>` : ""}
+    </div>
+  </li>`).join("");
+
+  root.innerHTML = `
+    <div class="plan-grid">
+      <div class="plan-col">
+        <h3>🧩 Pool <span class="badge">${pool.length} peça${pool.length===1?"":"s"}</span></h3>
+        ${formHtml}
+        <div id="plan-pool">${pool.length ? pool.map(t => renderPlanTaskHtml(t, true)).join("") : `<div style="color:#9296bd;font-size:12.5px;font-style:italic">Sem atividades. Adicione e arraste para um bloco de trabalho na timeline.</div>`}</div>
+      </div>
+      <div class="plan-col plan-timeline">
+        <h3>📅 Timeline — domingo 31/05 <span class="badge">${avail}min livres · ${plan}min planejado</span></h3>
+        ${slotsHtml}
+      </div>
+      <div class="plan-col plan-deliver">
+        <h3>🎯 Entregável final <span class="badge">${pct}%</span></h3>
+        <div class="countdown">
+          <div class="lbl">Até a entrega às 17:30</div>
+          <div class="val ${cd.cls}">${escapeHtml(cd.txt)}</div>
+        </div>
+        <div class="plan-health ${healthCls}"><b>${escapeHtml(healthTitle)}</b>${escapeHtml(healthBody)}</div>
+        <div class="deliv-progress"><div class="bar" style="width:${pct}%"></div></div>
+        <div class="deliv-pct">${pct}% pronto</div>
+        <ul class="deliv-list">${delivItems}</ul>
+      </div>
+    </div>
+  `;
+
+  bindPlanHandlers();
+}
+
+function bindPlanHandlers(){
+  const root = document.getElementById("view-plan-body");
+  if(!root) return;
+
+  // Form
+  const newBtn = document.getElementById("plan-new");
+  if(newBtn) newBtn.addEventListener("click", ()=>{ planFormOpen = true; renderPlan(); });
+  const fCancel = document.getElementById("pf-cancel");
+  if(fCancel) fCancel.addEventListener("click", ()=>{
+    planFormOpen = false;
+    planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"" };
+    renderPlan();
+  });
+  ["pf-title","pf-desc","pf-owner","pf-dur","pf-deliv"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("input", ()=>{
+      planFormDraft.title       = (document.getElementById("pf-title")||{}).value || "";
+      planFormDraft.description = (document.getElementById("pf-desc") ||{}).value || "";
+      planFormDraft.owner       = (document.getElementById("pf-owner")||{}).value || "";
+      planFormDraft.duration_min= parseInt((document.getElementById("pf-dur")||{}).value || "30", 10) || 30;
+      planFormDraft.deliverable = (document.getElementById("pf-deliv")||{}).value || "";
+    });
+  });
+  const fSave = document.getElementById("pf-save");
+  if(fSave) fSave.addEventListener("click", createPlanTask);
+
+  // Drag & drop
+  root.querySelectorAll(".ptask[draggable=true]").forEach(el=>{
+    el.addEventListener("dragstart", e=>{
+      e.dataTransfer.setData("text/plain", el.dataset.tid);
+      el.classList.add("drag");
+    });
+    el.addEventListener("dragend", ()=>el.classList.remove("drag"));
+  });
+  root.querySelectorAll(".pslot.working").forEach(slot=>{
+    slot.addEventListener("dragover", e=>{ e.preventDefault(); slot.classList.add("dragover"); });
+    slot.addEventListener("dragleave", ()=>slot.classList.remove("dragover"));
+    slot.addEventListener("drop", e=>{
+      e.preventDefault(); slot.classList.remove("dragover");
+      const tid = e.dataTransfer.getData("text/plain");
+      if(tid) movePlanTask(tid, slot.dataset.sid);
+    });
+  });
+  // Drop de volta no pool (qualquer área do plan-pool)
+  const pool = document.getElementById("plan-pool");
+  if(pool){
+    pool.addEventListener("dragover", e=>e.preventDefault());
+    pool.addEventListener("drop", e=>{
+      e.preventDefault();
+      const tid = e.dataTransfer.getData("text/plain");
+      if(tid) movePlanTask(tid, null);
+    });
+  }
+
+  // Status select + delete
+  root.querySelectorAll("[data-tstatus]").forEach(sel=>{
+    sel.addEventListener("change", ()=>updatePlanTaskStatus(sel.dataset.tstatus, sel.value));
+  });
+  root.querySelectorAll("[data-tdel]").forEach(b=>{
+    b.addEventListener("click", e=>{
+      e.stopPropagation();
+      deletePlanTask(b.dataset.tdel);
+    });
+  });
+
+  // Toggle deliverable
+  root.querySelectorAll(".deliv-item").forEach(li=>{
+    li.addEventListener("click", ()=>toggleDeliverable(li.dataset.did));
+  });
+}
+
+async function createPlanTask(){
+  const t = planFormDraft;
+  if(!t.title || !t.title.trim()){ alert("Dá um título pra atividade."); return; }
+  const id = "pt" + Date.now().toString(36);
+  const order = planTasks.filter(x => !x.slot_id).length;
+  const payload = {
+    id,
+    title: t.title.trim(),
+    description: t.description || null,
+    owner: t.owner || null,
+    duration_min: t.duration_min || 30,
+    deliverable: t.deliverable || null,
+    slot_id: null,
+    order_index: order,
+    status: "todo",
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await sb.from("planning_tasks").insert(payload);
+  if(error){ alert("Erro ao criar atividade: " + error.message); return; }
+  planFormOpen = false;
+  planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"" };
+  await fetchPlanTasks();
+}
+
+async function movePlanTask(taskId, slotId){
+  const task = planTasks.find(t => t.id === taskId);
+  if(!task) return;
+  // bloqueia drop em locked slots (segurança redundante; UI já não tem dragover lá)
+  if(slotId){
+    const slot = planSlots.find(s => s.id === slotId);
+    if(slot && slot.locked){ alert("Este bloco está travado — não recebe atividades."); return; }
+  }
+  // novo order_index = fim do destino
+  const dest = planTasks.filter(t => t.slot_id === slotId && t.id !== taskId);
+  const order = dest.length;
+  const payload = { slot_id: slotId, order_index: order, updated_at: new Date().toISOString() };
+  task.slot_id = slotId; task.order_index = order;
+  renderPlan();
+  const { error } = await sb.from("planning_tasks").update(payload).eq("id", taskId);
+  if(error){ alert("Erro ao mover: " + error.message); fetchPlanTasks(); }
+}
+
+async function updatePlanTaskStatus(taskId, status){
+  const t = planTasks.find(x => x.id === taskId);
+  if(!t) return;
+  t.status = status; renderPlan();
+  const { error } = await sb.from("planning_tasks")
+    .update({ status, updated_at: new Date().toISOString() }).eq("id", taskId);
+  if(error){ alert("Erro: " + error.message); fetchPlanTasks(); }
+}
+
+async function deletePlanTask(taskId){
+  if(!confirm("Apagar esta atividade do plano?")) return;
+  planTasks = planTasks.filter(t => t.id !== taskId);
+  renderPlan();
+  const { error } = await sb.from("planning_tasks").delete().eq("id", taskId);
+  if(error){ alert("Erro: " + error.message); fetchPlanTasks(); }
+}
+
+async function toggleDeliverable(did){
+  const d = deliverables.find(x => x.id === did);
+  if(!d) return;
+  d.done = !d.done; renderPlan();
+  const { error } = await sb.from("final_deliverables").update({ done: d.done }).eq("id", did);
+  if(error){ alert("Erro: " + error.message); fetchDeliverables(); }
+}
+
+// Realtime
+sb.channel("planning_slots_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"planning_slots"}, fetchPlanSlots)
+  .subscribe();
+sb.channel("planning_tasks_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"planning_tasks"}, fetchPlanTasks)
+  .subscribe();
+sb.channel("final_deliverables_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"final_deliverables"}, fetchDeliverables)
+  .subscribe();
+
+fetchPlanSlots();
+fetchPlanTasks();
+fetchDeliverables();
+
+// countdown a cada segundo se a aba do plano está visível
+setInterval(()=>{
+  const v = document.getElementById("view-plan");
+  if(v && v.style.display !== "none") renderPlan();
+}, 30000);
 
 // ============================================================
 // CRONOGRAMA — relógio, contagem regressiva, checklist com timestamps
