@@ -486,6 +486,81 @@
   .pt-notes-modal .ptn-form .row{display:flex;gap:6px;align-items:center;justify-content:space-between}
   .pt-notes-modal .ptn-form button{font-family:inherit;font-size:12.5px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer}
   .pt-notes-modal .ptn-empty{font-size:12.5px;color:#9296bd;font-style:italic;padding:6px 4px}
+
+  /* ============ PLANO V2 — Sortable + container único ============ */
+  .plan-timebar{display:flex;gap:14px;background:var(--card,#11132b);border:1px solid var(--line,#2a2e5a);border-left:5px solid var(--ok,#46e6a0);border-radius:12px;padding:14px 16px;margin-bottom:14px;flex-wrap:wrap}
+  .plan-timebar.warn{border-left-color:#ffce5a}
+  .plan-timebar.danger{border-left-color:#ff6b6b}
+  .plan-timebar .ptb-cell{display:flex;flex-direction:column;gap:2px;flex:1;min-width:170px}
+  .plan-timebar .ptb-cell .lbl{font-size:11px;color:#9296bd;font-weight:700;letter-spacing:.4px}
+  .plan-timebar .ptb-cell b{font-size:20px;color:#eef0ff;font-family:var(--mono,JetBrains Mono);letter-spacing:.5px}
+  .plan-timebar .ptb-cell b.warn{color:#ffce5a}
+  .plan-timebar .ptb-cell b.danger{color:#ff6b6b}
+  .plan-timebar .ptb-detail{font-size:11.5px;color:#9296bd;margin-top:2px}
+
+  .plan-grid-v2{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}
+  @media (max-width:1000px){.plan-grid-v2{grid-template-columns:1fr}}
+  .plan-col-main{min-width:0}
+  .plan-actions-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+  .plan-actions-row > *{flex:1;min-width:240px}
+
+  #plan-stages-wrap{display:flex;flex-direction:column;gap:14px}
+  .plan-stage{background:rgba(255,255,255,.02);border:1px solid var(--line,#2a2e5a);border-left:5px solid var(--stcolor,#7c83ff);border-radius:11px;padding:10px 12px}
+  .plan-stage-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .plan-stage-head .dot{width:9px;height:9px;border-radius:50%;background:var(--stcolor,#7c83ff)}
+  .plan-stage-head .st-title{font-weight:800;font-size:14px;color:#eef0ff}
+  .plan-stage-head .st-counter{font-family:var(--mono,JetBrains Mono);font-size:11.5px;color:#9296bd;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px}
+  .plan-stage-head .st-btn{background:transparent;border:1px solid var(--line,#2a2e5a);color:#9296bd;padding:3px 7px;border-radius:6px;cursor:pointer;font-size:11px}
+  .plan-stage-head .st-btn:hover{color:#eef0ff;background:rgba(255,255,255,.05)}
+  .plan-stage-tasks{display:flex;flex-direction:column;gap:6px;min-height:38px;padding:4px;border-radius:8px;transition:background .15s}
+  .plan-stage-tasks.sortable-over{background:rgba(124,131,255,.08);outline:2px dashed rgba(124,131,255,.4)}
+  .st-empty{font-size:12px;color:#6b7090;font-style:italic;padding:10px;text-align:center;border:1px dashed var(--line,#2a2e5a);border-radius:8px}
+
+  .ptask{display:flex;align-items:stretch;gap:8px;background:var(--cell,#1a1d3a);border:1px solid var(--line,#2a2e5a);border-radius:9px;padding:8px 10px 8px 0;color:#eef0ff;cursor:default;transition:transform .12s,box-shadow .12s}
+  .ptask.done{opacity:.65}
+  .ptask.doing{box-shadow:inset 0 0 0 1px rgba(255,206,90,.35)}
+  .ptask .pt-handle{display:flex;align-items:center;justify-content:center;width:22px;color:#6b7090;cursor:grab;user-select:none;font-size:14px;letter-spacing:-1px;line-height:1}
+  .ptask .pt-handle:active{cursor:grabbing}
+  .ptask .pt-body{flex:1;min-width:0}
+  .ptask .pt-title{font-size:13.5px;font-weight:700;color:#eef0ff;margin-bottom:5px;word-wrap:break-word}
+  .ptask .pt-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:#9296bd}
+  .ptask .pt-dur-wrap{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:6px;font-family:var(--mono,JetBrains Mono)}
+  .ptask .pt-dur-input{width:48px;background:transparent;border:1px solid var(--line,#2a2e5a);color:#eef0ff;text-align:center;border-radius:5px;padding:2px 4px;font:600 11.5px var(--mono,JetBrains Mono);outline:none}
+  .ptask .pt-dur-input:focus{border-color:var(--brand,#7c83ff);background:rgba(124,131,255,.08)}
+  .ptask .pt-status{background:rgba(255,255,255,.04);border:1px solid var(--line,#2a2e5a);color:#cdd0ee;padding:2px 8px;border-radius:6px;cursor:pointer;font:700 11px var(--mono,JetBrains Mono);letter-spacing:.3px}
+  .ptask .pt-status:hover{background:rgba(255,255,255,.08)}
+  .ptask .pt-status-doing{color:#ffce5a;border-color:rgba(255,206,90,.4)}
+  .ptask .pt-status-done{color:#46e6a0;border-color:rgba(70,230,160,.4)}
+  .ptask .pt-notes{background:rgba(255,255,255,.04);border:1px solid var(--line,#2a2e5a);color:#cdd0ee;padding:2px 7px;border-radius:6px;cursor:pointer;font-size:11px}
+  .ptask .pt-notes:hover{background:rgba(255,255,255,.08)}
+  .ptask .pt-actions{display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;padding:0 4px}
+  .ptask .pt-more,.ptask .pt-del{background:transparent;border:1px solid var(--line,#2a2e5a);color:#9296bd;width:24px;height:22px;border-radius:5px;cursor:pointer;font-size:12px;line-height:1}
+  .ptask .pt-more:hover{color:#eef0ff;background:rgba(255,255,255,.05)}
+  .ptask .pt-del:hover{color:#ff6b6b;border-color:rgba(255,107,107,.4)}
+
+  /* Sortable visual states */
+  .ptask-ghost{opacity:.35;background:rgba(124,131,255,.15) !important}
+  .ptask-chosen{box-shadow:0 6px 20px rgba(0,0,0,.5);transform:scale(1.02)}
+  .ptask-drag{cursor:grabbing}
+
+  .plan-newbtn,.stage-newbtn{display:block;width:100%;background:linear-gradient(135deg,var(--brand,#7c83ff),var(--brand2,#46e6a0));border:none;color:#fff;padding:11px 14px;border-radius:10px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .stage-newbtn{background:linear-gradient(135deg,#5be1ff,#7c83ff)}
+  .plan-newbtn:hover,.stage-newbtn:hover{filter:brightness(1.1)}
+
+  .plan-deliver{background:var(--card,#11132b);border:1px solid var(--line,#2a2e5a);border-radius:12px;padding:14px}
+  .plan-deliver h3{margin:0 0 10px;font-size:15px;color:#eef0ff;display:flex;justify-content:space-between;align-items:center}
+  .plan-deliver .badge{font-size:11.5px;background:rgba(70,230,160,.15);color:#46e6a0;padding:2px 8px;border-radius:6px;font-family:var(--mono,JetBrains Mono)}
+  .plan-deliver .deliv-progress{height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;margin:6px 0}
+  .plan-deliver .deliv-progress .bar{height:100%;background:linear-gradient(90deg,var(--brand,#7c83ff),var(--ok,#46e6a0));transition:width .3s}
+  .plan-deliver .deliv-pct{font-size:11.5px;color:#9296bd;font-family:var(--mono,JetBrains Mono);text-align:right}
+  .plan-deliver .deliv-list{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:5px}
+  .plan-deliver .deliv-item{display:flex;align-items:center;gap:8px;padding:7px 9px;background:rgba(255,255,255,.02);border:1px solid var(--line,#2a2e5a);border-radius:8px;cursor:pointer;transition:background .15s}
+  .plan-deliver .deliv-item:hover{background:rgba(255,255,255,.05)}
+  .plan-deliver .deliv-item.done{opacity:.6}
+  .plan-deliver .deliv-item .dx{width:18px;height:18px;border-radius:5px;border:1px solid var(--line,#2a2e5a);display:flex;align-items:center;justify-content:center;color:#46e6a0;font-weight:700}
+  .plan-deliver .deliv-item.done .dx{background:rgba(70,230,160,.15);border-color:#46e6a0}
+  .plan-deliver .dlabel{font-size:12.5px;color:#eef0ff;font-weight:600}
+  .plan-deliver .ddetail{font-size:11px;color:#9296bd;margin-top:2px}
 </style>
 </head>
 <body>
@@ -724,6 +799,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script>
 const DEFAULT_TEAM = ["Victor","Vitão","Monica","Gustavo","Nicolas"];
 let TEAM = [...DEFAULT_TEAM];
@@ -2180,28 +2256,14 @@ function stageProgress(stageId){
   return { done, total, pct: total ? Math.round(done*100/total) : 0 };
 }
 
+// V2: disponível = tempo até a entrega. Planejado = soma de duration_min de tudo que não está done.
 function planAvailableMin(){
-  const now = Date.now();
-  return planSlots
-    .filter(s => {
-      if(s.type === "deadline") return false;
-      if(new Date(s.end_at).getTime() <= now) return false;
-      if(s.locked) return false;
-      // working unlocked sempre conta; fixed unlocked só conta se já tiver tarefa alocada
-      if(s.type === "fixed"){
-        return planTasks.some(t => t.slot_id === s.id);
-      }
-      return s.type === "working";
-    })
-    .reduce((acc,s) => {
-      const start = Math.max(new Date(s.start_at).getTime(), now);
-      const end = Math.min(new Date(s.end_at).getTime(), PLAN_DEADLINE.getTime());
-      return acc + Math.max(0, Math.round((end - start) / 60000));
-    }, 0);
+  const diff = PLAN_DEADLINE.getTime() - Date.now();
+  return Math.max(0, Math.floor(diff / 60000));
 }
 function planPlannedMin(){
   return planTasks
-    .filter(t => t.slot_id && t.status !== "done")
+    .filter(t => t.status !== "done")
     .reduce((acc,t) => acc + (t.duration_min || 0), 0);
 }
 
@@ -2221,13 +2283,7 @@ function planCountdownText(){
   return { txt:`${h}h ${pad(m)}m ${pad(s)}s`, cls };
 }
 
-function renderPlanTaskHtml(t, draggable){
-  const delivLabel = (deliverables.find(d => d.id === t.deliverable)||{}).label || "";
-  const stage = t.stage_id ? stageById(t.stage_id) : null;
-  const stageStyle = stage ? `style="--stcolor:${escapeHtml(stage.color||'#7c83ff')}"` : "";
-  const stageTag = stage
-    ? `<span class="pt-stage" ${stageStyle}><span class="dot"></span>${escapeHtml(stage.title)}</span>`
-    : "";
+function renderPlanTaskHtml(t){
   const team = planTaskAssigneeList(t);
   const shown = team.slice(0,4);
   const rest  = team.length - shown.length;
@@ -2238,25 +2294,23 @@ function renderPlanTaskHtml(t, draggable){
        </span>`
     : "";
   const notesCount = planTaskNotesCount(t.id);
-  const notesBadge = notesCount
-    ? `<span class="pt-notes" data-tnotes="${escapeHtml(t.id)}" title="${notesCount} anotaç${notesCount===1?"ão":"ões"}">📝 ${notesCount}</span>`
-    : `<span class="pt-notes" data-tnotes="${escapeHtml(t.id)}" title="Adicionar anotação">📝</span>`;
-  return `<div class="ptask ${t.status==="done"?"done":""} ${t.status==="doing"?"doing":""}"
-              draggable="${draggable?"true":"false"}" data-tid="${escapeHtml(t.id)}" ${stageStyle}>
-    <div class="pt-title">${escapeHtml(t.title)}</div>
-    <div class="pt-meta">
-      ${avatarStack}
-      <span class="pt-dur" data-tdur="${escapeHtml(t.id)}" title="Clique para editar a duração">${t.duration_min||0}min</span>
-      ${stageTag}
-      ${notesBadge}
-      ${delivLabel ? `<span class="pt-deliv">→ ${escapeHtml(delivLabel)}</span>` : ""}
+  const notesBadge = `<button class="pt-notes" data-tnotes="${escapeHtml(t.id)}" title="Anotações">📝${notesCount>0?` ${notesCount}`:""}</button>`;
+  const stLabel = t.status==="done" ? "✅ feito" : (t.status==="doing" ? "🔨 fazendo" : "📥 a fazer");
+  const stChip = `<button class="pt-status pt-status-${t.status||'todo'}" data-tcycle="${escapeHtml(t.id)}" title="Clique pra mudar status">${stLabel}</button>`;
+  return `<div class="ptask ${t.status==="done"?"done":""} ${t.status==="doing"?"doing":""}" data-tid="${escapeHtml(t.id)}">
+    <div class="pt-handle" title="Arraste pra mover">⋮⋮</div>
+    <div class="pt-body">
+      <div class="pt-title">${escapeHtml(t.title)}</div>
+      <div class="pt-meta">
+        ${avatarStack}
+        <span class="pt-dur-wrap" title="Duração em minutos">
+          <input type="number" min="5" step="5" class="pt-dur-input" data-tdurin="${escapeHtml(t.id)}" value="${t.duration_min||30}"> min
+        </span>
+        ${stChip}
+        ${notesBadge}
+      </div>
     </div>
-    <div class="pt-row">
-      <select data-tstatus="${escapeHtml(t.id)}">
-        <option value="todo"${t.status==="todo"?" selected":""}>A fazer</option>
-        <option value="doing"${t.status==="doing"?" selected":""}>Em andamento</option>
-        <option value="done"${t.status==="done"?" selected":""}>Concluído</option>
-      </select>
+    <div class="pt-actions">
       <button class="pt-more" data-tmore="${escapeHtml(t.id)}" title="Mais opções">⋮</button>
       <button class="pt-del" data-tdel="${escapeHtml(t.id)}" title="Apagar atividade">✕</button>
     </div>
@@ -2266,24 +2320,21 @@ function renderPlanTaskHtml(t, draggable){
 function renderPlan(){
   const root = document.getElementById("view-plan-body");
   if(!root) return;
-  // anti-race: não re-renderiza enquanto um drag está em andamento
-  // (impede que realtime do Supabase mate o DOM do elemento sendo arrastado)
+  // anti-race com Sortable (não re-renderiza durante drag)
   if(window.__planDragging){ window.__planRenderPending = true; return; }
-  const now = Date.now();
-  const pool = planTasks.filter(t => !t.slot_id);
   const cd = planCountdownText();
   const avail = planAvailableMin();
-  const plan = planPlannedMin();
-  const delta = avail - plan;
-  let healthCls = "ok", healthTitle = "✅ Plano cabe no tempo disponível", healthBody = `Sobram ${delta} min de folga.`;
-  if(plan > avail){
-    healthCls = "danger";
-    healthTitle = "⚠ O plano não fecha no tempo";
-    healthBody = `Faltam ${plan - avail} min — corte ou realoque atividades.`;
-  } else if(delta < 30){
-    healthCls = "warn";
-    healthTitle = "🟡 Margem apertada";
-    healthBody = `Só ${delta} min de folga total.`;
+  const planned = planPlannedMin();
+  const margin = avail - planned;
+  let mClass = "ok", mLabel = "🟢 No prazo", mDetail = `Sobram ${margin} min de folga`;
+  if(planned > avail){
+    mClass = "danger";
+    mLabel = "🔴 Não cabe no tempo";
+    mDetail = `Faltam ${Math.abs(margin)} min — corta ou acelera`;
+  } else if(margin < 30){
+    mClass = "warn";
+    mLabel = "🟡 Margem apertada";
+    mDetail = `Só ${margin} min de folga`;
   }
 
   // Form de nova atividade
@@ -2326,53 +2377,44 @@ function renderPlan(){
     </div>
   ` : `<button class="stage-newbtn" id="stage-new">＋ Nova etapa</button>`;
 
-  // Timeline com linha NOW
-  const showNowLine = now < PLAN_DEADLINE.getTime();
-  const slotsHtml = planSlots.map((s, idx) => {
-    const startMs = new Date(s.start_at).getTime();
-    const endMs = new Date(s.end_at).getTime();
-    const isPast = endMs < now;
-    const isCurrent = startMs <= now && now < endMs;
-    const classes = ["pslot", s.type, s.locked?"locked":""];
-    if(isPast) classes.push("past");
-    const slotTasks = planTasks
-      .filter(t => t.slot_id === s.id)
+  // === Container único por etapa: Sortable cuida do drag (desktop + touch) ===
+  const stagesHtml = planStages.map(st => {
+    const items = planTasks
+      .filter(t => t.stage_id === st.id)
       .sort((a,b) => (a.order_index||0)-(b.order_index||0));
-    const cap = (s.type === "working" || (s.type === "fixed" && slotTasks.length))
-      ? `<span class="ps-cap">${slotDurMin(s)} min · ${slotTasks.reduce((a,t)=>a+(t.duration_min||0),0)} planejado</span>`
-      : "";
-    // Lock toggle (deadline = disabled; fixed/working = togglavel)
-    let lockBtn = "";
-    if(s.type === "deadline"){
-      lockBtn = `<button class="ps-lockbtn is-disabled" title="Deadline da entrega — sempre travado" disabled>🔒</button>`;
-    } else {
-      const icon = s.locked ? "🔒" : "🔓";
-      const title = s.locked ? "Bloqueado — clique para liberar" : "Liberado — clique para bloquear";
-      lockBtn = `<button class="ps-lockbtn ${s.locked?"is-locked":""}" data-lock-slot="${escapeHtml(s.id)}" title="${title}">${icon}</button>`;
-    }
-
-    // inserção da linha NOW entre slots, antes do primeiro slot futuro
-    let nowMark = "";
-    if(showNowLine && !isCurrent){
-      const prev = planSlots[idx-1];
-      const prevEnd = prev ? new Date(prev.end_at).getTime() : 0;
-      if(prev && prevEnd <= now && now < startMs){
-        nowMark = `<div class="now-line"><span class="nowlbl">AGORA · ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}</span></div>`;
-      }
-    }
-    const currentMark = isCurrent ? `<div class="now-line" style="border-color:var(--ok)"><span class="nowlbl" style="color:var(--ok)">AGORA NESTE BLOCO · ${pad(new Date().getHours())}:${pad(new Date().getMinutes())}</span></div>` : "";
-
-    return nowMark + `<div class="${classes.filter(Boolean).join(" ")}" data-sid="${escapeHtml(s.id)}" data-stype="${escapeHtml(s.type)}" data-slocked="${s.locked?"1":"0"}" data-spast="${isPast?"1":"0"}">
-      <div class="ps-head">
-        <span class="ps-time">${escapeHtml(fmtSlotRange(s))}</span>
-        <span class="ps-label">${escapeHtml(s.label)}</span>
-        ${lockBtn}
+    const stTime = items.filter(t => t.status !== "done").reduce((a,t) => a + (t.duration_min||0), 0);
+    const stDone = items.filter(t => t.status === "done").length;
+    return `<div class="plan-stage" style="--stcolor:${escapeHtml(st.color||'#7c83ff')}" data-stage-id="${escapeHtml(st.id)}">
+      <div class="plan-stage-head">
+        <span class="dot"></span>
+        <span class="st-title">${escapeHtml(st.title)}</span>
+        <span class="st-counter">${stDone}/${items.length} · ${stTime}min</span>
+        <span style="flex:1"></span>
+        <button class="st-btn" data-stage-edit="${escapeHtml(st.id)}" title="Editar etapa">✎</button>
+        <button class="st-btn" data-stage-del="${escapeHtml(st.id)}" title="Excluir etapa">✕</button>
       </div>
-      ${cap}
-      ${currentMark}
-      <div class="ps-tasks">${slotTasks.map(t => renderPlanTaskHtml(t, true)).join("")}</div>
+      <div class="plan-stage-tasks" data-stage-tasks="${escapeHtml(st.id)}">
+        ${items.length ? items.map(t => renderPlanTaskHtml(t)).join("") : `<div class="st-empty">Solte uma atividade aqui ou crie uma nova.</div>`}
+      </div>
     </div>`;
   }).join("");
+
+  // Container "Sem etapa"
+  const noStageItems = planTasks
+    .filter(t => !t.stage_id)
+    .sort((a,b) => (a.order_index||0)-(b.order_index||0));
+  const noStageTime = noStageItems.filter(t => t.status !== "done").reduce((a,t) => a + (t.duration_min||0), 0);
+  const noStageDone = noStageItems.filter(t => t.status === "done").length;
+  const noStageHtml = `<div class="plan-stage no-stage" style="--stcolor:#6b7090" data-stage-id="__none__">
+    <div class="plan-stage-head">
+      <span class="dot"></span>
+      <span class="st-title">📥 Sem etapa</span>
+      <span class="st-counter">${noStageDone}/${noStageItems.length} · ${noStageTime}min</span>
+    </div>
+    <div class="plan-stage-tasks" data-stage-tasks="__none__">
+      ${noStageItems.length ? noStageItems.map(t => renderPlanTaskHtml(t)).join("") : `<div class="st-empty">Solte uma atividade aqui (sem etapa).</div>`}
+    </div>
+  </div>`;
 
   // Entregáveis
   const pct = deliverablesByPct();
@@ -2383,38 +2425,6 @@ function renderPlan(){
       ${d.detail ? `<div class="ddetail">${escapeHtml(d.detail)}</div>` : ""}
     </div>
   </li>`).join("");
-
-  // Pool agrupado por etapa
-  const poolGroupsHtml = (() => {
-    const groups = planStages.map(st => ({ stage: st, items: pool.filter(t => t.stage_id === st.id) }));
-    groups.push({ stage: null, items: pool.filter(t => !t.stage_id) });
-    return groups.map(({stage, items}) => {
-      const id = stage ? stage.id : "__nostage__";
-      const color = stage ? (stage.color || "#7c83ff") : "#6b7090";
-      const prog = stage ? stageProgress(stage.id) : { done:0, total:items.length, pct:0 };
-      const title = stage ? stage.title : "Sem etapa";
-      const collapsed = !!stageCollapsed[id];
-      const actions = stage
-        ? `<div class="st-actions">
-             <button class="st-btn" data-stage-edit="${escapeHtml(stage.id)}" title="Editar">✎</button>
-             <button class="st-btn" data-stage-del="${escapeHtml(stage.id)}" title="Excluir">✕</button>
-           </div>`
-        : "";
-      const body = items.length
-        ? items.map(t => renderPlanTaskHtml(t, true)).join("")
-        : `<div class="st-empty">Sem atividades nesta etapa ainda.</div>`;
-      return `<div class="stage-group ${collapsed?"collapsed":""} ${stage?"":"no-stage"}" style="--stcolor:${color}" data-stage-group="${escapeHtml(id)}">
-        <div class="stage-group-head" data-stage-toggle="${escapeHtml(id)}">
-          <span class="caret">${collapsed?"▸":"▾"}</span>
-          <span class="st-title">${escapeHtml(title)}</span>
-          <span class="st-counter">${prog.done}/${prog.total||items.length}</span>
-          ${actions}
-        </div>
-        ${stage ? `<div class="st-bar"><div class="st-fill" style="width:${prog.pct}%"></div></div>` : ""}
-        <div class="st-body">${body}</div>
-      </div>`;
-    }).join("");
-  })();
 
   // Barra "Rumo à Solução"
   const solutionSegments = planStages.map(st => {
@@ -2442,7 +2452,7 @@ function renderPlan(){
     </div>
   ` : "";
 
-  // Popover do ⋮ / dur / assignees
+  // Popover do ⋮ — movimentação entre etapas (sem slots) + assign
   const popoverHtml = (() => {
     if(!openPlanMenu) return "";
     const t = planTasks.find(x => x.id === openPlanMenu.tid);
@@ -2452,18 +2462,6 @@ function renderPlan(){
     const left = Math.min(window.innerWidth - 270, Math.max(8, r.left - 90));
     const pos = `style="top:${top}px;left:${left}px"`;
 
-    if(openPlanMenu.mode === "dur"){
-      return `<div class="pt-popover" id="pt-popover" ${pos}>
-        <div class="pt-pop-head">⏱ Editar duração</div>
-        <div class="pt-dur-row">
-          <button data-dur-delta="-15">−15</button>
-          <input type="number" id="pt-dur-input" min="5" step="5" value="${t.duration_min||30}">
-          <button data-dur-delta="15">+15</button>
-        </div>
-        <button data-dur-save title="Salvar">💾 Salvar</button>
-        <button data-pop-close>Fechar</button>
-      </div>`;
-    }
     if(openPlanMenu.mode === "assign"){
       const cur = planTaskAssigneeList(t);
       const chips = TEAM.map(p => `<button class="pt-assign-chip ${cur.includes(p)?"sel":""}" data-pt-assign="${escapeHtml(p)}">${avatarHtml(p,14)} ${escapeHtml(p)}</button>`).join("");
@@ -2474,26 +2472,21 @@ function renderPlan(){
       </div>`;
     }
 
-    // mode === "menu"
-    const slotOpts = planSlots
-      .filter(s => s.type !== "deadline" && !s.locked && new Date(s.end_at).getTime() > Date.now())
-      .map(s => `<button data-move-slot="${escapeHtml(s.id)}" ${t.slot_id===s.id?'class="is-disabled" disabled':""}>
-        <span style="font-family:var(--mono);color:#9296bd;font-size:11px">${fmtSlotRange(s)}</span>
-        <span>${escapeHtml(s.label)}</span>
+    // mode === "menu": mover entre etapas
+    const stageMoves = planStages
+      .filter(s => s.id !== t.stage_id)
+      .map(s => `<button data-move-stage="${escapeHtml(s.id)}">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${escapeHtml(s.color||'#7c83ff')};margin-right:6px"></span>
+        <span>${escapeHtml(s.title)}</span>
       </button>`).join("");
-    const reorderUp   = `<button data-reorder="up"   ${planReorderEnabled(t,'up')?"":'class="is-disabled" disabled'}>↑ Mover para cima</button>`;
-    const reorderDown = `<button data-reorder="down" ${planReorderEnabled(t,'down')?"":'class="is-disabled" disabled'}>↓ Mover para baixo</button>`;
+    const moveNoStage = t.stage_id ? `<button data-move-stage="__none__">📥 Sem etapa</button>` : "";
     return `<div class="pt-popover" id="pt-popover" ${pos}>
       <div class="pt-pop-head">Ações</div>
-      <button data-open-dur>⏱ Editar duração (${t.duration_min||0} min)</button>
       <button data-open-assign>👥 Envolvidos (${planTaskAssigneeList(t).length})</button>
       <button data-open-notes>📝 Anotações (${planTaskNotesCount(t.id)})</button>
-      ${reorderUp}
-      ${reorderDown}
       <hr>
-      <div class="pt-pop-head">Mover para</div>
-      ${t.slot_id ? `<button data-move-pool>← Voltar ao pool</button>` : ""}
-      ${slotOpts || `<div style="font-size:11.5px;color:#9296bd;padding:6px;font-style:italic">Nenhum bloco disponível agora.</div>`}
+      <div class="pt-pop-head">Mover para etapa</div>
+      ${moveNoStage}${stageMoves || `<div style="font-size:11.5px;color:#9296bd;padding:6px;font-style:italic">Sem outras etapas.</div>`}
       <hr>
       <button class="danger" data-pop-close>Fechar</button>
     </div>`;
@@ -2532,26 +2525,30 @@ function renderPlan(){
     </div>`;
   })();
 
+  // === barra de tempo no topo ===
+  const timebar = `
+    <div class="plan-timebar ${mClass}">
+      <div class="ptb-cell"><span class="lbl">⏳ Até a entrega</span><b class="${cd.cls}">${escapeHtml(cd.txt)}</b></div>
+      <div class="ptb-cell"><span class="lbl">📦 Planejado</span><b>${planned} min</b></div>
+      <div class="ptb-cell"><span class="lbl">${mLabel}</span><b class="${mClass==='ok'?'':mClass}">${margin>=0?"+":""}${margin} min</b><span class="ptb-detail">${escapeHtml(mDetail)}</span></div>
+    </div>`;
+
   root.innerHTML = `
+    ${timebar}
     ${solutionHtml}
-    <div class="plan-grid">
-      <div class="plan-col">
-        <h3>🧩 Pool <span class="badge">${pool.length} peça${pool.length===1?"":"s"}</span></h3>
-        ${formHtml}
-        ${stageFormHtml}
-        <div id="plan-pool">${pool.length || planStages.length ? poolGroupsHtml : `<div style="color:#9296bd;font-size:12.5px;font-style:italic">Sem atividades. Adicione e arraste para um bloco de trabalho na timeline.</div>`}</div>
-      </div>
-      <div class="plan-col plan-timeline">
-        <h3>📅 Timeline — domingo 31/05 <span class="badge">${avail}min livres · ${plan}min planejado</span></h3>
-        ${slotsHtml}
+    <div class="plan-grid-v2">
+      <div class="plan-col-main">
+        <div class="plan-actions-row">
+          <div>${formHtml}</div>
+          <div>${stageFormHtml}</div>
+        </div>
+        <div id="plan-stages-wrap">
+          ${stagesHtml}
+          ${noStageHtml}
+        </div>
       </div>
       <div class="plan-col plan-deliver">
         <h3>🎯 Entregável final <span class="badge">${pct}%</span></h3>
-        <div class="countdown">
-          <div class="lbl">Até a entrega às 17:30</div>
-          <div class="val ${cd.cls}">${escapeHtml(cd.txt)}</div>
-        </div>
-        <div class="plan-health ${healthCls}"><b>${escapeHtml(healthTitle)}</b>${escapeHtml(healthBody)}</div>
         <div class="deliv-progress"><div class="bar" style="width:${pct}%"></div></div>
         <div class="deliv-pct">${pct}% pronto</div>
         <ul class="deliv-list">${delivItems}</ul>
@@ -2564,22 +2561,14 @@ function renderPlan(){
   bindPlanHandlers();
 }
 
-function planReorderEnabled(t, dir){
-  const peers = planTasks
-    .filter(x => (x.slot_id||null) === (t.slot_id||null))
-    .sort((a,b) => (a.order_index||0)-(b.order_index||0));
-  const idx = peers.findIndex(x => x.id === t.id);
-  if(idx < 0) return false;
-  if(dir === "up")   return idx > 0;
-  if(dir === "down") return idx < peers.length - 1;
-  return false;
-}
+// (slots descontinuados; reorder agora é feito pelo Sortable dentro da etapa)
+function planReorderEnabled(){ return false; }
 
 function bindPlanHandlers(){
   const root = document.getElementById("view-plan-body");
   if(!root) return;
 
-  // Form
+  // Form de nova atividade
   const newBtn = document.getElementById("plan-new");
   if(newBtn) newBtn.addEventListener("click", ()=>{
     planFormOpen = true;
@@ -2646,15 +2635,7 @@ function bindPlanHandlers(){
   const sfSave = document.getElementById("sf-save");
   if(sfSave) sfSave.addEventListener("click", savePlanStage);
 
-  // Toggle/edit/delete grupos de etapa
-  root.querySelectorAll("[data-stage-toggle]").forEach(head=>{
-    head.addEventListener("click", e=>{
-      if(e.target.closest(".st-actions")) return;
-      const id = head.dataset.stageToggle;
-      stageCollapsed[id] = !stageCollapsed[id];
-      renderPlan();
-    });
-  });
+  // Editar/excluir etapa
   root.querySelectorAll("[data-stage-edit]").forEach(b=>{
     b.addEventListener("click", e=>{
       e.stopPropagation();
@@ -2684,102 +2665,68 @@ function bindPlanHandlers(){
     });
   });
 
-  // Drag & drop hardening
-  root.querySelectorAll(".ptask[draggable=true]").forEach(el=>{
-    el.addEventListener("dragstart", e=>{
-      try{
-        e.dataTransfer.setData("text/plain", el.dataset.tid);
-        e.dataTransfer.effectAllowed = "move";
-      }catch(err){}
-      el.classList.add("drag-source");
-      window.__planDragTid = el.dataset.tid; // fallback (alguns browsers bloqueiam getData no dragover)
-      window.__planDragging = true;
+  // === SORTABLE: drag funciona em desktop E touch (iPad/celular) ===
+  if(typeof Sortable !== "undefined"){
+    root.querySelectorAll("[data-stage-tasks]").forEach(container=>{
+      Sortable.create(container, {
+        group: "plan-tasks",
+        handle: ".pt-handle",
+        animation: 160,
+        ghostClass: "ptask-ghost",
+        chosenClass: "ptask-chosen",
+        dragClass: "ptask-drag",
+        forceFallback: false,
+        fallbackOnBody: true,
+        emptyInsertThreshold: 12,
+        onStart: () => { window.__planDragging = true; },
+        onEnd: async (evt) => {
+          window.__planDragging = false;
+          const taskId = evt.item.dataset.tid;
+          const newStageRaw = evt.to.dataset.stageTasks;
+          const newStageId = newStageRaw === "__none__" ? null : newStageRaw;
+          const newIndex = evt.newIndex;
+          await applySortableUpdate(taskId, newStageId, newIndex);
+          if(window.__planRenderPending){ window.__planRenderPending = false; renderPlan(); }
+        }
+      });
     });
-    el.addEventListener("dragend", ()=>{
-      el.classList.remove("drag-source");
-      window.__planDragTid = null;
-      window.__planDragging = false;
-      root.querySelectorAll(".insert-before,.insert-after,.dragover,.drop-blocked")
-        .forEach(x => x.classList.remove("insert-before","insert-after","dragover","drop-blocked"));
-      if(window.__planRenderPending){ window.__planRenderPending = false; renderPlan(); }
-    });
-    // marcar pos de inserção quando dragover passa em cima de outra peça (mesmo container)
-    el.addEventListener("dragover", e=>{
-      e.preventDefault();
-      try{ e.dataTransfer.dropEffect = "move"; }catch(err){}
-      const rect = el.getBoundingClientRect();
-      const above = (e.clientY - rect.top) < rect.height/2;
-      root.querySelectorAll(".insert-before,.insert-after").forEach(x => x.classList.remove("insert-before","insert-after"));
-      el.classList.add(above ? "insert-before" : "insert-after");
-    });
-    el.addEventListener("drop", e=>{
-      e.preventDefault();
-      e.stopPropagation();
-      const srcTid = e.dataTransfer.getData("text/plain") || window.__planDragTid;
-      if(!srcTid || srcTid === el.dataset.tid){
-        el.classList.remove("insert-before","insert-after");
-        return;
-      }
-      const target = planTasks.find(x => x.id === el.dataset.tid);
-      if(!target) return;
-      const rect = el.getBoundingClientRect();
-      const above = (e.clientY - rect.top) < rect.height/2;
-      const insertIdx = (target.order_index || 0) + (above ? 0 : 1);
-      el.classList.remove("insert-before","insert-after");
-      movePlanTaskToIndex(srcTid, target.slot_id || null, insertIdx);
-    });
-  });
-
-  // Drop em qualquer pslot que NÃO seja deadline (com hardening)
-  root.querySelectorAll(".pslot").forEach(slot=>{
-    const stype = slot.dataset.stype;
-    if(stype === "deadline") return;
-    slot.addEventListener("dragover", e=>{
-      e.preventDefault();
-      try{ e.dataTransfer.dropEffect = "move"; }catch(err){}
-      const locked = slot.dataset.slocked === "1";
-      const past   = slot.dataset.spast === "1";
-      if(locked || past){ slot.classList.add("drop-blocked"); }
-      else { slot.classList.add("dragover"); }
-    });
-    slot.addEventListener("dragleave", ()=>{
-      slot.classList.remove("dragover");
-      slot.classList.remove("drop-blocked");
-    });
-    slot.addEventListener("drop", e=>{
-      e.preventDefault();
-      slot.classList.remove("dragover");
-      slot.classList.remove("drop-blocked");
-      const tid = e.dataTransfer.getData("text/plain") || window.__planDragTid;
-      if(tid) movePlanTask(tid, slot.dataset.sid);
-    });
-  });
-
-  // Lock toggle por slot
-  root.querySelectorAll("[data-lock-slot]").forEach(btn=>{
-    btn.addEventListener("click", e=>{
-      e.stopPropagation();
-      togglePlanSlotLock(btn.dataset.lockSlot);
-    });
-  });
-  // Drop de volta no pool
-  const poolEl = document.getElementById("plan-pool");
-  if(poolEl){
-    poolEl.addEventListener("dragover", e=>{
-      e.preventDefault();
-      try{ e.dataTransfer.dropEffect = "move"; }catch(err){}
-    });
-    poolEl.addEventListener("drop", e=>{
-      e.preventDefault();
-      const tid = e.dataTransfer.getData("text/plain") || window.__planDragTid;
-      if(tid) movePlanTask(tid, null);
-    });
+  } else {
+    console.warn("[plan] SortableJS não carregou — drag indisponível, use o menu ⋮.");
   }
 
-  // Status select + delete
-  root.querySelectorAll("[data-tstatus]").forEach(sel=>{
-    sel.addEventListener("change", ()=>updatePlanTaskStatus(sel.dataset.tstatus, sel.value));
+  // Input inline de duração
+  root.querySelectorAll("[data-tdurin]").forEach(inp=>{
+    const commit = () => {
+      const tid = inp.dataset.tdurin;
+      const val = Math.max(5, parseInt(inp.value||"0",10) || 0);
+      const t = planTasks.find(x => x.id === tid);
+      if(!t || t.duration_min === val) return;
+      updatePlanTaskDuration(tid, val);
+    };
+    inp.addEventListener("change", commit);
+    inp.addEventListener("blur", commit);
+    inp.addEventListener("keydown", e => {
+      if(e.key === "Enter"){ e.preventDefault(); inp.blur(); }
+    });
+    // não dispara drag/click do card quando interage com o input
+    inp.addEventListener("pointerdown", e => e.stopPropagation());
+    inp.addEventListener("mousedown", e => e.stopPropagation());
+    inp.addEventListener("click", e => e.stopPropagation());
   });
+
+  // Chip de status: cicla todo → doing → done
+  root.querySelectorAll("[data-tcycle]").forEach(btn=>{
+    btn.addEventListener("click", async e=>{
+      e.stopPropagation();
+      const tid = btn.dataset.tcycle;
+      const t = planTasks.find(x => x.id === tid);
+      if(!t) return;
+      const next = t.status === "todo" ? "doing" : (t.status === "doing" ? "done" : "todo");
+      await updatePlanTaskStatus(tid, next);
+    });
+  });
+
+  // Apagar atividade
   root.querySelectorAll("[data-tdel]").forEach(b=>{
     b.addEventListener("click", e=>{
       e.stopPropagation();
@@ -2787,7 +2734,7 @@ function bindPlanHandlers(){
     });
   });
 
-  // ⋮ menu (fallback clicável)
+  // ⋮ menu (popover)
   root.querySelectorAll("[data-tmore]").forEach(b=>{
     b.addEventListener("click", e=>{
       e.stopPropagation();
@@ -2800,15 +2747,8 @@ function bindPlanHandlers(){
       renderPlan();
     });
   });
-  // Editar duração inline
-  root.querySelectorAll("[data-tdur]").forEach(b=>{
-    b.addEventListener("click", e=>{
-      e.stopPropagation();
-      openPlanMenu = { tid: b.dataset.tdur, anchor: b.getBoundingClientRect(), mode: "dur" };
-      renderPlan();
-    });
-  });
-  // Abrir modal de notas via badge na peça
+
+  // Badge de notas abre modal
   root.querySelectorAll("[data-tnotes]").forEach(b=>{
     b.addEventListener("click", e=>{
       e.stopPropagation();
@@ -2823,51 +2763,17 @@ function bindPlanHandlers(){
     const closeBtn = pop.querySelector("[data-pop-close]");
     if(closeBtn) closeBtn.addEventListener("click", ()=>{ openPlanMenu = null; renderPlan(); });
 
-    // dur mode
-    pop.querySelectorAll("[data-dur-delta]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const inp = document.getElementById("pt-dur-input");
-        const cur = parseInt(inp.value||"0",10) || 0;
-        const next = Math.max(5, cur + parseInt(btn.dataset.durDelta,10));
-        inp.value = next;
+    // Mover entre etapas (caminho seguro, clicável)
+    pop.querySelectorAll("[data-move-stage]").forEach(b=>{
+      b.addEventListener("click", async ()=>{
+        const tid = openPlanMenu.tid;
+        const raw = b.dataset.moveStage;
+        const stageId = raw === "__none__" ? null : raw;
+        openPlanMenu = null;
+        await movePlanTaskToStage(tid, stageId);
       });
-    });
-    const durSave = pop.querySelector("[data-dur-save]");
-    if(durSave) durSave.addEventListener("click", async ()=>{
-      const inp = document.getElementById("pt-dur-input");
-      const val = Math.max(5, parseInt(inp.value||"0",10) || 0);
-      await updatePlanTaskDuration(openPlanMenu.tid, val);
-      openPlanMenu = null;
-      renderPlan();
     });
 
-    // menu mode
-    pop.querySelectorAll("[data-move-slot]").forEach(b=>{
-      b.addEventListener("click", async ()=>{
-        const tid = openPlanMenu.tid;
-        openPlanMenu = null;
-        await movePlanTask(tid, b.dataset.moveSlot);
-      });
-    });
-    const movePool = pop.querySelector("[data-move-pool]");
-    if(movePool) movePool.addEventListener("click", async ()=>{
-      const tid = openPlanMenu.tid;
-      openPlanMenu = null;
-      await movePlanTask(tid, null);
-    });
-    pop.querySelectorAll("[data-reorder]").forEach(b=>{
-      b.addEventListener("click", async ()=>{
-        const tid = openPlanMenu.tid;
-        const dir = b.dataset.reorder;
-        openPlanMenu = null;
-        await reorderPlanTask(tid, dir);
-      });
-    });
-    const openDur = pop.querySelector("[data-open-dur]");
-    if(openDur) openDur.addEventListener("click", ()=>{
-      openPlanMenu = { ...openPlanMenu, mode:"dur" };
-      renderPlan();
-    });
     const openAssign = pop.querySelector("[data-open-assign]");
     if(openAssign) openAssign.addEventListener("click", ()=>{
       openPlanMenu = { ...openPlanMenu, mode:"assign" };
@@ -2880,7 +2786,7 @@ function bindPlanHandlers(){
       openPlanTaskNotes(tid);
     });
 
-    // assign mode
+    // Modo assign
     pop.querySelectorAll("[data-pt-assign]").forEach(chip=>{
       chip.addEventListener("click", async ()=>{
         const name = chip.dataset.ptAssign;
@@ -2961,35 +2867,30 @@ async function createPlanTask(){
   await fetchPlanTasks();
 }
 
-async function movePlanTaskToIndex(taskId, slotId, insertIdx){
+// V2 — único caminho de persistência de movimento. Funciona pra Sortable e pro menu ⋮.
+async function applySortableUpdate(taskId, newStageId, newIndex){
   const task = planTasks.find(t => t.id === taskId);
   if(!task) return;
-  if(slotId){
-    const slot = planSlots.find(s => s.id === slotId);
-    if(!slot) return;
-    if(slot.type === "deadline"){ alert("Deadline da entrega — não recebe tarefas."); return; }
-    if(slot.locked){ alert("Bloco bloqueado — desbloqueie para alocar tarefas."); return; }
-    if(new Date(slot.end_at).getTime() < Date.now()){ alert("Bloco já encerrado — escolha um bloco futuro."); return; }
-  }
-  // Reordena lista do destino
+  // peers do destino (sem o item movido)
   const peers = planTasks
-    .filter(t => (t.slot_id||null) === (slotId||null) && t.id !== taskId)
+    .filter(t => (t.stage_id||null) === (newStageId||null) && t.id !== taskId)
     .sort((a,b) => (a.order_index||0)-(b.order_index||0));
-  const safeIdx = Math.max(0, Math.min(peers.length, insertIdx));
+  const safeIdx = Math.max(0, Math.min(peers.length, newIndex|0));
   peers.splice(safeIdx, 0, task);
-
-  // Aplica order_index sequencial e marca task com novo slot
-  const updates = peers.map((t, i) => ({ id: t.id, order_index: i }));
-  task.slot_id = slotId || null;
+  // recalcula order_index sequencial e atualiza estado local
+  const updates = peers.map((t,i) => ({ id: t.id, order_index: i }));
+  task.stage_id = newStageId || null;
   updates.forEach(u => { const x = planTasks.find(p => p.id === u.id); if(x) x.order_index = u.order_index; });
   renderPlan();
-
-  // Persiste: 1) tarefa movida com slot_id + order_index; 2) reorder dos peers
+  // persiste: 1) tarefa movida (stage_id + order_index); 2) reorder dos peers
   const moved = updates.find(u => u.id === taskId);
-  const mvPayload = { slot_id: slotId || null, order_index: moved ? moved.order_index : 0, updated_at: new Date().toISOString() };
+  const mvPayload = {
+    stage_id: newStageId || null,
+    order_index: moved ? moved.order_index : 0,
+    updated_at: new Date().toISOString()
+  };
   const { error } = await sb.from("planning_tasks").update(mvPayload).eq("id", taskId);
   if(error){ alert("Erro ao mover: " + error.message); fetchPlanTasks(); return; }
-  // peers que não são o item movido
   for(const u of updates){
     if(u.id === taskId) continue;
     const { error: e2 } = await sb.from("planning_tasks")
@@ -2999,18 +2900,17 @@ async function movePlanTaskToIndex(taskId, slotId, insertIdx){
   }
 }
 
-async function reorderPlanTask(taskId, dir){
-  const task = planTasks.find(t => t.id === taskId);
-  if(!task) return;
-  const peers = planTasks
-    .filter(t => (t.slot_id||null) === (task.slot_id||null))
-    .sort((a,b) => (a.order_index||0)-(b.order_index||0));
-  const idx = peers.findIndex(p => p.id === taskId);
-  if(idx < 0) return;
-  const targetIdx = dir === "up" ? idx-1 : idx+1;
-  if(targetIdx < 0 || targetIdx >= peers.length) return;
-  await movePlanTaskToIndex(taskId, task.slot_id || null, targetIdx);
+async function movePlanTaskToStage(taskId, stageId){
+  const peers = planTasks.filter(t => (t.stage_id||null) === (stageId||null) && t.id !== taskId);
+  await applySortableUpdate(taskId, stageId, peers.length);
 }
+
+// Compat shims (caso algum caller antigo ainda chame)
+async function movePlanTaskToIndex(taskId, _slotId, insertIdx){
+  const t = planTasks.find(x => x.id === taskId);
+  await applySortableUpdate(taskId, t ? (t.stage_id||null) : null, insertIdx);
+}
+async function reorderPlanTask(){ /* sem op — reorder agora é só drag */ }
 
 async function updatePlanTaskDuration(taskId, minutes){
   const t = planTasks.find(x => x.id === taskId);
@@ -3127,21 +3027,15 @@ async function deletePlanStage(stageId){
   if(error){ alert("Erro ao excluir etapa: " + error.message); fetchPlanStages(); fetchPlanTasks(); }
 }
 
-async function movePlanTask(taskId, slotId){
-  const task = planTasks.find(t => t.id === taskId);
-  if(!task) return;
-  if(slotId){
-    const slot = planSlots.find(s => s.id === slotId);
-    if(!slot){ return; }
-    if(slot.type === "deadline"){ alert("Deadline da entrega — não recebe tarefas."); return; }
-    if(slot.locked){ alert("Bloco bloqueado — desbloqueie para alocar tarefas."); return; }
-    if(new Date(slot.end_at).getTime() < Date.now()){
-      alert("Bloco já encerrado — escolha um bloco futuro."); return;
-    }
-  }
-  const dest = planTasks.filter(t => t.slot_id === slotId && t.id !== taskId);
+// Compat: callers antigos chamavam movePlanTask(tid, slotId) — agora redireciona pra stage move
+async function movePlanTask(taskId, stageOrSlotId){
+  // No V2 não tem slot; tratamos o segundo arg como stage (ou null).
+  await movePlanTaskToStage(taskId, stageOrSlotId || null);
+  return;
+  // (código antigo abaixo intencionalmente inalcançável; mantido só pro git diff ficar limpo)
+  const dest = planTasks.filter(t => t.slot_id === stageOrSlotId && t.id !== taskId);
   const order = dest.length;
-  const payload = { slot_id: slotId, order_index: order, updated_at: new Date().toISOString() };
+  const payload = { slot_id: stageOrSlotId, order_index: order, updated_at: new Date().toISOString() };
   task.slot_id = slotId; task.order_index = order;
   renderPlan();
   const { error } = await sb.from("planning_tasks").update(payload).eq("id", taskId);
