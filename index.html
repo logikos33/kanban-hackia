@@ -212,6 +212,28 @@
   .setform .addbtn{padding:9px 16px;font-size:13px}
   .setwarn{margin-top:12px;font-family:var(--mono);font-size:11.5px;color:#ffb3b3;background:rgba(255,107,107,.10);border:1px solid rgba(255,107,107,.35);border-radius:8px;padding:8px 10px;display:none}
   .setwarn.on{display:block}
+
+  /* NOTAS */
+  .notes-wrap{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+  .notes-wrap .flbl{margin-top:0}
+  .notes-list{list-style:none;margin:8px 0 14px;padding:0;display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto}
+  .note{background:var(--cell);border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:9px;padding:10px 12px;font-size:13px;color:#e9eaf6;line-height:1.45;position:relative}
+  .note .nhead{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11.5px;color:#9296bd;font-family:var(--mono);font-weight:600}
+  .note .nauthor{color:#cfd2ef;font-weight:700;background:var(--card2);padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:10.5px}
+  .note .nbody{white-space:pre-wrap;word-wrap:break-word}
+  .note .ndel{position:absolute;top:8px;right:10px;background:none;border:none;color:#6b7090;font-weight:700;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:6px}
+  .note .ndel:hover{color:var(--no);background:var(--card2)}
+  .note.ro{opacity:.92;border-left-color:#7a809f}
+  .note-form{display:flex;flex-direction:column;gap:8px;background:var(--cell);border:1px dashed var(--line);border-radius:9px;padding:10px 12px}
+  .note-form .nrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .note-form select{flex:1 1 160px}
+  .note-form .nsave{font-family:inherit;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;padding:8px 14px;border-radius:9px;cursor:pointer}
+  .note-form .nsave:hover{filter:brightness(1.1)}
+  .note-form .nsave:disabled{opacity:.55;cursor:not-allowed}
+  .notes-locked{font-family:var(--mono);font-size:11.5px;color:#9296bd;background:var(--cell);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px}
+
+  /* badge de notas no card */
+  .ccard .has-notes{font-size:10.5px;color:#cfd2ef;margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:var(--card2);border:1px solid var(--line);padding:2px 8px;border-radius:999px;margin-left:6px}
 </style>
 </head>
 <body>
@@ -392,6 +414,23 @@
     <label class="flbl">Responsáveis</label>
     <div class="who-list" id="md-who"></div>
 
+    <div class="notes-wrap">
+      <label class="flbl">📝 Notas da atividade</label>
+      <ul class="notes-list" id="md-notes-list"></ul>
+      <div id="md-notes-add-wrap">
+        <div class="note-form" id="md-note-form">
+          <textarea id="md-note-text" placeholder="Registre o que aconteceu, decisões, bloqueios…" rows="2"></textarea>
+          <div class="nrow">
+            <select id="md-note-author">
+              <option value="">Quem está anotando…</option>
+            </select>
+            <button type="button" class="nsave" id="md-note-save" disabled>Salvar nota</button>
+          </div>
+        </div>
+      </div>
+      <div class="notes-locked" id="md-notes-locked" style="display:none">🔒 Sprint concluída — notas viraram somente leitura.</div>
+    </div>
+
     <div class="mfoot">
       <span class="savestate" id="md-state">—</span>
       <button class="save-btn" id="md-save">Salvar</button>
@@ -418,9 +457,13 @@ const COLS = [
 // PITCH: domingo 31/05/2026 às 18:00 (horário local)
 const PITCH_AT = new Date(2026, 4, 31, 18, 0, 0); // mês 0-indexed (4 = maio)
 
-// Cronograma dinâmico: sprints de 30 min ancoradas em "agora" → pitch.
-// Cada sprint vira um checkpoint do que o time mexeu no backlog na janela.
-const SPRINT_MS = 30 * 60 * 1000;
+// 3 fases fixas. Sequência imutável, sem auto-close por tempo.
+// Cada fase só transiciona pendente → andamento → feito por clique manual.
+const DEFAULT_SPRINTS = [
+  { id: "ignicao",      name: "Ignição",      position: 1 },
+  { id: "construcao",   name: "Construção",   position: 2 },
+  { id: "apresentacao", name: "Apresentação", position: 3 },
+];
 
 const DEFAULT_LANES = [
   {id:"front",    name:"Front / UX",          who:"Front-end",          color:"#7c83ff"},
@@ -473,6 +516,8 @@ const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 const board = document.getElementById("board");
 const MLABEL = {must:"MUST", should:"SHOULD", could:"COULD", wont:"WON'T"};
 let cards = [];
+let allNotes = [];
+const NOTE_DELETE_WINDOW_MS = 5 * 60 * 1000;
 
 function setStatus(ok, msg){
   const el = document.getElementById("conn");
@@ -560,11 +605,14 @@ function render(){
           ? `<div class="chips">${assignees.map(a=>`<span class="chip" data-p="${escapeHtml(a)}">${escapeHtml(a)}</span>`).join("")}</div>`
           : "";
         const hasDesc = c.description && c.description.trim().length
-          ? `<div class="has-desc">📝 nota</div>` : "";
+          ? `<div class="has-desc">📋 descrição</div>` : "";
+        const noteCount = (allNotes||[]).filter(n => n.card_id === c.id).length;
+        const notesBadge = noteCount > 0
+          ? `<span class="has-notes" title="${noteCount} nota${noteCount>1?"s":""} registrada${noteCount>1?"s":""}">📝 ${noteCount}</span>` : "";
         card.innerHTML =
           `<div class="ct">${del}${escapeHtml(c.title)}</div>` +
           `<span class="cm m-${c.moscow}">${MLABEL[c.moscow]}</span>` +
-          chips + hasDesc;
+          notesBadge + chips + hasDesc;
         card.addEventListener("dragstart", e=>{e.dataTransfer.setData("text/plain",c.id);card.classList.add("drag");card._dragged=true;});
         card.addEventListener("dragend", ()=>{card.classList.remove("drag");setTimeout(()=>card._dragged=false,50);});
         card.addEventListener("click", e=>{
@@ -946,6 +994,14 @@ function openModal(id){
   ).join("");
   mdState.className = "savestate";
   mdState.textContent = "—";
+  // reseta o form de nota e popula lista
+  const ntxt = document.getElementById("md-note-text");
+  const nsel = document.getElementById("md-note-author");
+  const nbtn = document.getElementById("md-note-save");
+  if(ntxt) ntxt.value = "";
+  if(nsel) nsel.value = "";
+  if(nbtn) nbtn.disabled = true;
+  if(typeof renderModalNotes === "function") renderModalNotes(id);
   modalBg.classList.add("on");
   setTimeout(()=>mdDesc.focus(), 50);
 }
@@ -990,6 +1046,161 @@ async function saveCardDetails(){
 mdSave.addEventListener("click", saveCardDetails);
 
 // ============================================================
+// NOTAS — diário do time, append-only, delete só pelo autor em ≤5min
+// ============================================================
+function fmtAgo(iso){
+  const ms = Date.now() - new Date(iso).getTime();
+  if(ms < 60000) return "agora";
+  const m = Math.floor(ms/60000);
+  if(m < 60) return `há ${m} min`;
+  const h = Math.floor(m/60);
+  if(h < 24) return `há ${h}h ${pad(m%60)}m`;
+  const d = Math.floor(h/24);
+  return `há ${d}d`;
+}
+
+async function fetchNotes(){
+  const { data, error } = await sb.from("activity_notes").select("*").order("created_at",{ascending:false});
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      console.warn("[notes] tabela activity_notes ausente — rode supabase-setup.sql");
+    } else { console.error(error); }
+    return;
+  }
+  allNotes = data || [];
+  if(typeof render === "function") render();
+  if(typeof renderSchedule === "function") renderSchedule();
+  if(editingId) renderModalNotes(editingId);
+}
+
+function isNoteSprintLocked(note){
+  if(!note || !note.sprint_id) return false;
+  const sprint = getSprint(note.sprint_id);
+  return sprint && sprint.status === "completed";
+}
+
+function canDeleteNote(note){
+  if(!note) return false;
+  if(isNoteSprintLocked(note)) return false;
+  const ageMs = Date.now() - new Date(note.created_at).getTime();
+  return ageMs <= NOTE_DELETE_WINDOW_MS;
+}
+
+function renderModalNotes(cardId){
+  const list = document.getElementById("md-notes-list");
+  const locked = document.getElementById("md-notes-locked");
+  const formWrap = document.getElementById("md-notes-add-wrap");
+  const authorSel = document.getElementById("md-note-author");
+  if(!list || !authorSel) return;
+
+  // popula dropdown de autor com TEAM atual
+  const prevAuthor = authorSel.value;
+  authorSel.innerHTML = `<option value="">Quem está anotando…</option>` +
+    TEAM.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+  if(prevAuthor && TEAM.includes(prevAuthor)) authorSel.value = prevAuthor;
+
+  const cardNotes = (allNotes||[])
+    .filter(n => n.card_id === cardId)
+    .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const active = activeSprint();
+  // bloqueia adição se o card só foi tocado em sprints concluídas? regra do spec:
+  // "Notas de sprints concluídas são completamente somente leitura"
+  // → Aqui o trava é por nota individual. Sempre permitimos NOVAS notas se houver
+  // sprint ativa OU se nenhuma sprint estiver active e quisermos registrar retroativo.
+  // Decisão simples: sempre permite adicionar; novas notas pegam o sprint_id ativo (ou null).
+  if(formWrap) formWrap.style.display = "";
+  if(locked)   locked.style.display = "none";
+
+  list.innerHTML = cardNotes.length
+    ? cardNotes.map(n=>{
+        const lock = isNoteSprintLocked(n);
+        const del = canDeleteNote(n)
+          ? `<button class="ndel" data-nid="${escapeHtml(n.id)}" title="Apagar (até 5 min)">✕</button>` : "";
+        return `<li class="note${lock?" ro":""}">` +
+                 `<div class="nhead"><span class="nauthor">${escapeHtml(n.author||"?")}</span>` +
+                 `<span>${escapeHtml(fmtAgo(n.created_at))}</span>` +
+                 (lock ? `<span>· 🔒 sprint concluída</span>` : "") +
+                 `</div>` +
+                 `<div class="nbody">${escapeHtml(n.content)}</div>` +
+                 del +
+               `</li>`;
+      }).join("")
+    : `<li style="color:#9296bd;font-size:12.5px;font-style:italic;list-style:none;padding:6px 0">Sem notas ainda. Registre o que está acontecendo.</li>`;
+}
+
+async function addNote(cardId, content, author){
+  content = (content||"").trim();
+  if(!content){ alert("Escreva alguma coisa antes de salvar a nota."); return false; }
+  if(!author){ alert("Selecione quem está anotando."); return false; }
+  const sprint = activeSprint();
+  const payload = { card_id: cardId, sprint_id: sprint ? sprint.id : null, content, author };
+  const { data, error } = await sb.from("activity_notes").insert(payload).select().single();
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      alert("⚠ Tabela activity_notes ausente. Rode supabase-setup.sql no SQL Editor.");
+    } else {
+      alert("Erro ao salvar nota: " + error.message);
+    }
+    return false;
+  }
+  if(data) allNotes = [data, ...allNotes];
+  render(); renderSchedule(); renderModalNotes(cardId);
+  return true;
+}
+
+async function deleteNote(noteId){
+  const note = allNotes.find(n => n.id === noteId);
+  if(!note){ return; }
+  if(!canDeleteNote(note)){
+    alert("Esta nota não pode mais ser apagada (limite de 5 min ou sprint concluída).");
+    return;
+  }
+  if(!confirm(`Apagar a nota de ${note.author}?`)) return;
+  allNotes = allNotes.filter(n => n.id !== noteId);
+  render(); renderSchedule();
+  if(editingId) renderModalNotes(editingId);
+  const { error } = await sb.from("activity_notes").delete().eq("id", noteId);
+  if(error){ alert("Erro: " + error.message); fetchNotes(); }
+}
+
+// listeners do modal de notas
+(function bindNoteHandlers(){
+  const txt = document.getElementById("md-note-text");
+  const sel = document.getElementById("md-note-author");
+  const save = document.getElementById("md-note-save");
+  const list = document.getElementById("md-notes-list");
+  if(!txt || !sel || !save || !list) return;
+
+  function refreshSaveState(){
+    save.disabled = !(txt.value.trim() && sel.value);
+  }
+  txt.addEventListener("input", refreshSaveState);
+  sel.addEventListener("change", refreshSaveState);
+
+  save.addEventListener("click", async ()=>{
+    if(!editingId) return;
+    save.disabled = true;
+    const ok = await addNote(editingId, txt.value, sel.value);
+    if(ok){ txt.value = ""; }
+    refreshSaveState();
+    txt.focus();
+  });
+
+  list.addEventListener("click", e=>{
+    const id = e.target.dataset && e.target.dataset.nid;
+    if(id) deleteNote(id);
+  });
+})();
+
+// realtime das notas
+sb.channel("activity_notes_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"activity_notes"}, fetchNotes)
+  .subscribe();
+
+fetchNotes();
+
+// ============================================================
 // CRONOGRAMA — relógio, contagem regressiva, checklist com timestamps
 // Estados por etapa: pendente → em andamento → feito
 // Persistência: Supabase (tabela hackathon_schedule) + realtime
@@ -998,16 +1209,20 @@ mdSave.addEventListener("click", saveCardDetails);
 function pad(n){ return String(n).padStart(2,"0"); }
 const DAYS_PT = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 
-// scheduleState[id] = {started_at: ISO|null, done_at: ISO|null}
-let scheduleState = {};
+// scheduleSprints = lista ordenada de fases vindas do Supabase (ou defaults).
+// Cada item: {id, name, position, status: 'pending'|'active'|'completed', started_at, done_at}
+let scheduleSprints = DEFAULT_SPRINTS.map(s => ({...s, status:"pending", started_at:null, done_at:null}));
 let scheduleReady = false;
 
+function getSprint(id){ return scheduleSprints.find(s => s.id === id); }
 function stageStatus(id){
-  const r = scheduleState[id];
-  if(!r || !r.started_at) return "pendente";
-  if(!r.done_at) return "andamento";
-  return "feito";
+  const s = getSprint(id);
+  if(!s) return "pendente";
+  if(s.status === "active")    return "andamento";
+  if(s.status === "completed") return "feito";
+  return "pendente";
 }
+function activeSprint(){ return scheduleSprints.find(s => s.status === "active") || null; }
 
 function fmtTimeShort(iso){
   if(!iso) return "—";
@@ -1035,44 +1250,12 @@ function fmtDurShort(ms){
   return `${Math.floor(m/60)}h ${pad(m%60)}m`;
 }
 
-// Ancora as sprints no half-hour atual e gera até o pitch.
-// Sprints com timestamp já registrado (em andamento ou feita) também aparecem,
-// mesmo que a janela planejada já tenha passado — assim o time não perde o histórico.
-function buildSprints(refNow){
-  const now = refNow || new Date();
-  const pitchMs = PITCH_AT.getTime();
-  let startMs = Math.floor(now.getTime() / SPRINT_MS) * SPRINT_MS;
-  // se houver sprint registrada antes do "agora", inclui desde lá
-  Object.values(scheduleState||{}).forEach(r=>{
-    if(!r || !r.started_at) return;
-    const t = new Date(r.started_at).getTime();
-    const floor = Math.floor(t / SPRINT_MS) * SPRINT_MS;
-    if(floor < startMs) startMs = floor;
-  });
-  const sprints = [];
-  let curMs = startMs;
-  let i = 1;
-  while(curMs < pitchMs){
-    const endMs = Math.min(curMs + SPRINT_MS, pitchMs);
-    const start = new Date(curMs);
-    const isPitch = endMs >= pitchMs;
-    const id = "sprint_" + start.getFullYear() +
-               pad(start.getMonth()+1) + pad(start.getDate()) + "T" +
-               pad(start.getHours()) + pad(start.getMinutes());
-    sprints.push({
-      id, num: i,
-      start, end: new Date(endMs),
-      plannedMs: endMs - curMs,
-      isPitch
-    });
-    curMs += SPRINT_MS;
-    i++;
-  }
-  return sprints;
+// Sequência fixa de 3 fases — nunca regenerada por timer, nunca renumerada.
+// Histórico de fases concluídas é permanente em hackathon_schedule.
+function buildSprints(){
+  return scheduleSprints.slice().sort((a,b)=>(a.position||0)-(b.position||0));
 }
-function sprintById(id){
-  return buildSprints().find(s => s.id === id);
-}
+function sprintById(id){ return getSprint(id); }
 
 // Apuração da sprint: cards mexidos no backlog dentro da janela.
 function computeSprintReport(startMs, endMs){
@@ -1110,37 +1293,62 @@ function renderReportDetails(r){
 }
 
 async function fetchScheduleState(){
-  const { data, error } = await sb.from("hackathon_schedule").select("*");
+  const { data, error } = await sb.from("hackathon_schedule").select("*").order("position", {ascending:true});
   if(error){
     if(/relation .* does not exist/i.test(error.message)){
       console.warn("[cronograma] tabela hackathon_schedule ausente — rode supabase-setup.sql");
     } else {
       console.error(error);
     }
+    scheduleSprints = DEFAULT_SPRINTS.map(s=>({...s, status:"pending", started_at:null, done_at:null}));
     scheduleReady = true; renderSchedule(); return;
   }
-  scheduleState = {};
-  (data||[]).forEach(r=>{ scheduleState[r.id] = {started_at:r.started_at, done_at:r.done_at}; });
+  if(!data || data.length === 0){
+    // seed default phases
+    const seed = DEFAULT_SPRINTS.map(s=>({id:s.id, name:s.name, position:s.position, status:"pending"}));
+    const r = await sb.from("hackathon_schedule").upsert(seed, {onConflict:"id"});
+    if(r.error) console.warn("[cronograma seed]", r.error.message);
+    scheduleSprints = seed.map(s=>({...s, started_at:null, done_at:null}));
+  } else {
+    scheduleSprints = data.map(r=>({
+      id: r.id,
+      name: r.name || r.id,
+      position: r.position || 0,
+      status: r.status || "pending",
+      started_at: r.started_at,
+      done_at: r.done_at
+    }));
+  }
   scheduleReady = true;
   renderSchedule();
 }
 
 async function onStageClick(id){
-  const cur = stageStatus(id);
+  const sprint = getSprint(id); if(!sprint) return;
+  const cur = sprint.status;
   const nowIso = new Date().toISOString();
   let payload, optimistic;
-  if(cur === "pendente"){
-    payload = {id, started_at: nowIso, done_at: null, updated_at: nowIso};
-    optimistic = {started_at: nowIso, done_at: null};
-  } else if(cur === "andamento"){
-    payload = {id, started_at: scheduleState[id].started_at, done_at: nowIso, updated_at: nowIso};
-    optimistic = {started_at: scheduleState[id].started_at, done_at: nowIso};
-  } else { // feito
-    if(!confirm("Reabrir esta etapa? Os horários serão apagados.")) return;
-    payload = {id, started_at: null, done_at: null, updated_at: nowIso};
-    optimistic = {started_at: null, done_at: null};
+
+  if(cur === "pending"){
+    // só 1 active por vez
+    const other = scheduleSprints.find(s => s.status === "active" && s.id !== id);
+    if(other){
+      alert(`Já existe uma sprint em andamento: "${other.name}". Conclua-a antes de iniciar outra.`);
+      return;
+    }
+    if(!confirm(`Iniciar a fase "${sprint.name}"?`)) return;
+    payload = {id, name:sprint.name, position:sprint.position, status:"active", started_at:nowIso, done_at:null, updated_at:nowIso};
+    optimistic = {status:"active", started_at:nowIso, done_at:null};
+  } else if(cur === "active"){
+    if(!confirm(`Concluir a fase "${sprint.name}"?\nO histórico fica permanente (sem reabrir).`)) return;
+    payload = {id, name:sprint.name, position:sprint.position, status:"completed", started_at:sprint.started_at, done_at:nowIso, updated_at:nowIso};
+    optimistic = {status:"completed", started_at:sprint.started_at, done_at:nowIso};
+  } else { // completed
+    alert(`A fase "${sprint.name}" foi concluída em ${fmtTimeShort(sprint.done_at)} — registro permanente.`);
+    return;
   }
-  scheduleState[id] = optimistic;
+
+  Object.assign(sprint, optimistic);
   renderSchedule();
   const { error } = await sb.from("hackathon_schedule").upsert(payload, {onConflict:"id"});
   if(error){
@@ -1153,109 +1361,89 @@ async function onStageClick(id){
   }
 }
 
-function chipFor(plannedMs, actualMs){
-  if(!plannedMs || plannedMs <= 0) return "";
-  const ratio = actualMs / plannedMs;
-  const delta = actualMs - plannedMs;
-  const sign = delta >= 0 ? "+" : "−";
-  if(ratio <= 1) return `<span class="statchip green">🟢 no prazo · ${fmtDurShort(actualMs)}</span>`;
-  if(ratio <= 1.3) return `<span class="statchip yellow">🟡 ${sign}${fmtDurShort(Math.abs(delta))}</span>`;
-  return `<span class="statchip red">🔴 ${sign}${fmtDurShort(Math.abs(delta))}</span>`;
-}
-
-function liveChipFor(plannedMs, runningMs){
-  if(!plannedMs || plannedMs <= 0) return "";
-  const ratio = runningMs / plannedMs;
-  if(ratio <= 1) return `<span class="statchip green">🟢 dentro da janela</span>`;
-  if(ratio <= 1.3) return `<span class="statchip yellow">🟡 estourando</span>`;
-  return `<span class="statchip red">🔴 atrasada</span>`;
-}
-
 function renderSprintRow(s){
-  const st = stageStatus(s.id);
-  const rec = scheduleState[s.id] || {};
+  const st = s.status || "pending";
   const nowMs = Date.now();
   let chkClass = "", chkIcon = "";
-  if(st === "andamento"){ chkClass = "run"; chkIcon = "⏳"; }
-  else if(st === "feito"){ chkClass = "done"; chkIcon = "✓"; }
+  if(st === "active"){ chkClass = "run"; chkIcon = "⏳"; }
+  else if(st === "completed"){ chkClass = "done"; chkIcon = "✓"; }
 
   let stageClass = "stage";
-  if(s.isPitch) stageClass += " pitch";
-  if(st === "andamento") stageClass += " run";
-  if(st === "feito") stageClass += " done";
+  if(s.id === "apresentacao") stageClass += " pitch";
+  if(st === "active") stageClass += " run";
+  if(st === "completed") stageClass += " done";
 
-  // janela para o relatório: usa marcação real se houver, senão usa a janela planejada
-  const startMs = rec.started_at ? new Date(rec.started_at).getTime() : s.start.getTime();
-  const endMs   = rec.done_at    ? new Date(rec.done_at).getTime()
-                                 : Math.min(nowMs, s.end.getTime());
-  const report = computeSprintReport(startMs, endMs);
-
-  // metaline (status do sprint)
-  let info = "—", infoCls = "stinfo";
-  let chip = "";
-  if(st === "andamento"){
-    const runMs = nowMs - new Date(rec.started_at).getTime();
-    info = `⏳ iniciada ${fmtTimeShort(rec.started_at)} · rodando há ${fmtDur(runMs)}`;
-    infoCls = "stinfo run";
-    chip = liveChipFor(s.plannedMs, runMs);
-  } else if(st === "feito"){
-    const dur = new Date(rec.done_at).getTime() - new Date(rec.started_at).getTime();
-    info = `✅ fechada ${fmtTimeShort(rec.done_at)} · durou ${fmtDur(dur)}`;
-    infoCls = "stinfo done";
-    chip = chipFor(s.plannedMs, dur);
-  } else if(s.start.getTime() <= nowMs && s.end.getTime() > nowMs){
-    info = "🟦 sprint atual — clique para marcar início";
-    infoCls = "stinfo run";
-  } else if(s.end.getTime() <= nowMs){
-    info = "⏸ janela já passou — clique para registrar retrô";
+  // janela para o relatório: somente quando há started_at; cobre até done_at ou agora
+  let report = { total:0, done:[], fazendo:[], revisao:[], backlog:[], all:[] };
+  if(s.started_at){
+    const startMs = new Date(s.started_at).getTime();
+    const endMs   = s.done_at ? new Date(s.done_at).getTime() : nowMs;
+    report = computeSprintReport(startMs, endMs);
   }
 
-  const timeLabel = `${pad(s.start.getHours())}:${pad(s.start.getMinutes())}–${pad(s.end.getHours())}:${pad(s.end.getMinutes())}`;
-  const title = s.isPitch
-    ? `🎤 Sprint #${s.num} — janela do PITCH (18h)`
-    : `Sprint #${s.num} — 30 min`;
+  // notas registradas nesta fase
+  const sprintNotes = (allNotes||[]).filter(n => n.sprint_id === s.id);
+
+  // metaline
+  let info = "—", infoCls = "stinfo";
+  if(st === "active"){
+    const runMs = nowMs - new Date(s.started_at).getTime();
+    info = `⏳ iniciada ${fmtTimeShort(s.started_at)} · rodando há ${fmtDur(runMs)}`;
+    infoCls = "stinfo run";
+  } else if(st === "completed"){
+    const dur = new Date(s.done_at).getTime() - new Date(s.started_at).getTime();
+    info = `✅ fechada ${fmtTimeShort(s.done_at)} · durou ${fmtDur(dur)}`;
+    infoCls = "stinfo done";
+  } else {
+    info = "clique para iniciar esta fase";
+  }
+
+  const title = (s.id === "apresentacao" ? "🎤 " : "") +
+                `Fase ${s.position} — ${escapeHtml(s.name||s.id)}`;
+  const stepLabel = `${s.position}/${scheduleSprints.length}`;
+
   return (
-    `<div class="${stageClass}" data-sid="${s.id}" data-time="${timeLabel}">` +
-      `<div class="stime">${timeLabel}</div>` +
-      `<div class="stchk ${chkClass}" data-chk="${s.id}" title="Clique para avançar estado">${chkIcon}</div>` +
-      `<div class="stitle">${escapeHtml(title)}</div>` +
-      `<div class="stwho">${report.total} ações</div>` +
+    `<div class="${stageClass}" data-sid="${escapeHtml(s.id)}">` +
+      `<div class="stime">${stepLabel}</div>` +
+      `<div class="stchk ${chkClass}" data-chk="${escapeHtml(s.id)}" title="${st==='completed'?'concluída (somente leitura)':'clique para avançar'}">${chkIcon}</div>` +
+      `<div class="stitle">${title}</div>` +
+      `<div class="stwho">${report.total} ações · 📝 ${sprintNotes.length}</div>` +
       `<div class="stmeta">` +
-        `<span class="${infoCls}" data-info="${s.id}">${info}</span>` +
-        chip +
+        `<span class="${infoCls}" data-info="${escapeHtml(s.id)}">${info}</span>` +
         renderReportInline(report) +
         renderReportDetails(report) +
+        renderSprintNotes(sprintNotes, s) +
       `</div>` +
     `</div>`
   );
 }
 
+function renderSprintNotes(notes, sprint){
+  if(!notes || notes.length === 0) return "";
+  const isReadOnly = sprint.status === "completed";
+  const items = notes.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0,8).map(n=>{
+    const card = cards.find(c=>c.id===n.card_id);
+    const cardTitle = card ? card.title : "(card removido)";
+    return `<li>📝 <b>${escapeHtml(n.author||"?")}</b> · ${escapeHtml(cardTitle)} · ${fmtTimeShort(n.created_at)} — ${escapeHtml(n.content)}</li>`;
+  }).join("");
+  const more = notes.length > 8 ? `<li style="opacity:.6">+ ${notes.length-8} mais notas…</li>` : "";
+  const lock = isReadOnly ? `<span class="statchip" style="opacity:.7">🔒 somente leitura</span>` : "";
+  return `<ul class="sprintlog">${items}${more}</ul>${lock}`;
+}
+
 function renderSchedule(){
   const root = document.getElementById("sched");
-  root.innerHTML = "";
+  if(!root) return;
   const sprints = buildSprints();
-  if(sprints.length === 0){
-    root.innerHTML = `<div class="schday"><div class="dhead"><span>🎤 Pitch encerrado</span></div></div>`;
-    renderStats(); return;
-  }
-  // agrupa por data (Sáb 30/05, Dom 31/05)
-  const byDay = new Map();
-  sprints.forEach(s=>{
-    const k = `${pad(s.start.getDate())}/${pad(s.start.getMonth()+1)}`;
-    if(!byDay.has(k)) byDay.set(k, []);
-    byDay.get(k).push(s);
-  });
-  byDay.forEach((list, dateKey)=>{
-    const dayName = DAYS_PT[list[0].start.getDay()];
-    const done = list.filter(s=>stageStatus(s.id)==="feito").length;
-    const wrap = document.createElement("div");
-    wrap.className = "schday";
-    wrap.innerHTML =
-      `<div class="dhead"><span>${dayName} ${dateKey}</span>` +
-      `<span class="dprog">${done}/${list.length} sprints fechadas</span></div>` +
-      list.map(renderSprintRow).join("");
-    root.appendChild(wrap);
-  });
+  const done = sprints.filter(s=>s.status==="completed").length;
+  const wrap = document.createElement("div");
+  wrap.className = "schday";
+  wrap.innerHTML =
+    `<div class="dhead"><span>🗺️ Hackathon — 3 fases</span>` +
+    `<span class="dprog">${done}/${sprints.length} fases concluídas</span></div>` +
+    sprints.map(renderSprintRow).join("");
+  root.innerHTML = "";
+  root.appendChild(wrap);
   markCurrentStage();
   renderStats();
 }
@@ -1266,23 +1454,22 @@ document.getElementById("sched").addEventListener("click", e=>{
 });
 
 function markCurrentStage(){
-  const now = Date.now();
   const sprints = buildSprints();
-  const cur  = sprints.find(s => s.start.getTime() <= now && now < s.end.getTime());
-  const next = sprints.find(s => s.start.getTime() > now);
+  const cur = sprints.find(s => s.status === "active");
+  const next = sprints.find(s => s.status === "pending");
   document.querySelectorAll(".stage.now").forEach(el=>el.classList.remove("now"));
   if(cur){
     const el = document.querySelector(`.stage[data-sid="${cur.id}"]`);
-    if(el && stageStatus(cur.id) !== "feito") el.classList.add("now");
+    if(el) el.classList.add("now");
   }
   const elStage = document.getElementById("clk-stage");
   const elNext  = document.getElementById("clk-next");
   if(elStage) elStage.textContent = cur
-    ? (cur.isPitch ? `🎤 Sprint #${cur.num} — janela do PITCH` : `Sprint #${cur.num} (${pad(cur.start.getHours())}:${pad(cur.start.getMinutes())}–${pad(cur.end.getHours())}:${pad(cur.end.getMinutes())})`)
-    : "Pitch encerrado";
+    ? `Fase ${cur.position} — ${cur.name}`
+    : (sprints.every(s=>s.status==="completed") ? "🏁 Todas as fases concluídas" : "Nenhuma fase em andamento");
   if(elNext) elNext.textContent = next
-    ? `Próxima: Sprint #${next.num} às ${pad(next.start.getHours())}:${pad(next.start.getMinutes())}`
-    : "Última sprint do hackathon";
+    ? `Próxima: Fase ${next.position} — ${next.name}`
+    : "—";
 }
 
 function isSameDay(a, b){
@@ -1291,43 +1478,35 @@ function isSameDay(a, b){
 
 function renderStats(){
   const today = new Date();
-  const sprintMap = Object.fromEntries(buildSprints().map(s=>[s.id, s]));
-  let accMs = 0, doneCount = 0, runCount = 0, onTime = 0, measured = 0;
-  Object.keys(scheduleState).forEach(id=>{
-    const r = scheduleState[id];
-    if(!r) return;
-    if(r.started_at && !r.done_at) runCount++;
-    if(r.started_at && r.done_at){
-      const start = new Date(r.started_at);
-      const end   = new Date(r.done_at);
+  let accMs = 0, doneCount = 0, runCount = 0;
+  scheduleSprints.forEach(s=>{
+    if(s.status === "active" && s.started_at) runCount++;
+    if(s.status === "completed" && s.started_at && s.done_at){
+      const start = new Date(s.started_at);
+      const end   = new Date(s.done_at);
       if(isSameDay(end, today)) accMs += (end - start);
       doneCount++;
-      const sprint = sprintMap[id];
-      if(sprint && sprint.plannedMs){
-        measured++;
-        if((end - start) <= sprint.plannedMs) onTime++;
-      }
     }
   });
+  const totalNotes = (allNotes || []).length;
   const elAcc = document.getElementById("st-acc");
   const elRate = document.getElementById("st-rate");
   const elDone = document.getElementById("st-done");
   const elRun  = document.getElementById("st-run");
   if(elAcc) elAcc.textContent = accMs ? fmtDur(accMs) : "0m";
-  if(elRate) elRate.textContent = measured ? `${Math.round(onTime*100/measured)}% (${onTime}/${measured})` : "—";
+  if(elRate) elRate.textContent = `📝 ${totalNotes}`;
   if(elDone) elDone.textContent = doneCount;
   if(elRun)  elRun.textContent  = runCount;
 }
 
 function tickRunningStages(){
-  // atualiza só as linhas "em andamento" sem rerender completo
-  Object.keys(scheduleState).forEach(id=>{
-    const r = scheduleState[id];
-    if(!r || !r.started_at || r.done_at) return;
-    const el = document.querySelector(`.stinfo[data-info="${id}"]`);
+  // atualiza só as fases em andamento (sem rerender completo)
+  scheduleSprints.forEach(s=>{
+    if(s.status !== "active" || !s.started_at) return;
+    const el = document.querySelector(`.stinfo[data-info="${s.id}"]`);
     if(!el) return;
-    const runMs = Date.now() - new Date(r.started_at).getTime();
-    el.textContent = `⏳ iniciada ${fmtTimeShort(r.started_at)} · rodando há ${fmtDur(runMs)}`;
+    const runMs = Date.now() - new Date(s.started_at).getTime();
+    el.textContent = `⏳ iniciada ${fmtTimeShort(s.started_at)} · rodando há ${fmtDur(runMs)}`;
   });
 }
 
@@ -1353,27 +1532,24 @@ function tickClock(){
   }
   tickRunningStages();
   if(now.getSeconds() % 30 === 0){ markCurrentStage(); renderStats(); }
-  // a cada meia hora cheia, uma nova sprint começa — re-render completo
-  if(now.getSeconds() === 0 && (now.getMinutes() === 0 || now.getMinutes() === 30)){
-    renderSchedule();
-  }
+  // NOTE: sem auto-rerender por tempo. Mudanças de fase só por clique manual.
 }
 
-// limpeza única dos timestamps com ids do schedule estático antigo (s01, s02, …)
-// — só rodam uma vez por navegador via flag de localStorage.
-async function migrateScheduleOnce(){
-  const KEY = "hackia_sched_migrated_v2";
+// Limpeza one-shot dos ids legados do schedule dinâmico (sprint_2026...).
+// As 3 fases fixas (ignicao/construcao/apresentacao) NUNCA são deletadas.
+async function purgeLegacyScheduleOnce(){
+  const KEY = "hackia_sched_migrated_v3_fixed_phases";
   if(localStorage.getItem(KEY) === "1") return;
-  const { error } = await sb.from("hackathon_schedule").delete().neq("id","__none__");
+  const { error } = await sb.from("hackathon_schedule").delete().like("id", "sprint\\_%");
   if(!error || /relation .* does not exist/i.test(error.message)){
     localStorage.setItem(KEY, "1");
   } else {
-    console.warn("[migrate schedule]", error.message);
+    console.warn("[purge legacy schedule]", error.message);
   }
 }
 
 (async ()=>{
-  await migrateScheduleOnce();
+  await purgeLegacyScheduleOnce();
   await fetchScheduleState();
 })();
 renderSchedule();
