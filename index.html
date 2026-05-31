@@ -434,6 +434,58 @@
   /* Tag de cor na peça */
   .ptask .pt-stage{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:1px 7px 1px 5px;border-radius:999px;border:1px solid var(--line);background:var(--card)}
   .ptask .pt-stage .dot{width:7px;height:7px;border-radius:50%;background:var(--stcolor,#7c83ff)}
+
+  /* Avatares empilhados + badges + menu */
+  .ptask .pt-assignees{display:inline-flex;align-items:center}
+  .ptask .pt-assignees .pt-av{margin-left:-5px;border:2px solid var(--cell);border-radius:50%;display:inline-flex}
+  .ptask .pt-assignees .pt-av:first-child{margin-left:0}
+  .ptask .pt-assignees .pt-more-av{width:18px;height:18px;border-radius:50%;background:var(--card2);color:#cfd2ef;font-family:var(--mono);font-size:9.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--cell);margin-left:-5px}
+  .ptask .pt-dur{cursor:pointer;transition:.12s}
+  .ptask .pt-dur:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .ptask .pt-notes{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(124,131,255,.18);border:1px solid var(--line);color:#cfd2ef;cursor:pointer;transition:.12s}
+  .ptask .pt-notes:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .ptask .pt-more{background:var(--card2);border:1px solid var(--line);color:#cfd2ef;font-size:13px;cursor:pointer;padding:2px 8px;border-radius:7px;font-family:inherit;line-height:1}
+  .ptask .pt-more:hover{border-color:var(--brand);background:var(--brand);color:#fff}
+  .ptask.drag-source{outline:2px dashed var(--brand);outline-offset:2px}
+  .ptask.insert-before{box-shadow:inset 0 2px 0 0 var(--brand)}
+  .ptask.insert-after{box-shadow:inset 0 -2px 0 0 var(--brand)}
+
+  /* Popover de menu (mover para, etc) */
+  .pt-popover{position:fixed;z-index:9999;background:var(--card);border:1px solid var(--brand);border-radius:11px;padding:8px;min-width:230px;max-width:260px;box-shadow:0 12px 32px rgba(0,0,0,.5);font-family:inherit;display:flex;flex-direction:column;gap:3px;max-height:62vh;overflow:auto}
+  .pt-popover .pt-pop-head{font-size:10.5px;font-weight:800;color:#9296bd;text-transform:uppercase;letter-spacing:.5px;padding:4px 6px;margin-top:4px}
+  .pt-popover .pt-pop-head:first-child{margin-top:0}
+  .pt-popover button{font-family:inherit;font-size:12.5px;font-weight:600;background:transparent;border:1px solid transparent;color:#cfd2ef;text-align:left;padding:7px 9px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .pt-popover button:hover{background:var(--card2);border-color:var(--line);color:#fff}
+  .pt-popover button.danger{color:#ffb3b3}
+  .pt-popover button.danger:hover{background:rgba(255,107,107,.10);border-color:var(--no)}
+  .pt-popover button.is-disabled{opacity:.4;cursor:not-allowed}
+  .pt-popover hr{border:none;border-top:1px solid var(--line);margin:5px 0}
+  .pt-popover .pt-dur-row{display:flex;align-items:center;gap:6px;padding:6px}
+  .pt-popover .pt-dur-row button{background:var(--card2);border:1px solid var(--line);padding:5px 10px;font-weight:800}
+  .pt-popover .pt-dur-row input{flex:1;background:var(--cell);border:1px solid var(--line);color:#eef0ff;font-family:var(--mono);font-size:13px;font-weight:700;padding:6px 8px;border-radius:7px;text-align:center}
+  .pt-popover .pt-assign-grid{display:flex;flex-wrap:wrap;gap:5px;padding:4px 6px 8px}
+  .pt-popover .pt-assign-chip{font-family:inherit;font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--cell);color:#cfd2ef;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .pt-popover .pt-assign-chip.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+  /* Multi-select de assignees no form */
+  .plan-form .pf-assign-row{display:flex;flex-wrap:wrap;gap:5px}
+  .plan-form .pf-assign-chip{font-family:inherit;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:#cfd2ef;cursor:pointer}
+  .plan-form .pf-assign-chip.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+  /* Modal de notas da tarefa */
+  .pt-notes-modal{position:fixed;inset:0;background:rgba(8,10,28,.78);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}
+  .pt-notes-modal .ptn-card{background:var(--card);border:1px solid var(--brand);border-radius:14px;padding:18px 20px;max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;gap:12px}
+  .pt-notes-modal h4{font-size:14px;font-weight:800;color:#eef0ff;margin:0;display:flex;align-items:center;justify-content:space-between}
+  .pt-notes-modal h4 button{background:transparent;border:none;color:#9296bd;font-size:18px;cursor:pointer}
+  .pt-notes-modal .ptn-list{display:flex;flex-direction:column;gap:8px;overflow:auto;max-height:48vh;padding-right:4px}
+  .pt-notes-modal .ptn-item{background:var(--cell);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+  .pt-notes-modal .ptn-item .ptn-author{font-family:var(--mono);font-size:10.5px;color:#9296bd;margin-bottom:3px;font-weight:700}
+  .pt-notes-modal .ptn-item .ptn-content{font-size:13px;color:#eef0ff;line-height:1.45;white-space:pre-wrap}
+  .pt-notes-modal .ptn-form{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
+  .pt-notes-modal .ptn-form select,.pt-notes-modal .ptn-form textarea{font-family:inherit;font-size:13px;background:var(--cell);border:1px solid var(--line);color:#eef0ff;padding:7px 10px;border-radius:8px;outline:none}
+  .pt-notes-modal .ptn-form .row{display:flex;gap:6px;align-items:center;justify-content:space-between}
+  .pt-notes-modal .ptn-form button{font-family:inherit;font-size:12.5px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer}
+  .pt-notes-modal .ptn-empty{font-size:12.5px;color:#9296bd;font-style:italic;padding:6px 4px}
 </style>
 </head>
 <body>
@@ -1792,8 +1844,26 @@ let planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliv
 let stageFormOpen = false;
 let stageFormDraft = { id:null, title:"", description:"", color:"#7c83ff", deliverable_id:"" };
 let stageCollapsed = {}; // { stage_id: true|false }
+let planFormAssignees = []; // multi-seleção no form de criar tarefa
+let openPlanMenu = null;    // { tid, anchor: DOMRect, mode: 'menu'|'dur'|'assign' }
+let openPlanNotesTid = null;
+let planTaskNotes = [];     // notas carregadas para o modal aberto
 const STAGE_COLORS = ["#7c83ff","#46e6a0","#ffce5a","#ff8ad6","#ff6b6b","#5be1ff","#c084fc","#ffa45c"];
 const PLAN_DEADLINE = new Date(2026, 4, 31, 17, 30, 0); // 31/05/2026 17:30 local
+
+function planTaskAssigneeList(t){
+  const owner = (t.owner||"").trim();
+  const arr = Array.isArray(t.assignees) ? t.assignees : [];
+  // remove duplicatas, dono primeiro
+  const seen = new Set();
+  const out = [];
+  if(owner){ out.push(owner); seen.add(owner); }
+  arr.forEach(n => { const x=(n||"").trim(); if(x && !seen.has(x)){ out.push(x); seen.add(x); }});
+  return out;
+}
+function planTaskNotesCount(tid){
+  return (allNotes||[]).filter(n => n.planning_task_id === tid).length;
+}
 
 function fmtSlotRange(s){
   const a = new Date(s.start_at), b = new Date(s.end_at);
@@ -1882,22 +1952,33 @@ function planCountdownText(){
 }
 
 function renderPlanTaskHtml(t, draggable){
-  const owner = (t.owner||"").trim();
-  const avatar = owner ? avatarHtml(owner, 18) : "";
   const delivLabel = (deliverables.find(d => d.id === t.deliverable)||{}).label || "";
   const stage = t.stage_id ? stageById(t.stage_id) : null;
   const stageStyle = stage ? `style="--stcolor:${escapeHtml(stage.color||'#7c83ff')}"` : "";
   const stageTag = stage
     ? `<span class="pt-stage" ${stageStyle}><span class="dot"></span>${escapeHtml(stage.title)}</span>`
     : "";
+  const team = planTaskAssigneeList(t);
+  const shown = team.slice(0,4);
+  const rest  = team.length - shown.length;
+  const avatarStack = team.length
+    ? `<span class="pt-assignees" title="${escapeHtml(team.join(', '))}">
+         ${shown.map(n => `<span class="pt-av">${avatarHtml(n, 18)}</span>`).join("")}
+         ${rest > 0 ? `<span class="pt-more-av">+${rest}</span>` : ""}
+       </span>`
+    : "";
+  const notesCount = planTaskNotesCount(t.id);
+  const notesBadge = notesCount
+    ? `<span class="pt-notes" data-tnotes="${escapeHtml(t.id)}" title="${notesCount} anotaç${notesCount===1?"ão":"ões"}">📝 ${notesCount}</span>`
+    : `<span class="pt-notes" data-tnotes="${escapeHtml(t.id)}" title="Adicionar anotação">📝</span>`;
   return `<div class="ptask ${t.status==="done"?"done":""} ${t.status==="doing"?"doing":""}"
               draggable="${draggable?"true":"false"}" data-tid="${escapeHtml(t.id)}" ${stageStyle}>
     <div class="pt-title">${escapeHtml(t.title)}</div>
     <div class="pt-meta">
-      ${avatar}
-      ${owner ? `<span>${escapeHtml(owner)}</span>` : ""}
-      <span class="pt-dur">${t.duration_min||0}min</span>
+      ${avatarStack}
+      <span class="pt-dur" data-tdur="${escapeHtml(t.id)}" title="Clique para editar a duração">${t.duration_min||0}min</span>
       ${stageTag}
+      ${notesBadge}
       ${delivLabel ? `<span class="pt-deliv">→ ${escapeHtml(delivLabel)}</span>` : ""}
     </div>
     <div class="pt-row">
@@ -1906,6 +1987,7 @@ function renderPlanTaskHtml(t, draggable){
         <option value="doing"${t.status==="doing"?" selected":""}>Em andamento</option>
         <option value="done"${t.status==="done"?" selected":""}>Concluído</option>
       </select>
+      <button class="pt-more" data-tmore="${escapeHtml(t.id)}" title="Mais opções">⋮</button>
       <button class="pt-del" data-tdel="${escapeHtml(t.id)}" title="Apagar atividade">✕</button>
     </div>
   </div>`;
@@ -1935,6 +2017,7 @@ function renderPlan(){
   const delivOpts = deliverables.map(d => `<option value="${escapeHtml(d.id)}"${planFormDraft.deliverable===d.id?" selected":""}>${escapeHtml(d.label)}</option>`).join("");
   const teamOpts = TEAM.map(p => `<option value="${escapeHtml(p)}"${planFormDraft.owner===p?" selected":""}>${escapeHtml(p)}</option>`).join("");
   const stageOpts = planStages.map(st => `<option value="${escapeHtml(st.id)}"${planFormDraft.stage_id===st.id?" selected":""}>${escapeHtml(st.title)}</option>`).join("");
+  const assignChips = TEAM.map(p => `<button type="button" class="pf-assign-chip ${planFormAssignees.includes(p)?"sel":""}" data-pf-assign="${escapeHtml(p)}">${avatarHtml(p, 16)} ${escapeHtml(p)}</button>`).join("");
   const formHtml = planFormOpen ? `
     <div class="plan-form" id="plan-form">
       <input type="text" id="pf-title" placeholder="O que precisa ser feito?" value="${escapeHtml(planFormDraft.title)}" required>
@@ -1943,6 +2026,8 @@ function renderPlan(){
         <select id="pf-owner"><option value="">Dono…</option>${teamOpts}</select>
         <input type="number" id="pf-dur" min="5" step="5" placeholder="Duração (min)" value="${planFormDraft.duration_min||30}">
       </div>
+      <div style="font-size:11px;color:#9296bd;font-weight:700;letter-spacing:.3px">QUEM MAIS ESTÁ ENVOLVIDO</div>
+      <div class="pf-assign-row">${assignChips}</div>
       <select id="pf-stage"><option value="">Sem etapa</option>${stageOpts}</select>
       <select id="pf-deliv"><option value="">→ Entregável final (opcional)</option>${delivOpts}</select>
       <div class="actions">
@@ -2084,6 +2169,96 @@ function renderPlan(){
     </div>
   ` : "";
 
+  // Popover do ⋮ / dur / assignees
+  const popoverHtml = (() => {
+    if(!openPlanMenu) return "";
+    const t = planTasks.find(x => x.id === openPlanMenu.tid);
+    if(!t) return "";
+    const r = openPlanMenu.anchor || { left:100, top:100, bottom:120, right:200 };
+    const top  = Math.min(window.innerHeight - 340, r.bottom + 6);
+    const left = Math.min(window.innerWidth - 270, Math.max(8, r.left - 90));
+    const pos = `style="top:${top}px;left:${left}px"`;
+
+    if(openPlanMenu.mode === "dur"){
+      return `<div class="pt-popover" id="pt-popover" ${pos}>
+        <div class="pt-pop-head">⏱ Editar duração</div>
+        <div class="pt-dur-row">
+          <button data-dur-delta="-15">−15</button>
+          <input type="number" id="pt-dur-input" min="5" step="5" value="${t.duration_min||30}">
+          <button data-dur-delta="15">+15</button>
+        </div>
+        <button data-dur-save title="Salvar">💾 Salvar</button>
+        <button data-pop-close>Fechar</button>
+      </div>`;
+    }
+    if(openPlanMenu.mode === "assign"){
+      const cur = planTaskAssigneeList(t);
+      const chips = TEAM.map(p => `<button class="pt-assign-chip ${cur.includes(p)?"sel":""}" data-pt-assign="${escapeHtml(p)}">${avatarHtml(p,14)} ${escapeHtml(p)}</button>`).join("");
+      return `<div class="pt-popover" id="pt-popover" ${pos}>
+        <div class="pt-pop-head">👥 Quem está envolvido</div>
+        <div class="pt-assign-grid">${chips}</div>
+        <button data-pop-close>Fechar</button>
+      </div>`;
+    }
+
+    // mode === "menu"
+    const slotOpts = planSlots
+      .filter(s => s.type !== "deadline" && !s.locked && new Date(s.end_at).getTime() > Date.now())
+      .map(s => `<button data-move-slot="${escapeHtml(s.id)}" ${t.slot_id===s.id?'class="is-disabled" disabled':""}>
+        <span style="font-family:var(--mono);color:#9296bd;font-size:11px">${fmtSlotRange(s)}</span>
+        <span>${escapeHtml(s.label)}</span>
+      </button>`).join("");
+    const reorderUp   = `<button data-reorder="up"   ${planReorderEnabled(t,'up')?"":'class="is-disabled" disabled'}>↑ Mover para cima</button>`;
+    const reorderDown = `<button data-reorder="down" ${planReorderEnabled(t,'down')?"":'class="is-disabled" disabled'}>↓ Mover para baixo</button>`;
+    return `<div class="pt-popover" id="pt-popover" ${pos}>
+      <div class="pt-pop-head">Ações</div>
+      <button data-open-dur>⏱ Editar duração (${t.duration_min||0} min)</button>
+      <button data-open-assign>👥 Envolvidos (${planTaskAssigneeList(t).length})</button>
+      <button data-open-notes>📝 Anotações (${planTaskNotesCount(t.id)})</button>
+      ${reorderUp}
+      ${reorderDown}
+      <hr>
+      <div class="pt-pop-head">Mover para</div>
+      ${t.slot_id ? `<button data-move-pool>← Voltar ao pool</button>` : ""}
+      ${slotOpts || `<div style="font-size:11.5px;color:#9296bd;padding:6px;font-style:italic">Nenhum bloco disponível agora.</div>`}
+      <hr>
+      <button class="danger" data-pop-close>Fechar</button>
+    </div>`;
+  })();
+
+  // Modal de notas da tarefa
+  const notesModalHtml = (() => {
+    if(!openPlanNotesTid) return "";
+    const t = planTasks.find(x => x.id === openPlanNotesTid);
+    if(!t) return "";
+    const teamOptsN = TEAM.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+    const items = (planTaskNotes||[]).length
+      ? planTaskNotes.map(n => {
+          const dt = new Date(n.created_at);
+          const stamp = `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+          return `<div class="ptn-item">
+            <div class="ptn-author">${escapeHtml(n.author||"—")} · ${stamp}</div>
+            <div class="ptn-content">${escapeHtml(n.content||"")}</div>
+          </div>`;
+        }).join("")
+      : `<div class="ptn-empty">Nenhuma anotação ainda. Use o formulário abaixo.</div>`;
+    return `<div class="pt-notes-modal" id="pt-notes-modal">
+      <div class="ptn-card">
+        <h4>📝 ${escapeHtml(t.title)} <button data-notes-close>×</button></h4>
+        <div class="ptn-list" id="ptn-list">${items}</div>
+        <div class="ptn-form">
+          <div class="row">
+            <select id="ptn-author"><option value="">Autor…</option>${teamOptsN}</select>
+          </div>
+          <textarea id="ptn-content" rows="3" placeholder="O que aconteceu nessa atividade?"></textarea>
+          <div class="row" style="justify-content:flex-end">
+            <button id="ptn-save">Adicionar nota</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  })();
+
   root.innerHTML = `
     ${solutionHtml}
     <div class="plan-grid">
@@ -2109,9 +2284,22 @@ function renderPlan(){
         <ul class="deliv-list">${delivItems}</ul>
       </div>
     </div>
+    ${popoverHtml}
+    ${notesModalHtml}
   `;
 
   bindPlanHandlers();
+}
+
+function planReorderEnabled(t, dir){
+  const peers = planTasks
+    .filter(x => (x.slot_id||null) === (t.slot_id||null))
+    .sort((a,b) => (a.order_index||0)-(b.order_index||0));
+  const idx = peers.findIndex(x => x.id === t.id);
+  if(idx < 0) return false;
+  if(dir === "up")   return idx > 0;
+  if(dir === "down") return idx < peers.length - 1;
+  return false;
 }
 
 function bindPlanHandlers(){
@@ -2120,11 +2308,16 @@ function bindPlanHandlers(){
 
   // Form
   const newBtn = document.getElementById("plan-new");
-  if(newBtn) newBtn.addEventListener("click", ()=>{ planFormOpen = true; renderPlan(); });
+  if(newBtn) newBtn.addEventListener("click", ()=>{
+    planFormOpen = true;
+    planFormAssignees = [];
+    renderPlan();
+  });
   const fCancel = document.getElementById("pf-cancel");
   if(fCancel) fCancel.addEventListener("click", ()=>{
     planFormOpen = false;
-    planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"" };
+    planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"", stage_id:"" };
+    planFormAssignees = [];
     renderPlan();
   });
   ["pf-title","pf-desc","pf-owner","pf-dur","pf-deliv","pf-stage"].forEach(id=>{
@@ -2206,21 +2399,68 @@ function bindPlanHandlers(){
     });
   });
 
-  // Drag & drop
+  // Assignees no form (multi-seleção)
+  root.querySelectorAll("[data-pf-assign]").forEach(b=>{
+    b.addEventListener("click", e=>{
+      e.preventDefault();
+      const name = b.dataset.pfAssign;
+      const idx = planFormAssignees.indexOf(name);
+      if(idx >= 0) planFormAssignees.splice(idx,1);
+      else planFormAssignees.push(name);
+      renderPlan();
+    });
+  });
+
+  // Drag & drop hardening
   root.querySelectorAll(".ptask[draggable=true]").forEach(el=>{
     el.addEventListener("dragstart", e=>{
-      e.dataTransfer.setData("text/plain", el.dataset.tid);
-      el.classList.add("drag");
+      try{
+        e.dataTransfer.setData("text/plain", el.dataset.tid);
+        e.dataTransfer.effectAllowed = "move";
+      }catch(err){}
+      el.classList.add("drag-source");
+      window.__planDragTid = el.dataset.tid; // fallback (alguns browsers bloqueiam getData no dragover)
     });
-    el.addEventListener("dragend", ()=>el.classList.remove("drag"));
+    el.addEventListener("dragend", ()=>{
+      el.classList.remove("drag-source");
+      window.__planDragTid = null;
+      root.querySelectorAll(".insert-before,.insert-after,.dragover,.drop-blocked")
+        .forEach(x => x.classList.remove("insert-before","insert-after","dragover","drop-blocked"));
+    });
+    // marcar pos de inserção quando dragover passa em cima de outra peça (mesmo container)
+    el.addEventListener("dragover", e=>{
+      e.preventDefault();
+      try{ e.dataTransfer.dropEffect = "move"; }catch(err){}
+      const rect = el.getBoundingClientRect();
+      const above = (e.clientY - rect.top) < rect.height/2;
+      root.querySelectorAll(".insert-before,.insert-after").forEach(x => x.classList.remove("insert-before","insert-after"));
+      el.classList.add(above ? "insert-before" : "insert-after");
+    });
+    el.addEventListener("drop", e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const srcTid = e.dataTransfer.getData("text/plain") || window.__planDragTid;
+      if(!srcTid || srcTid === el.dataset.tid){
+        el.classList.remove("insert-before","insert-after");
+        return;
+      }
+      const target = planTasks.find(x => x.id === el.dataset.tid);
+      if(!target) return;
+      const rect = el.getBoundingClientRect();
+      const above = (e.clientY - rect.top) < rect.height/2;
+      const insertIdx = (target.order_index || 0) + (above ? 0 : 1);
+      el.classList.remove("insert-before","insert-after");
+      movePlanTaskToIndex(srcTid, target.slot_id || null, insertIdx);
+    });
   });
-  // Drop em qualquer pslot que NÃO seja deadline.
-  // Locked ou past = feedback visual de bloqueio e movePlanTask rejeita.
+
+  // Drop em qualquer pslot que NÃO seja deadline (com hardening)
   root.querySelectorAll(".pslot").forEach(slot=>{
     const stype = slot.dataset.stype;
     if(stype === "deadline") return;
     slot.addEventListener("dragover", e=>{
       e.preventDefault();
+      try{ e.dataTransfer.dropEffect = "move"; }catch(err){}
       const locked = slot.dataset.slocked === "1";
       const past   = slot.dataset.spast === "1";
       if(locked || past){ slot.classList.add("drop-blocked"); }
@@ -2234,7 +2474,7 @@ function bindPlanHandlers(){
       e.preventDefault();
       slot.classList.remove("dragover");
       slot.classList.remove("drop-blocked");
-      const tid = e.dataTransfer.getData("text/plain");
+      const tid = e.dataTransfer.getData("text/plain") || window.__planDragTid;
       if(tid) movePlanTask(tid, slot.dataset.sid);
     });
   });
@@ -2246,13 +2486,16 @@ function bindPlanHandlers(){
       togglePlanSlotLock(btn.dataset.lockSlot);
     });
   });
-  // Drop de volta no pool (qualquer área do plan-pool)
-  const pool = document.getElementById("plan-pool");
-  if(pool){
-    pool.addEventListener("dragover", e=>e.preventDefault());
-    pool.addEventListener("drop", e=>{
+  // Drop de volta no pool
+  const poolEl = document.getElementById("plan-pool");
+  if(poolEl){
+    poolEl.addEventListener("dragover", e=>{
       e.preventDefault();
-      const tid = e.dataTransfer.getData("text/plain");
+      try{ e.dataTransfer.dropEffect = "move"; }catch(err){}
+    });
+    poolEl.addEventListener("drop", e=>{
+      e.preventDefault();
+      const tid = e.dataTransfer.getData("text/plain") || window.__planDragTid;
       if(tid) movePlanTask(tid, null);
     });
   }
@@ -2268,10 +2511,151 @@ function bindPlanHandlers(){
     });
   });
 
+  // ⋮ menu (fallback clicável)
+  root.querySelectorAll("[data-tmore]").forEach(b=>{
+    b.addEventListener("click", e=>{
+      e.stopPropagation();
+      const tid = b.dataset.tmore;
+      if(openPlanMenu && openPlanMenu.tid === tid && openPlanMenu.mode === "menu"){
+        openPlanMenu = null;
+      } else {
+        openPlanMenu = { tid, anchor: b.getBoundingClientRect(), mode: "menu" };
+      }
+      renderPlan();
+    });
+  });
+  // Editar duração inline
+  root.querySelectorAll("[data-tdur]").forEach(b=>{
+    b.addEventListener("click", e=>{
+      e.stopPropagation();
+      openPlanMenu = { tid: b.dataset.tdur, anchor: b.getBoundingClientRect(), mode: "dur" };
+      renderPlan();
+    });
+  });
+  // Abrir modal de notas via badge na peça
+  root.querySelectorAll("[data-tnotes]").forEach(b=>{
+    b.addEventListener("click", e=>{
+      e.stopPropagation();
+      openPlanTaskNotes(b.dataset.tnotes);
+    });
+  });
+
+  // Handlers DENTRO do popover
+  const pop = document.getElementById("pt-popover");
+  if(pop){
+    pop.addEventListener("click", e=>e.stopPropagation());
+    const closeBtn = pop.querySelector("[data-pop-close]");
+    if(closeBtn) closeBtn.addEventListener("click", ()=>{ openPlanMenu = null; renderPlan(); });
+
+    // dur mode
+    pop.querySelectorAll("[data-dur-delta]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const inp = document.getElementById("pt-dur-input");
+        const cur = parseInt(inp.value||"0",10) || 0;
+        const next = Math.max(5, cur + parseInt(btn.dataset.durDelta,10));
+        inp.value = next;
+      });
+    });
+    const durSave = pop.querySelector("[data-dur-save]");
+    if(durSave) durSave.addEventListener("click", async ()=>{
+      const inp = document.getElementById("pt-dur-input");
+      const val = Math.max(5, parseInt(inp.value||"0",10) || 0);
+      await updatePlanTaskDuration(openPlanMenu.tid, val);
+      openPlanMenu = null;
+      renderPlan();
+    });
+
+    // menu mode
+    pop.querySelectorAll("[data-move-slot]").forEach(b=>{
+      b.addEventListener("click", async ()=>{
+        const tid = openPlanMenu.tid;
+        openPlanMenu = null;
+        await movePlanTask(tid, b.dataset.moveSlot);
+      });
+    });
+    const movePool = pop.querySelector("[data-move-pool]");
+    if(movePool) movePool.addEventListener("click", async ()=>{
+      const tid = openPlanMenu.tid;
+      openPlanMenu = null;
+      await movePlanTask(tid, null);
+    });
+    pop.querySelectorAll("[data-reorder]").forEach(b=>{
+      b.addEventListener("click", async ()=>{
+        const tid = openPlanMenu.tid;
+        const dir = b.dataset.reorder;
+        openPlanMenu = null;
+        await reorderPlanTask(tid, dir);
+      });
+    });
+    const openDur = pop.querySelector("[data-open-dur]");
+    if(openDur) openDur.addEventListener("click", ()=>{
+      openPlanMenu = { ...openPlanMenu, mode:"dur" };
+      renderPlan();
+    });
+    const openAssign = pop.querySelector("[data-open-assign]");
+    if(openAssign) openAssign.addEventListener("click", ()=>{
+      openPlanMenu = { ...openPlanMenu, mode:"assign" };
+      renderPlan();
+    });
+    const openNotes = pop.querySelector("[data-open-notes]");
+    if(openNotes) openNotes.addEventListener("click", ()=>{
+      const tid = openPlanMenu.tid;
+      openPlanMenu = null;
+      openPlanTaskNotes(tid);
+    });
+
+    // assign mode
+    pop.querySelectorAll("[data-pt-assign]").forEach(chip=>{
+      chip.addEventListener("click", async ()=>{
+        const name = chip.dataset.ptAssign;
+        const t = planTasks.find(x => x.id === openPlanMenu.tid);
+        if(!t) return;
+        const list = Array.isArray(t.assignees) ? [...t.assignees] : [];
+        const idx = list.indexOf(name);
+        if(idx >= 0) list.splice(idx,1);
+        else list.push(name);
+        await updatePlanTaskAssignees(t.id, list);
+      });
+    });
+  }
+
+  // Modal de notas
+  const notesModal = document.getElementById("pt-notes-modal");
+  if(notesModal){
+    const card = notesModal.querySelector(".ptn-card");
+    notesModal.addEventListener("click", e=>{
+      if(e.target === notesModal){ closePlanTaskNotes(); }
+    });
+    if(card) card.addEventListener("click", e=>e.stopPropagation());
+    const closeBtn = notesModal.querySelector("[data-notes-close]");
+    if(closeBtn) closeBtn.addEventListener("click", closePlanTaskNotes);
+    const saveBtn = document.getElementById("ptn-save");
+    if(saveBtn) saveBtn.addEventListener("click", addPlanTaskNote);
+  }
+
   // Toggle deliverable
   root.querySelectorAll(".deliv-item").forEach(li=>{
     li.addEventListener("click", ()=>toggleDeliverable(li.dataset.did));
   });
+
+  // Click no body fecha o popover (mas não fecha o modal de notas)
+  if(openPlanMenu && !window.__planPopoverDocBound){
+    window.__planPopoverDocBound = true;
+    document.addEventListener("click", planClosePopoverOnOutside, true);
+  } else if(!openPlanMenu && window.__planPopoverDocBound){
+    window.__planPopoverDocBound = false;
+    document.removeEventListener("click", planClosePopoverOnOutside, true);
+  }
+}
+
+function planClosePopoverOnOutside(e){
+  const pop = document.getElementById("pt-popover");
+  if(!pop) return;
+  if(pop.contains(e.target)) return;
+  if(e.target.closest("[data-tmore]")) return;
+  if(e.target.closest("[data-tdur]")) return;
+  openPlanMenu = null;
+  renderPlan();
 }
 
 async function createPlanTask(){
@@ -2290,13 +2674,133 @@ async function createPlanTask(){
     slot_id: null,
     order_index: order,
     status: "todo",
+    assignees: planFormAssignees || [],
     updated_at: new Date().toISOString()
   };
   const { error } = await sb.from("planning_tasks").insert(payload);
   if(error){ alert("Erro ao criar atividade: " + error.message); return; }
   planFormOpen = false;
   planFormDraft = { title:"", description:"", owner:"", duration_min:30, deliverable:"", stage_id:"" };
+  planFormAssignees = [];
   await fetchPlanTasks();
+}
+
+async function movePlanTaskToIndex(taskId, slotId, insertIdx){
+  const task = planTasks.find(t => t.id === taskId);
+  if(!task) return;
+  if(slotId){
+    const slot = planSlots.find(s => s.id === slotId);
+    if(!slot) return;
+    if(slot.type === "deadline"){ alert("Deadline da entrega — não recebe tarefas."); return; }
+    if(slot.locked){ alert("Bloco bloqueado — desbloqueie para alocar tarefas."); return; }
+    if(new Date(slot.end_at).getTime() < Date.now()){ alert("Bloco já encerrado — escolha um bloco futuro."); return; }
+  }
+  // Reordena lista do destino
+  const peers = planTasks
+    .filter(t => (t.slot_id||null) === (slotId||null) && t.id !== taskId)
+    .sort((a,b) => (a.order_index||0)-(b.order_index||0));
+  const safeIdx = Math.max(0, Math.min(peers.length, insertIdx));
+  peers.splice(safeIdx, 0, task);
+
+  // Aplica order_index sequencial e marca task com novo slot
+  const updates = peers.map((t, i) => ({ id: t.id, order_index: i }));
+  task.slot_id = slotId || null;
+  updates.forEach(u => { const x = planTasks.find(p => p.id === u.id); if(x) x.order_index = u.order_index; });
+  renderPlan();
+
+  // Persiste: 1) tarefa movida com slot_id + order_index; 2) reorder dos peers
+  const moved = updates.find(u => u.id === taskId);
+  const mvPayload = { slot_id: slotId || null, order_index: moved ? moved.order_index : 0, updated_at: new Date().toISOString() };
+  const { error } = await sb.from("planning_tasks").update(mvPayload).eq("id", taskId);
+  if(error){ alert("Erro ao mover: " + error.message); fetchPlanTasks(); return; }
+  // peers que não são o item movido
+  for(const u of updates){
+    if(u.id === taskId) continue;
+    const { error: e2 } = await sb.from("planning_tasks")
+      .update({ order_index: u.order_index, updated_at: new Date().toISOString() })
+      .eq("id", u.id);
+    if(e2){ console.warn("[reorder peer]", e2); }
+  }
+}
+
+async function reorderPlanTask(taskId, dir){
+  const task = planTasks.find(t => t.id === taskId);
+  if(!task) return;
+  const peers = planTasks
+    .filter(t => (t.slot_id||null) === (task.slot_id||null))
+    .sort((a,b) => (a.order_index||0)-(b.order_index||0));
+  const idx = peers.findIndex(p => p.id === taskId);
+  if(idx < 0) return;
+  const targetIdx = dir === "up" ? idx-1 : idx+1;
+  if(targetIdx < 0 || targetIdx >= peers.length) return;
+  await movePlanTaskToIndex(taskId, task.slot_id || null, targetIdx);
+}
+
+async function updatePlanTaskDuration(taskId, minutes){
+  const t = planTasks.find(x => x.id === taskId);
+  if(!t) return;
+  const val = Math.max(5, parseInt(minutes,10) || 0);
+  t.duration_min = val;
+  renderPlan();
+  const { error } = await sb.from("planning_tasks")
+    .update({ duration_min: val, updated_at: new Date().toISOString() }).eq("id", taskId);
+  if(error){ alert("Erro ao salvar duração: " + error.message); fetchPlanTasks(); }
+}
+
+async function updatePlanTaskAssignees(taskId, list){
+  const t = planTasks.find(x => x.id === taskId);
+  if(!t) return;
+  t.assignees = list || [];
+  renderPlan();
+  const { error } = await sb.from("planning_tasks")
+    .update({ assignees: list || [], updated_at: new Date().toISOString() }).eq("id", taskId);
+  if(error){ alert("Erro ao salvar envolvidos: " + error.message); fetchPlanTasks(); }
+}
+
+async function openPlanTaskNotes(tid){
+  openPlanNotesTid = tid;
+  planTaskNotes = [];
+  renderPlan();
+  // SELECT direto por planning_task_id (padrão do fix de notas que funcionou)
+  const { data, error } = await sb.from("activity_notes")
+    .select("*").eq("planning_task_id", tid).order("created_at", { ascending: false });
+  if(error){
+    alert("Erro ao carregar notas: " + error.message);
+    return;
+  }
+  planTaskNotes = data || [];
+  renderPlan();
+}
+
+function closePlanTaskNotes(){
+  openPlanNotesTid = null;
+  planTaskNotes = [];
+  renderPlan();
+}
+
+async function addPlanTaskNote(){
+  const tid = openPlanNotesTid;
+  if(!tid) return;
+  const author  = (document.getElementById("ptn-author")||{}).value || "";
+  const content = ((document.getElementById("ptn-content")||{}).value || "").trim();
+  if(!author){ alert("Escolha um autor pra nota."); return; }
+  if(!content){ alert("Escreve algo na nota antes de salvar."); return; }
+  const payload = {
+    planning_task_id: tid,
+    card_id: null,
+    sprint_id: null,
+    author, content
+  };
+  const { error } = await sb.from("activity_notes").insert(payload);
+  if(error){ alert("Erro ao salvar nota: " + error.message); return; }
+  // Recarrega notas do banco
+  const { data, error: e2 } = await sb.from("activity_notes")
+    .select("*").eq("planning_task_id", tid).order("created_at", { ascending: false });
+  if(e2){ alert("Nota salva, mas erro ao recarregar: " + e2.message); return; }
+  planTaskNotes = data || [];
+  // Atualiza allNotes pra refletir contagem na peça
+  if(typeof fetchNotes === "function") fetchNotes();
+  renderPlan();
 }
 
 async function savePlanStage(){
