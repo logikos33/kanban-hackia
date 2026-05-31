@@ -503,7 +503,7 @@
       </div>
       <span class="conn" id="conn">● conectando…</span>
       <button class="btn" id="reset">↺ Voltar tudo ao backlog</button>
-      <button class="btn" id="reseed" title="Apaga tudo e planta o backlog do MVP">🔥 Re-seed MVP</button>
+      <button class="btn" id="reseed" title="Apaga TODOS os cards e replanta o MVP — exige digitar APAGAR TUDO">🧨 Apagar tudo</button>
       <div class="alert" id="alert">Must no backlog: —</div>
     </div>
   </div>
@@ -543,33 +543,44 @@
 </div>
 
 <div class="wrap">
-  <div class="addbar">
-    <div class="atitle">➕ Adicionar feature ao backlog</div>
+  <div class="addbar" style="border:2px solid var(--brand);box-shadow:0 4px 18px rgba(124,131,255,.18)">
+    <div class="atitle" style="font-size:15px">➕ Nova tarefa no backlog</div>
     <form class="addform" id="addform">
       <div class="field grow">
-        <label for="ftext">Ideia / descrição da feature</label>
+        <label for="ftext">Título <span style="color:var(--danger,#ff6b6b)">*</span></label>
         <input type="text" id="ftext" placeholder="Ex.: gerar selo de QR code com link do empreendimento" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="fowner">Responsável <span style="color:var(--danger,#ff6b6b)">*</span></label>
+        <select id="fowner" required><option value="">Quem assume…</option></select>
       </div>
       <div class="field">
         <label for="flane">Raia</label>
         <select id="flane"></select>
       </div>
       <div class="field">
-        <label for="fm">Prioridade</label>
-        <select id="fm">
-          <option value="must">Must</option>
-          <option value="should" selected>Should</option>
-          <option value="could">Could</option>
-          <option value="wont">Won't (roadmap)</option>
+        <label for="fm">MoSCoW <span style="color:var(--danger,#ff6b6b)">*</span></label>
+        <select id="fm" required>
+          <option value="">Prioridade…</option>
+          <option value="must">Must — sem isto não há entrega</option>
+          <option value="should">Should — importante, mas sobrevive sem</option>
+          <option value="could">Could — desejável (opcional)</option>
+          <option value="wont">Won't — fora do escopo agora</option>
         </select>
       </div>
-      <button type="submit" class="addbtn">Adicionar</button>
+      <div class="field grow" style="flex-basis:100%">
+        <label for="fdesc">Descrição breve (opcional)</label>
+        <textarea id="fdesc" rows="2" placeholder="Detalhes / aceite / observações" style="font-family:inherit;font-size:13px;background:var(--cell,#1a1d3a);border:1px solid var(--line,#2a2e5a);color:#eef0ff;padding:7px 10px;border-radius:8px;outline:none;resize:vertical"></textarea>
+      </div>
+      <button type="submit" class="addbtn">＋ Adicionar tarefa</button>
+      <div id="addform-err" style="flex-basis:100%;color:#ff6b6b;font-size:12.5px;font-weight:700;display:none"></div>
     </form>
   </div>
 </div>
 
 <div class="wrap">
   <div id="assignee-filter"></div>
+  <div id="moscow-filter" style="margin-top:8px"></div>
 </div>
 
 <div class="boardwrap">
@@ -644,6 +655,11 @@
       <span>· Status <b id="md-status">—</b></span>
     </div>
 
+    <div id="md-completion" style="display:none;background:rgba(70,230,160,.08);border:1px solid rgba(70,230,160,.35);border-radius:9px;padding:9px 11px;margin-top:10px">
+      <div style="font-size:11.5px;font-weight:800;color:#46e6a0;letter-spacing:.4px">✅ CONCLUÍDO POR <span id="md-completed-by">—</span> · <span id="md-completed-at">—</span></div>
+      <div id="md-completion-just" style="font-size:13px;color:#eef0ff;margin-top:5px;white-space:pre-wrap"></div>
+    </div>
+
     <label class="flbl" for="md-titletxt">Título</label>
     <input type="text" id="md-titletxt">
 
@@ -677,8 +693,34 @@
   </div>
 </div>
 
+<!-- MODAL DE CONCLUSÃO — exige justificativa + responsável -->
+<div class="modal-bg" id="completebg">
+  <div class="modal" id="completemodal" style="max-width:560px">
+    <div class="mhead">
+      <div class="ml"><h3>✅ Concluir tarefa</h3></div>
+      <button class="mclose" id="cmp-close" title="Fechar (cancela)">✕</button>
+    </div>
+    <div class="row"><span>Tarefa <b id="cmp-cardtitle">—</b></span></div>
+    <p style="font-size:13px;color:#cdd0ee;margin:8px 0 0">Pra mover pra <b>Feito</b>, registre o que foi concluído e quem assina.</p>
+
+    <label class="flbl" for="cmp-just">O que foi concluído? <span style="color:#ff6b6b">*</span></label>
+    <textarea id="cmp-just" rows="4" placeholder="Descreve o entregável real: o que ficou pronto, link, evidência…" style="font-family:inherit;font-size:13px;background:var(--cell,#1a1d3a);border:1px solid var(--line,#2a2e5a);color:#eef0ff;padding:9px 11px;border-radius:9px;outline:none;width:100%;resize:vertical"></textarea>
+
+    <label class="flbl" for="cmp-by">Responsável pela conclusão <span style="color:#ff6b6b">*</span></label>
+    <select id="cmp-by" style="font-family:inherit;font-size:13px;background:var(--cell,#1a1d3a);border:1px solid var(--line,#2a2e5a);color:#eef0ff;padding:9px 11px;border-radius:9px;outline:none;width:100%">
+      <option value="">Quem assina a conclusão…</option>
+    </select>
+
+    <div class="mfoot" style="margin-top:12px">
+      <span class="savestate" id="cmp-state">—</span>
+      <button class="save-btn" id="cmp-cancel" style="background:#3a3f6a;margin-right:8px">Cancelar</button>
+      <button class="save-btn" id="cmp-confirm">✅ Concluir</button>
+    </div>
+  </div>
+</div>
+
 <footer>
-  Arraste os cards entre as colunas. <b>Regra de ouro:</b> nenhum card sobe enquanto houver Must no Backlog. <b>Clique</b> em um card para editar descrição e responsáveis. O estado é compartilhado pelo time em tempo real (Supabase).
+  Arraste os cards entre as colunas. <b>Regra de ouro:</b> nenhum card sobe enquanto houver Must no Backlog. <b>Clique</b> em um card para editar descrição e responsáveis. <b>Concluir</b> exige justificativa + responsável. O estado é compartilhado pelo time em tempo real (Supabase).
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -774,10 +816,32 @@ function saveAssigneeFilter(){
 function cardAssigneesArray(c){
   return Array.isArray(c.assignees) ? c.assignees : [];
 }
-function cardMatchesFilter(c){
+function cardMatchesAssignee(c){
   if(assigneeFilter.length === 0) return true;
   const arr = cardAssigneesArray(c);
   return assigneeFilter.some(m => arr.includes(m));
+}
+
+// FILTRO MOSCOW (persistido em localStorage; sobrevive a realtime/refresh)
+let moscowFilter = [];
+const MOSCOW_LS_KEY = "kanban_moscow_filter_v1";
+function loadMoscowFilter(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(MOSCOW_LS_KEY) || "[]");
+    if(Array.isArray(saved)) moscowFilter = saved.filter(x => ["must","should","could","wont"].includes(x));
+  } catch(e){ moscowFilter = []; }
+}
+function saveMoscowFilter(){
+  try { localStorage.setItem(MOSCOW_LS_KEY, JSON.stringify(moscowFilter)); } catch(e){}
+}
+function cardMatchesMoscow(c){
+  if(moscowFilter.length === 0) return true;
+  return moscowFilter.includes(c.moscow);
+}
+
+// AND entre os dois filtros
+function cardMatchesFilter(c){
+  return cardMatchesAssignee(c) && cardMatchesMoscow(c);
 }
 function memberColor(name){
   const palette = {
@@ -811,7 +875,30 @@ function renderAssigneeFilter(){
   root.innerHTML = `<div class="filter-bar"><span class="ftag">👥 Filtrar por responsável</span><div class="afchips">${allChip}${memberChips}</div>${clear}</div>`;
 }
 
+function renderMoscowFilter(){
+  const root = document.getElementById("moscow-filter");
+  if(!root) return;
+  const total = cards.length;
+  const allActive = moscowFilter.length === 0;
+  const allChip = `<button class="afchip${allActive?" on":""}" data-mf="*">📋 Todos · ${total}</button>`;
+  const levels = [
+    {k:"must",   lbl:"Must",   dot:"var(--ok)"},
+    {k:"should", lbl:"Should", dot:"var(--brand)"},
+    {k:"could",  lbl:"Could",  dot:"var(--accent)"},
+    {k:"wont",   lbl:"Won't",  dot:"#7a809f"}
+  ];
+  const lvlChips = levels.map(L => {
+    const count = cards.filter(c => c.moscow === L.k).length;
+    const active = moscowFilter.includes(L.k);
+    return `<button class="afchip${active?" on":""}" data-mf="${L.k}"><span class="dot" style="background:${L.dot}"></span><span>${L.lbl} · ${count}</span></button>`;
+  }).join("");
+  const clear = moscowFilter.length
+    ? `<button class="afclear" data-mf="*">✕ Limpar filtro</button>` : "";
+  root.innerHTML = `<div class="filter-bar"><span class="ftag">🎯 Filtrar por MoSCoW</span><div class="afchips">${allChip}${lvlChips}</div>${clear}</div>`;
+}
+
 loadAssigneeFilter();
+loadMoscowFilter();
 
 function setStatus(ok, msg){
   const el = document.getElementById("conn");
@@ -858,6 +945,7 @@ async function autoSeedIfEmpty(){
 
 function render(){
   renderAssigneeFilter();
+  renderMoscowFilter();
   board.innerHTML = "";
   const corner = document.createElement("div");
   corner.className = "colhead corner";
@@ -895,6 +983,8 @@ function render(){
         card.className = `ccard m-${c.moscow}`;
         card.draggable = true;
         card.dataset.cardid = c.id;
+        // borda à esquerda na cor da raia — pista visual da swimlane
+        card.style.borderLeft = `5px solid ${lane.color || "#7c83ff"}`;
         const del = c.is_custom ? `<span class="del" data-del="${c.id}" title="Remover">✕</span>` : "";
         const assignees = cardAssigneesArray(c);
         const avatars = assignees.length
@@ -926,12 +1016,113 @@ function render(){
 
 async function moveCard(id, lane, status){
   const c = cardById(id); if(!c) return;
+  const prevStatus = c.status;
+  const prevLane   = c.lane;
+  // Entrando em Feito a partir de outro status: precisa justificativa + responsável.
+  // Grandfathering: se já estava em feito, não cobra (só se está entrando agora).
+  if(status === "feito" && prevStatus !== "feito"){
+    openCompletionModal(c, lane, prevStatus, prevLane);
+    return;
+  }
+  // Saindo de Feito: limpa campos de conclusão.
+  const clearComp = (prevStatus === "feito" && status !== "feito");
   c.lane = lane; c.status = status;            // atualização otimista
+  if(clearComp){
+    c.completion_justification = null;
+    c.completed_by = null;
+    c.completed_at = null;
+  }
   render();
-  const { error } = await sb.from("kanban_cards")
-    .update({lane, status, updated_at:new Date().toISOString()}).eq("id", id);
-  if(error){ setStatus(false, error.message); fetchCards(); }
+  const payload = {lane, status, updated_at:new Date().toISOString()};
+  if(clearComp){
+    payload.completion_justification = null;
+    payload.completed_by = null;
+    payload.completed_at = null;
+  }
+  let { error } = await sb.from("kanban_cards").update(payload).eq("id", id);
+  if(error && /column .* does not exist/i.test(error.message)){
+    // fallback: sem campos de conclusão (banco não migrado)
+    const { completion_justification, completed_by, completed_at, ...lean } = payload;
+    ({ error } = await sb.from("kanban_cards").update(lean).eq("id", id));
+  }
+  if(error){ setStatus(false, error.message); alert("Erro ao mover: " + error.message); fetchCards(); }
 }
+
+// ============================================================
+// MODAL DE CONCLUSÃO — força justificativa + responsável
+// ============================================================
+let pendingCompletion = null; // { card, lane, prevStatus, prevLane }
+
+function openCompletionModal(card, newLane, prevStatus, prevLane){
+  pendingCompletion = { card, lane:newLane, prevStatus, prevLane };
+  const bg  = document.getElementById("completebg");
+  const ttl = document.getElementById("cmp-cardtitle");
+  const just = document.getElementById("cmp-just");
+  const by  = document.getElementById("cmp-by");
+  const st  = document.getElementById("cmp-state");
+  if(ttl) ttl.textContent = card.title || "—";
+  if(just) just.value = "";
+  if(by){
+    by.innerHTML = "<option value=''>Quem assina a conclusão…</option>" +
+      TEAM.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("");
+  }
+  if(st){ st.className = "savestate"; st.textContent = "—"; }
+  if(bg) bg.classList.add("on");
+  setTimeout(()=>{ if(just) just.focus(); }, 50);
+}
+
+function closeCompletionModal(){
+  document.getElementById("completebg").classList.remove("on");
+  // Reverte: não altera nada no banco; o card permanece no status anterior
+  // (não houve UPDATE antes da confirmação).
+  pendingCompletion = null;
+  render();
+}
+
+async function confirmCompletion(){
+  if(!pendingCompletion) return;
+  const { card, lane } = pendingCompletion;
+  const just = (document.getElementById("cmp-just").value || "").trim();
+  const by   = document.getElementById("cmp-by").value;
+  const st   = document.getElementById("cmp-state");
+  if(!just){ if(st){ st.className="savestate err"; st.textContent="Falta a justificativa."; } return; }
+  if(!by){   if(st){ st.className="savestate err"; st.textContent="Falta o responsável."; } return; }
+  const completedAt = new Date().toISOString();
+  // optimistic
+  card.lane = lane; card.status = "feito";
+  card.completion_justification = just;
+  card.completed_by = by;
+  card.completed_at = completedAt;
+  if(st){ st.className="savestate"; st.textContent="salvando…"; }
+  render();
+  let { error } = await sb.from("kanban_cards").update({
+    lane, status:"feito",
+    completion_justification: just,
+    completed_by: by,
+    completed_at: completedAt,
+    updated_at: completedAt
+  }).eq("id", card.id);
+  if(error && /column .* does not exist/i.test(error.message)){
+    if(st){ st.className="savestate err"; st.textContent="⚠ banco sem colunas completion_*: rode a migration."; }
+    fetchCards();
+    return;
+  }
+  if(error){
+    if(st){ st.className="savestate err"; st.textContent="erro: " + error.message; }
+    alert("Erro ao concluir: " + error.message);
+    fetchCards();
+    return;
+  }
+  pendingCompletion = null;
+  document.getElementById("completebg").classList.remove("on");
+}
+
+document.getElementById("cmp-close").addEventListener("click", closeCompletionModal);
+document.getElementById("cmp-cancel").addEventListener("click", closeCompletionModal);
+document.getElementById("cmp-confirm").addEventListener("click", confirmCompletion);
+document.getElementById("completebg").addEventListener("click", e=>{
+  if(e.target.id === "completebg") closeCompletionModal();
+});
 
 function updateAlert(){
   const mustBacklog = cards.filter(c=>c.moscow==="must" && c.status==="backlog").length;
@@ -957,19 +1148,66 @@ function renderLaneSelect(){
 }
 renderLaneSelect();
 
-// adicionar feature
+// select de responsáveis no addform (re-renderizado quando TEAM muda)
+function renderOwnerSelect(){
+  const sel = document.getElementById("fowner");
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = "<option value=''>Quem assume…</option>";
+  TEAM.forEach(n => { const o=document.createElement("option"); o.value=n; o.textContent=n; sel.appendChild(o); });
+  if(cur && TEAM.includes(cur)) sel.value = cur;
+}
+renderOwnerSelect();
+
+// adicionar tarefa — exige Título + Responsável + MoSCoW
 document.getElementById("addform").addEventListener("submit", async e=>{
   e.preventDefault();
+  const errEl = document.getElementById("addform-err");
   const input = document.getElementById("ftext");
-  const t = input.value.trim(); if(!t) return;
+  const t = input.value.trim();
   const lane = document.getElementById("flane").value;
+  const owner = document.getElementById("fowner").value;
   const m = document.getElementById("fm").value;
+  const desc = (document.getElementById("fdesc").value || "").trim();
+
+  const missing = [];
+  if(!t) missing.push("Título");
+  if(!owner) missing.push("Responsável");
+  if(!m) missing.push("MoSCoW");
+  if(missing.length){
+    if(errEl){ errEl.textContent = "Falta preencher: " + missing.join(", ") + "."; errEl.style.display = ""; }
+    return;
+  }
+  if(errEl){ errEl.textContent = ""; errEl.style.display = "none"; }
+
   const id = "x" + Date.now().toString(36);
-  input.value = ""; input.focus();
-  const row = {id, lane, moscow:m, title:t, status:"backlog", is_custom:true, position:9999, updated_at:new Date().toISOString()};
+  const row = {
+    id, lane, moscow:m, title:t,
+    status:"backlog", is_custom:true, position:9999,
+    description: desc || null,
+    assignees: [owner],
+    updated_at: new Date().toISOString()
+  };
+  // optimistic
   cards.push(row); render(); renderSchedule();
-  const { error } = await sb.from("kanban_cards").insert(row);
-  if(error){ setStatus(false, error.message); fetchCards(); }
+  let { error } = await sb.from("kanban_cards").insert(row);
+  if(error && /column .* does not exist/i.test(error.message)){
+    // fallback se faltar description/assignees (não deveria mais — schema atualizado)
+    const { description, assignees, ...lean } = row;
+    ({ error } = await sb.from("kanban_cards").insert(lean));
+  }
+  if(error){
+    setStatus(false, error.message);
+    if(errEl){ errEl.textContent = "Erro ao salvar: " + error.message; errEl.style.display = ""; }
+    fetchCards();
+    return;
+  }
+  // limpa
+  input.value = "";
+  document.getElementById("fdesc").value = "";
+  document.getElementById("fowner").value = "";
+  document.getElementById("fm").value = "";
+  input.focus();
 });
 
 // filtro por responsável
@@ -985,6 +1223,22 @@ document.getElementById("assignee-filter").addEventListener("click", e=>{
       : [...assigneeFilter, v];
   }
   saveAssigneeFilter();
+  render();
+});
+
+// filtro MoSCoW (multi-OR, combina por AND com o de responsável)
+document.getElementById("moscow-filter").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-mf]");
+  if(!btn) return;
+  const v = btn.dataset.mf;
+  if(v === "*"){
+    moscowFilter = [];
+  } else {
+    moscowFilter = moscowFilter.includes(v)
+      ? moscowFilter.filter(x => x !== v)
+      : [...moscowFilter, v];
+  }
+  saveMoscowFilter();
   render();
 });
 
@@ -1025,14 +1279,14 @@ document.getElementById("reset").addEventListener("click", async ()=>{
 // re-seed: APAGA tudo e planta o backlog do MVP "Combinado Não Sai Caro"
 document.getElementById("reseed").addEventListener("click", async ()=>{
   const ok = confirm(
-    "⚠ ATENÇÃO — Re-seed do MVP\n\n" +
-    "Isto VAI APAGAR todos os cards atuais (inclusive os adicionados pelo time) e plantar o backlog do MVP \"Combinado Não Sai Caro\" do zero.\n\n" +
+    "⚠ ATENÇÃO — APAGAR TUDO\n\n" +
+    "Isto VAI APAGAR todos os cards atuais (inclusive os adicionados pelo time) e replantar o backlog do MVP \"Combinado Não Sai Caro\" do zero.\n\n" +
     "Também vai apagar os timestamps do cronograma (started_at / done_at).\n\n" +
     "Tem certeza?"
   );
   if(!ok) return;
-  const really = prompt("Para confirmar, digite RESET MVP:");
-  if(really !== "RESET MVP"){ alert("Cancelado."); return; }
+  const really = prompt("Para confirmar, digite EXATAMENTE: APAGAR TUDO");
+  if(really !== "APAGAR TUDO"){ alert("Cancelado — texto não conferiu."); return; }
 
   // 1) limpa cards
   let r = await sb.from("kanban_cards").delete().neq("id","__none__");
@@ -1104,6 +1358,7 @@ async function fetchTeam(){
     TEAM = data.map(r=>r.name);
   }
   renderSettings();
+  if(typeof renderOwnerSelect === "function") renderOwnerSelect();
 }
 
 async function fetchLanes(){
@@ -1303,6 +1558,21 @@ function openModal(id){
   mdStatus.textContent = col ? col.label : c.status;
   mdTitleTxt.value = c.title || "";
   mdDesc.value = c.description || "";
+  // Bloco de conclusão (visível só se há dados de conclusão)
+  const cmpBox = document.getElementById("md-completion");
+  if(cmpBox){
+    if(c.status === "feito" && (c.completion_justification || c.completed_by)){
+      document.getElementById("md-completed-by").textContent = c.completed_by || "—";
+      const dt = c.completed_at ? new Date(c.completed_at) : null;
+      document.getElementById("md-completed-at").textContent = dt
+        ? `${pad(dt.getDate())}/${pad(dt.getMonth()+1)} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`
+        : "—";
+      document.getElementById("md-completion-just").textContent = c.completion_justification || "(sem justificativa)";
+      cmpBox.style.display = "";
+    } else {
+      cmpBox.style.display = "none";
+    }
+  }
   const sel = new Set(Array.isArray(c.assignees) ? c.assignees : []);
   mdWho.innerHTML = TEAM.map(p =>
     `<button type="button" class="who-btn ${sel.has(p)?"on":""}" data-p="${p}">${p}</button>`
@@ -1996,6 +2266,9 @@ function renderPlanTaskHtml(t, draggable){
 function renderPlan(){
   const root = document.getElementById("view-plan-body");
   if(!root) return;
+  // anti-race: não re-renderiza enquanto um drag está em andamento
+  // (impede que realtime do Supabase mate o DOM do elemento sendo arrastado)
+  if(window.__planDragging){ window.__planRenderPending = true; return; }
   const now = Date.now();
   const pool = planTasks.filter(t => !t.slot_id);
   const cd = planCountdownText();
@@ -2420,12 +2693,15 @@ function bindPlanHandlers(){
       }catch(err){}
       el.classList.add("drag-source");
       window.__planDragTid = el.dataset.tid; // fallback (alguns browsers bloqueiam getData no dragover)
+      window.__planDragging = true;
     });
     el.addEventListener("dragend", ()=>{
       el.classList.remove("drag-source");
       window.__planDragTid = null;
+      window.__planDragging = false;
       root.querySelectorAll(".insert-before,.insert-after,.dragover,.drop-blocked")
         .forEach(x => x.classList.remove("insert-before","insert-after","dragover","drop-blocked"));
+      if(window.__planRenderPending){ window.__planRenderPending = false; renderPlan(); }
     });
     // marcar pos de inserção quando dragover passa em cima de outra peça (mesmo container)
     el.addEventListener("dragover", e=>{
