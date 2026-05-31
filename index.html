@@ -743,6 +743,23 @@
     <label class="flbl">Responsáveis</label>
     <div class="who-list" id="md-who"></div>
 
+    <div class="files-wrap" style="margin-top:14px;border-top:1px solid var(--line,#2a2e5a);padding-top:12px">
+      <label class="flbl">📎 Evidências da atividade <span id="md-files-count" style="color:#9296bd;font-weight:600">(0)</span></label>
+      <ul class="files-list" id="md-files-list" style="list-style:none;padding:0;margin:6px 0;display:flex;flex-direction:column;gap:6px"></ul>
+      <div class="file-form" id="md-file-form" style="display:flex;flex-direction:column;gap:7px;background:rgba(255,255,255,.02);border:1px solid var(--line,#2a2e5a);border-radius:9px;padding:9px 11px">
+        <input type="text" id="md-file-caption" placeholder="O que esta evidência comprova? (opcional)" style="font:inherit;font-size:12.5px;background:var(--cell,#1a1d3a);border:1px solid var(--line,#2a2e5a);color:#eef0ff;padding:7px 10px;border-radius:7px;outline:none">
+        <div class="frow" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <select id="md-file-author" style="font:inherit;font-size:12.5px;background:var(--cell,#1a1d3a);border:1px solid var(--line,#2a2e5a);color:#eef0ff;padding:7px 10px;border-radius:7px;outline:none;min-width:150px">
+            <option value="">Quem está enviando…</option>
+          </select>
+          <input type="file" id="md-file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.txt,application/pdf,image/png,image/jpeg,image/webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="flex:1;font:inherit;font-size:12px;color:#cdd0ee">
+          <button type="button" class="fsave" id="md-file-upload" disabled style="font:inherit;font-size:12.5px;font-weight:700;background:linear-gradient(135deg,var(--brand,#7c83ff),var(--brand2,#46e6a0));border:none;color:#fff;padding:7px 14px;border-radius:7px;cursor:pointer">📤 Enviar</button>
+        </div>
+        <div id="md-file-hint" style="font-size:11px;color:#9296bd">Até 10 MB · pdf, png, jpg, jpeg, webp, doc, docx, txt</div>
+        <div id="md-file-state" class="savestate" style="font-size:11.5px"></div>
+      </div>
+    </div>
+
     <div class="notes-wrap">
       <label class="flbl">📝 Notas da atividade</label>
       <ul class="notes-list" id="md-notes-list"></ul>
@@ -874,6 +891,10 @@ const MLABEL = {must:"MUST", should:"SHOULD", could:"COULD", wont:"WON'T"};
 let cards = [];
 let allNotes = [];        // populado por fetchNotes() — usado para badges do board
 let modalNotes = [];      // notas do card atualmente aberto no modal (lido direto do banco)
+let allFiles = [];        // evidências por card — badge no board
+let cardFiles = [];       // arquivos do card aberto no modal
+const FILE_MAX_BYTES = 10 * 1024 * 1024;
+const FILE_ALLOWED_EXT = ["pdf","png","jpg","jpeg","webp","doc","docx","txt"];
 const NOTE_DELETE_WINDOW_MS = 5 * 60 * 1000;
 
 // FILTRO POR RESPONSÁVEL (persistido em localStorage; sobrevive a realtime/refresh)
@@ -1070,10 +1091,13 @@ function render(){
         const noteCount = (allNotes||[]).filter(n => n.card_id === c.id).length;
         const notesBadge = noteCount > 0
           ? `<span class="has-notes" title="${noteCount} nota${noteCount>1?"s":""} registrada${noteCount>1?"s":""}">📝 ${noteCount}</span>` : "";
+        const fileCount = (allFiles||[]).filter(f => f.card_id === c.id).length;
+        const filesBadge = fileCount > 0
+          ? `<span class="has-files" title="${fileCount} evidência${fileCount>1?"s":""}" style="background:rgba(255,255,255,.06);color:#cdd0ee;padding:2px 7px;border-radius:6px;font-size:11px;margin-left:4px">📎 ${fileCount}</span>` : "";
         card.innerHTML =
           `<div class="ct">${del}${escapeHtml(c.title)}</div>` +
           `<span class="cm m-${c.moscow}">${MLABEL[c.moscow]}</span>` +
-          notesBadge + avatars + hasDesc;
+          notesBadge + filesBadge + avatars + hasDesc;
         card.addEventListener("dragstart", e=>{e.dataTransfer.setData("text/plain",c.id);card.classList.add("drag");card._dragged=true;});
         card.addEventListener("dragend", ()=>{card.classList.remove("drag");setTimeout(()=>card._dragged=false,50);});
         card.addEventListener("click", e=>{
@@ -1617,6 +1641,24 @@ function openModal(id){
   if(nbtn) nbtn.disabled = true;
   modalNotes = [];
   if(typeof loadModalNotes === "function") loadModalNotes(id);
+  // Evidências: reseta form + popula autor + carrega lista do banco
+  cardFiles = [];
+  const fcap   = document.getElementById("md-file-caption");
+  const fauth  = document.getElementById("md-file-author");
+  const finp   = document.getElementById("md-file-input");
+  const fbtn   = document.getElementById("md-file-upload");
+  const fstate = document.getElementById("md-file-state");
+  if(fcap)   fcap.value = "";
+  if(finp)   finp.value = "";
+  if(fbtn)   fbtn.disabled = true;
+  if(fstate){ fstate.textContent = ""; fstate.className = "savestate"; }
+  if(fauth){
+    fauth.innerHTML = "<option value=''>Quem está enviando…</option>" +
+      TEAM.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+    fauth.value = "";
+  }
+  renderCardFilesList();
+  if(typeof loadCardFiles === "function") loadCardFiles(id);
   modalBg.classList.add("on");
   setTimeout(()=>mdDesc.focus(), 50);
 }
@@ -1830,6 +1872,213 @@ sb.channel("activity_notes_rt")
   .subscribe();
 
 fetchNotes();
+
+// ============================================================
+// EVIDÊNCIAS — anexos por card (Storage bucket "evidencias" público)
+// Trade-off: bucket público de leitura simplifica o pitch (URLs diretas).
+// Privacidade: nada sensível deve ser anexado neste quadro de hackathon.
+// ============================================================
+function fileIcon(mime){
+  const m = (mime||"").toLowerCase();
+  if(m.startsWith("image/")) return "🖼";
+  if(m === "application/pdf") return "📕";
+  if(m.includes("word") || m === "application/msword") return "📘";
+  if(m === "text/plain") return "📄";
+  return "📎";
+}
+function fmtFileSize(n){
+  n = Number(n||0);
+  if(n < 1024) return n + " B";
+  if(n < 1024*1024) return (n/1024).toFixed(1) + " KB";
+  return (n/(1024*1024)).toFixed(1) + " MB";
+}
+function fileExtAllowed(name){
+  const ext = (name.split(".").pop()||"").toLowerCase();
+  return FILE_ALLOWED_EXT.includes(ext);
+}
+
+async function fetchAllFiles(){
+  const { data, error } = await sb.from("activity_files").select("*").order("created_at",{ascending:false});
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      console.warn("[files] tabela activity_files ausente — rode a migration.");
+    } else { console.error("[files]", error); }
+    return;
+  }
+  allFiles = data || [];
+  if(typeof render === "function") render();
+  if(editingId) loadCardFiles(editingId);
+}
+
+async function loadCardFiles(cardId){
+  const { data, error } = await sb.from("activity_files")
+    .select("*").eq("card_id", cardId).order("created_at",{ascending:false});
+  if(error){
+    const st = document.getElementById("md-file-state");
+    if(st){ st.className = "savestate err"; st.textContent = "Erro carregando evidências: " + error.message; }
+    return;
+  }
+  cardFiles = data || [];
+  // mantém allFiles consistente
+  allFiles = (allFiles||[]).filter(f => f.card_id !== cardId).concat(cardFiles);
+  renderCardFilesList();
+  if(typeof render === "function") render();
+}
+
+function renderCardFilesList(){
+  const list = document.getElementById("md-files-list");
+  const count = document.getElementById("md-files-count");
+  if(!list) return;
+  if(count) count.textContent = `(${cardFiles.length})`;
+  if(!cardFiles.length){
+    list.innerHTML = `<li style="font-size:12px;color:#9296bd;font-style:italic;padding:6px 0">Sem evidências anexadas ainda.</li>`;
+    return;
+  }
+  list.innerHTML = cardFiles.map(f => {
+    const dt = new Date(f.created_at);
+    const stamp = `${pad(dt.getDate())}/${pad(dt.getMonth()+1)} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    const url = f.file_url || "";
+    const capLine = f.caption ? `<div style="font-size:12px;color:#cdd0ee;margin-top:3px;font-style:italic">${escapeHtml(f.caption)}</div>` : "";
+    return `<li style="display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid var(--line,#2a2e5a);border-radius:8px;padding:8px 10px">
+      <span style="font-size:20px;line-height:1">${fileIcon(f.mime_type)}</span>
+      <div style="flex:1;min-width:0">
+        <a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="font-size:13px;font-weight:700;color:#eef0ff;text-decoration:none;word-break:break-all">${escapeHtml(f.file_name)}</a>
+        <div style="font-size:10.5px;color:#9296bd;font-family:var(--mono,JetBrains Mono);margin-top:2px">${escapeHtml(f.uploaded_by||"—")} · ${stamp} · ${fmtFileSize(f.size_bytes)}</div>
+        ${capLine}
+      </div>
+      <a href="${escapeHtml(url)}" target="_blank" rel="noopener" download="${escapeHtml(f.file_name)}" title="Abrir/baixar" style="font-size:14px;background:rgba(255,255,255,.05);border:1px solid var(--line,#2a2e5a);color:#cdd0ee;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;text-decoration:none">⤓</a>
+      <button data-fdel="${escapeHtml(f.id)}" data-fpath="${escapeHtml(f.file_path)}" title="Remover evidência" style="font-size:13px;background:transparent;border:1px solid var(--line,#2a2e5a);color:#9296bd;width:28px;height:28px;border-radius:6px;cursor:pointer">✕</button>
+    </li>`;
+  }).join("");
+}
+
+async function uploadCardFile(){
+  if(!editingId){ return; }
+  const cardId = editingId;
+  const finp   = document.getElementById("md-file-input");
+  const fcap   = document.getElementById("md-file-caption");
+  const fauth  = document.getElementById("md-file-author");
+  const fbtn   = document.getElementById("md-file-upload");
+  const fstate = document.getElementById("md-file-state");
+  const file = finp && finp.files && finp.files[0];
+  if(!file){
+    if(fstate){ fstate.className="savestate err"; fstate.textContent="Escolha um arquivo primeiro."; }
+    return;
+  }
+  if(!fileExtAllowed(file.name)){
+    if(fstate){ fstate.className="savestate err"; fstate.textContent="Tipo não permitido. Use: " + FILE_ALLOWED_EXT.join(", "); }
+    return;
+  }
+  if(file.size > FILE_MAX_BYTES){
+    if(fstate){ fstate.className="savestate err"; fstate.textContent=`Arquivo grande demais (${fmtFileSize(file.size)}). Máximo: 10 MB.`; }
+    return;
+  }
+  const author  = fauth ? fauth.value : "";
+  const caption = fcap  ? (fcap.value||"").trim() : "";
+  if(!author){
+    if(fstate){ fstate.className="savestate err"; fstate.textContent="Escolha quem está enviando."; }
+    return;
+  }
+
+  const ts = Date.now();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0,80);
+  const path = `${cardId}/${ts}_${safeName}`;
+  if(fbtn) fbtn.disabled = true;
+  if(fstate){ fstate.className="savestate"; fstate.textContent="📤 enviando arquivo…"; }
+
+  // 1) upload no Storage com checagem
+  const up = await sb.storage.from("evidencias").upload(path, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || undefined
+  });
+  if(up.error){
+    if(fstate){ fstate.className="savestate err"; fstate.textContent="Erro no upload: " + up.error.message; }
+    if(fbtn) fbtn.disabled = false;
+    return;
+  }
+
+  // 2) URL pública (bucket aberto)
+  const { data: pub } = sb.storage.from("evidencias").getPublicUrl(path);
+  const publicUrl = pub ? pub.publicUrl : null;
+
+  // 3) registra a linha em activity_files com checagem
+  const id = "af" + ts.toString(36) + Math.random().toString(36).slice(2,6);
+  const row = {
+    id, card_id: cardId,
+    file_name: file.name,
+    file_path: path,
+    file_url: publicUrl,
+    mime_type: file.type || null,
+    size_bytes: file.size,
+    caption: caption || null,
+    uploaded_by: author
+  };
+  const ins = await sb.from("activity_files").insert(row);
+  if(ins.error){
+    if(fstate){ fstate.className="savestate err"; fstate.textContent="Upload OK, mas erro ao registrar: " + ins.error.message; }
+    // tenta limpar o orfão no Storage
+    await sb.storage.from("evidencias").remove([path]);
+    if(fbtn) fbtn.disabled = false;
+    return;
+  }
+
+  if(fstate){ fstate.className="savestate ok"; fstate.textContent="✓ evidência salva."; }
+  if(finp) finp.value = "";
+  if(fcap) fcap.value = "";
+  if(fbtn) fbtn.disabled = true;
+  await loadCardFiles(cardId);
+}
+
+async function deleteCardFile(fileId, filePath){
+  if(!confirm("Remover esta evidência? Vai apagar o arquivo do Storage também.")) return;
+  const fstate = document.getElementById("md-file-state");
+  // 1) deleta a linha (cascata não toca Storage; precisamos remover manualmente)
+  const del = await sb.from("activity_files").delete().eq("id", fileId);
+  if(del.error){
+    if(fstate){ fstate.className="savestate err"; fstate.textContent="Erro ao remover: " + del.error.message; }
+    return;
+  }
+  // 2) remove o objeto no Storage (idempotente; ignora falha de "not found")
+  if(filePath){
+    const rm = await sb.storage.from("evidencias").remove([filePath]);
+    if(rm.error){ console.warn("[files] remove storage:", rm.error.message); }
+  }
+  if(fstate){ fstate.className="savestate ok"; fstate.textContent="✓ evidência removida."; }
+  if(editingId) await loadCardFiles(editingId);
+}
+
+// Handlers do form (delegados pra sobreviver re-renders)
+(function bindFileHandlers(){
+  const finp = document.getElementById("md-file-input");
+  const fbtn = document.getElementById("md-file-upload");
+  const fauth = document.getElementById("md-file-author");
+  if(finp) finp.addEventListener("change", ()=>{
+    const has = finp.files && finp.files.length > 0;
+    const authorOk = fauth && fauth.value;
+    if(fbtn) fbtn.disabled = !(has && authorOk);
+  });
+  if(fauth) fauth.addEventListener("change", ()=>{
+    const has = finp && finp.files && finp.files.length > 0;
+    const authorOk = !!fauth.value;
+    if(fbtn) fbtn.disabled = !(has && authorOk);
+  });
+  if(fbtn) fbtn.addEventListener("click", uploadCardFile);
+
+  const list = document.getElementById("md-files-list");
+  if(list) list.addEventListener("click", e=>{
+    const b = e.target.closest("[data-fdel]");
+    if(!b) return;
+    deleteCardFile(b.dataset.fdel, b.dataset.fpath);
+  });
+})();
+
+// realtime das evidências
+sb.channel("activity_files_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"activity_files"}, fetchAllFiles)
+  .subscribe();
+
+fetchAllFiles();
 
 // ============================================================
 // DOR & PERSONA — canvas editável + histórico de versões
