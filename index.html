@@ -235,6 +235,23 @@
   /* badge de notas no card */
   .ccard .has-notes{font-size:10.5px;color:#cfd2ef;margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:var(--card2);border:1px solid var(--line);padding:2px 8px;border-radius:999px;margin-left:6px}
 
+  /* FILTRO POR RESPONSÁVEL + AVATARES */
+  .filter-bar{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .filter-bar .ftag{font-size:11px;font-weight:700;color:#9296bd;letter-spacing:.4px;text-transform:uppercase}
+  .afchips{display:flex;flex-wrap:wrap;gap:7px;flex:1 1 auto}
+  .afchip{font-family:inherit;font-size:12.5px;font-weight:700;background:var(--cell);border:1px solid var(--line);color:#cfd2ef;padding:4px 11px 4px 5px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.12s}
+  .afchip:hover{border-color:var(--brand)}
+  .afchip.on{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent}
+  .afchip.on .avatar{outline:2px solid rgba(255,255,255,.6)}
+  .afchip[data-af="*"]{padding:6px 13px}
+  .afclear{font-family:inherit;font-size:11.5px;font-weight:700;background:transparent;border:1px solid var(--line);color:#9296bd;padding:6px 12px;border-radius:9px;cursor:pointer}
+  .afclear:hover{color:#fff;border-color:var(--no)}
+
+  .avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;font-size:10px;font-weight:800;color:#0c0f24;border:2px solid var(--card);flex-shrink:0;letter-spacing:0}
+  .ccard .avatars{display:inline-flex;align-items:center;margin-top:6px;margin-right:6px}
+  .ccard .avatars .avatar{margin-left:-6px}
+  .ccard .avatars .avatar:first-child{margin-left:0}
+
   /* DOR & PERSONA — canvas editável */
   .canvas{margin-top:24px;padding-bottom:40px}
   .canvas-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
@@ -367,6 +384,10 @@
       <button type="submit" class="addbtn">Adicionar</button>
     </form>
   </div>
+</div>
+
+<div class="wrap">
+  <div id="assignee-filter"></div>
 </div>
 
 <div class="boardwrap">
@@ -546,8 +567,63 @@ const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 const board = document.getElementById("board");
 const MLABEL = {must:"MUST", should:"SHOULD", could:"COULD", wont:"WON'T"};
 let cards = [];
-let allNotes = [];
+let allNotes = [];        // populado por fetchNotes() — usado para badges do board
+let modalNotes = [];      // notas do card atualmente aberto no modal (lido direto do banco)
 const NOTE_DELETE_WINDOW_MS = 5 * 60 * 1000;
+
+// FILTRO POR RESPONSÁVEL (persistido em localStorage; sobrevive a realtime/refresh)
+let assigneeFilter = [];
+const FILTER_LS_KEY = "kanban_assignee_filter_v1";
+function loadAssigneeFilter(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(FILTER_LS_KEY) || "[]");
+    if(Array.isArray(saved)) assigneeFilter = saved;
+  } catch(e){ assigneeFilter = []; }
+}
+function saveAssigneeFilter(){
+  try { localStorage.setItem(FILTER_LS_KEY, JSON.stringify(assigneeFilter)); } catch(e){}
+}
+function cardAssigneesArray(c){
+  return Array.isArray(c.assignees) ? c.assignees : [];
+}
+function cardMatchesFilter(c){
+  if(assigneeFilter.length === 0) return true;
+  const arr = cardAssigneesArray(c);
+  return assigneeFilter.some(m => arr.includes(m));
+}
+function memberColor(name){
+  const palette = {
+    "Victor":"#bfc3ff","Vitão":"#9af0cd","Monica":"#ffc4a8","Gustavo":"#ffe19a","Nicolas":"#d2bbff"
+  };
+  if(palette[name]) return palette[name];
+  let h = 0;
+  for(let i=0;i<name.length;i++) h = (h*31 + name.charCodeAt(i)) >>> 0;
+  return `hsl(${h % 360}, 70%, 78%)`;
+}
+function memberInitials(name){
+  return String(name||"").trim().split(/\s+/).map(w => (w[0]||"")).join("").toUpperCase().slice(0,2) || "?";
+}
+function avatarHtml(name, size){
+  size = size || 22;
+  return `<span class="avatar" style="width:${size}px;height:${size}px;background:${memberColor(name)}" title="${escapeHtml(name)}">${escapeHtml(memberInitials(name))}</span>`;
+}
+function renderAssigneeFilter(){
+  const root = document.getElementById("assignee-filter");
+  if(!root) return;
+  const total = cards.length;
+  const allActive = assigneeFilter.length === 0;
+  const allChip = `<button class="afchip${allActive?" on":""}" data-af="*">📋 Todos · ${total}</button>`;
+  const memberChips = TEAM.map(p=>{
+    const count = cards.filter(c => cardAssigneesArray(c).includes(p)).length;
+    const active = assigneeFilter.includes(p);
+    return `<button class="afchip${active?" on":""}" data-af="${escapeHtml(p)}">${avatarHtml(p,20)}<span>${escapeHtml(p)} · ${count}</span></button>`;
+  }).join("");
+  const clear = assigneeFilter.length
+    ? `<button class="afclear" data-af="*">✕ Limpar filtro</button>` : "";
+  root.innerHTML = `<div class="filter-bar"><span class="ftag">👥 Filtrar por responsável</span><div class="afchips">${allChip}${memberChips}</div>${clear}</div>`;
+}
+
+loadAssigneeFilter();
 
 function setStatus(ok, msg){
   const el = document.getElementById("conn");
@@ -593,16 +669,18 @@ async function autoSeedIfEmpty(){
 }
 
 function render(){
+  renderAssigneeFilter();
   board.innerHTML = "";
   const corner = document.createElement("div");
   corner.className = "colhead corner";
   corner.textContent = "Raia ▸ / Status ▾";
   corner.style.borderLeft = "0";
   board.appendChild(corner);
+  // contagem de cards POR COLUNA respeitando o filtro
   COLS.forEach(col=>{
     const h = document.createElement("div");
     h.className = "colhead";
-    const cnt = cards.filter(c=>c.status===col.id).length;
+    const cnt = cards.filter(c=>c.status===col.id && cardMatchesFilter(c)).length;
     h.innerHTML = `<span>${col.label}</span><span class="cnt">${cnt}</span>`;
     board.appendChild(h);
   });
@@ -624,15 +702,15 @@ function render(){
         if(!id) return;
         moveCard(id, cell.dataset.lane, cell.dataset.status);
       });
-      cards.filter(c=>c.lane===lane.id && c.status===col.id).forEach(c=>{
+      cards.filter(c=>c.lane===lane.id && c.status===col.id && cardMatchesFilter(c)).forEach(c=>{
         const card = document.createElement("div");
         card.className = `ccard m-${c.moscow}`;
         card.draggable = true;
         card.dataset.cardid = c.id;
         const del = c.is_custom ? `<span class="del" data-del="${c.id}" title="Remover">✕</span>` : "";
-        const assignees = Array.isArray(c.assignees) ? c.assignees : [];
-        const chips = assignees.length
-          ? `<div class="chips">${assignees.map(a=>`<span class="chip" data-p="${escapeHtml(a)}">${escapeHtml(a)}</span>`).join("")}</div>`
+        const assignees = cardAssigneesArray(c);
+        const avatars = assignees.length
+          ? `<div class="avatars">${assignees.slice(0,4).map(a=>avatarHtml(a,22)).join("")}${assignees.length>4?`<span class="avatar" style="width:22px;height:22px;background:#7a809f">+${assignees.length-4}</span>`:""}</div>`
           : "";
         const hasDesc = c.description && c.description.trim().length
           ? `<div class="has-desc">📋 descrição</div>` : "";
@@ -642,7 +720,7 @@ function render(){
         card.innerHTML =
           `<div class="ct">${del}${escapeHtml(c.title)}</div>` +
           `<span class="cm m-${c.moscow}">${MLABEL[c.moscow]}</span>` +
-          notesBadge + chips + hasDesc;
+          notesBadge + avatars + hasDesc;
         card.addEventListener("dragstart", e=>{e.dataTransfer.setData("text/plain",c.id);card.classList.add("drag");card._dragged=true;});
         card.addEventListener("dragend", ()=>{card.classList.remove("drag");setTimeout(()=>card._dragged=false,50);});
         card.addEventListener("click", e=>{
@@ -704,6 +782,22 @@ document.getElementById("addform").addEventListener("submit", async e=>{
   cards.push(row); render(); renderSchedule();
   const { error } = await sb.from("kanban_cards").insert(row);
   if(error){ setStatus(false, error.message); fetchCards(); }
+});
+
+// filtro por responsável
+document.getElementById("assignee-filter").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-af]");
+  if(!btn) return;
+  const v = btn.dataset.af;
+  if(v === "*"){
+    assigneeFilter = [];
+  } else {
+    assigneeFilter = assigneeFilter.includes(v)
+      ? assigneeFilter.filter(x => x !== v)
+      : [...assigneeFilter, v];
+  }
+  saveAssigneeFilter();
+  render();
 });
 
 // remover card customizado
@@ -1032,7 +1126,8 @@ function openModal(id){
   if(ntxt) ntxt.value = "";
   if(nsel) nsel.value = "";
   if(nbtn) nbtn.disabled = true;
-  if(typeof renderModalNotes === "function") renderModalNotes(id);
+  modalNotes = [];
+  if(typeof loadModalNotes === "function") loadModalNotes(id);
   modalBg.classList.add("on");
   setTimeout(()=>mdDesc.focus(), 50);
 }
@@ -1101,7 +1196,9 @@ async function fetchNotes(){
   allNotes = data || [];
   if(typeof render === "function") render();
   if(typeof renderSchedule === "function") renderSchedule();
-  if(editingId) renderModalNotes(editingId);
+  // Se o modal está aberto, recarrega as notas daquele card direto do banco
+  // (mantém a lista do modal autoritativa em cima do banco, não do estado global).
+  if(editingId) loadModalNotes(editingId);
 }
 
 function isNoteSprintLocked(note){
@@ -1117,6 +1214,25 @@ function canDeleteNote(note){
   return ageMs <= NOTE_DELETE_WINDOW_MS;
 }
 
+// Carrega as notas do card direto do banco (não confia em estado global).
+async function loadModalNotes(cardId){
+  const list = document.getElementById("md-notes-list");
+  if(list) list.innerHTML = `<li style="color:#9296bd;font-size:12.5px;list-style:none;padding:6px 0">Carregando notas…</li>`;
+  const { data, error } = await sb.from("activity_notes")
+    .select("*").eq("card_id", cardId).order("created_at",{ascending:false});
+  if(error){
+    modalNotes = [];
+    if(list) list.innerHTML = `<li style="color:#ffb3b3;font-size:12.5px;list-style:none;padding:6px 0">Erro ao carregar notas: ${escapeHtml(error.message)}</li>`;
+    return;
+  }
+  modalNotes = data || [];
+  // mantém allNotes sincronizado para os badges no board
+  const merged = (allNotes||[]).filter(n => n.card_id !== cardId).concat(modalNotes);
+  allNotes = merged;
+  if(typeof render === "function") render();
+  renderModalNotes(cardId);
+}
+
 function renderModalNotes(cardId){
   const list = document.getElementById("md-notes-list");
   const locked = document.getElementById("md-notes-locked");
@@ -1124,22 +1240,16 @@ function renderModalNotes(cardId){
   const authorSel = document.getElementById("md-note-author");
   if(!list || !authorSel) return;
 
-  // popula dropdown de autor com TEAM atual
+  // popula dropdown de autor com TEAM atual (preserva seleção)
   const prevAuthor = authorSel.value;
   authorSel.innerHTML = `<option value="">Quem está anotando…</option>` +
     TEAM.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
   if(prevAuthor && TEAM.includes(prevAuthor)) authorSel.value = prevAuthor;
 
-  const cardNotes = (allNotes||[])
-    .filter(n => n.card_id === cardId)
+  const cardNotes = (modalNotes||[])
+    .slice()
     .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
-  const active = activeSprint();
-  // bloqueia adição se o card só foi tocado em sprints concluídas? regra do spec:
-  // "Notas de sprints concluídas são completamente somente leitura"
-  // → Aqui o trava é por nota individual. Sempre permitimos NOVAS notas se houver
-  // sprint ativa OU se nenhuma sprint estiver active e quisermos registrar retroativo.
-  // Decisão simples: sempre permite adicionar; novas notas pegam o sprint_id ativo (ou null).
   if(formWrap) formWrap.style.display = "";
   if(locked)   locked.style.display = "none";
 
@@ -1166,7 +1276,7 @@ async function addNote(cardId, content, author){
   if(!author){ alert("Selecione quem está anotando."); return false; }
   const sprint = activeSprint();
   const payload = { card_id: cardId, sprint_id: sprint ? sprint.id : null, content, author };
-  const { data, error } = await sb.from("activity_notes").insert(payload).select().single();
+  const { error } = await sb.from("activity_notes").insert(payload);
   if(error){
     if(/relation .* does not exist/i.test(error.message)){
       alert("⚠ Tabela activity_notes ausente. Rode supabase-setup.sql no SQL Editor.");
@@ -1175,24 +1285,25 @@ async function addNote(cardId, content, author){
     }
     return false;
   }
-  if(data) allNotes = [data, ...allNotes];
-  render(); renderSchedule(); renderModalNotes(cardId);
+  // recarrega do banco — não confia em estado local
+  await loadModalNotes(cardId);
+  renderSchedule();
   return true;
 }
 
 async function deleteNote(noteId){
-  const note = allNotes.find(n => n.id === noteId);
+  const note = (modalNotes||[]).find(n => n.id === noteId) || (allNotes||[]).find(n => n.id === noteId);
   if(!note){ return; }
   if(!canDeleteNote(note)){
     alert("Esta nota não pode mais ser apagada (limite de 5 min ou sprint concluída).");
     return;
   }
   if(!confirm(`Apagar a nota de ${note.author}?`)) return;
-  allNotes = allNotes.filter(n => n.id !== noteId);
-  render(); renderSchedule();
-  if(editingId) renderModalNotes(editingId);
   const { error } = await sb.from("activity_notes").delete().eq("id", noteId);
-  if(error){ alert("Erro: " + error.message); fetchNotes(); }
+  if(error){ alert("Erro: " + error.message); fetchNotes(); return; }
+  if(editingId){ await loadModalNotes(editingId); }
+  else { await fetchNotes(); }
+  renderSchedule();
 }
 
 // listeners do modal de notas
