@@ -234,6 +234,60 @@
 
   /* badge de notas no card */
   .ccard .has-notes{font-size:10.5px;color:#cfd2ef;margin-top:4px;display:inline-flex;align-items:center;gap:4px;background:var(--card2);border:1px solid var(--line);padding:2px 8px;border-radius:999px;margin-left:6px}
+
+  /* DOR & PERSONA — canvas editável */
+  .canvas{margin-top:24px;padding-bottom:40px}
+  .canvas-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .canvas-bar h2{font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .canvas-bar .meta{font-family:var(--mono);font-size:11.5px;color:#9296bd}
+  .canvas-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .canvas-btn{font-family:inherit;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;padding:9px 18px;border-radius:9px;cursor:pointer;transition:.15s}
+  .canvas-btn:hover{filter:brightness(1.1)}
+  .canvas-btn.ghost{background:var(--card2);border:1px solid var(--line);color:#cfd2ef}
+  .canvas-btn.ghost:hover{border-color:var(--brand)}
+  .canvas-btn:disabled{opacity:.55;cursor:not-allowed;filter:none}
+
+  .canvas-hero{background:linear-gradient(135deg,#1a1f47,#2a2370 55%,#3f2da0);border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:var(--radius);padding:22px 26px;margin-bottom:18px}
+  .canvas-hero .eyebrow{color:var(--accent);font-weight:700;font-size:12px;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+  .canvas-hero .dor{font-size:19px;font-weight:700;color:#fff;line-height:1.35}
+  .canvas-hero textarea{width:100%;min-height:90px;font-family:inherit;font-size:18px;font-weight:700;background:rgba(12,15,36,.55);border:1px solid var(--line);color:#fff;padding:12px 14px;border-radius:10px;outline:none;line-height:1.35;resize:vertical}
+  .canvas-hero textarea:focus{border-color:var(--accent)}
+
+  .canvas-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:860px){.canvas-grid{grid-template-columns:1fr}}
+  .canvas-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+  .canvas-card .lbl{font-size:11px;font-weight:700;color:#9296bd;letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .canvas-card .val{font-size:14px;color:#e9eaf6;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .canvas-card .val.empty{color:#6b7090;font-style:italic}
+  .canvas-card textarea{width:100%;min-height:130px;font-family:inherit;font-size:14px;background:var(--cell);border:1px solid var(--line);color:#eef0ff;padding:11px 13px;border-radius:9px;outline:none;line-height:1.5;resize:vertical}
+  .canvas-card textarea:focus{border-color:var(--brand)}
+
+  .canvas-foot{margin-top:18px;font-family:var(--mono);font-size:12px;color:#9296bd;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .canvas-foot b{color:#cfd2ef}
+
+  .canvas-editor-bar{margin-top:18px;background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .canvas-editor-bar label{font-size:11px;font-weight:700;color:#9296bd;letter-spacing:.3px;text-transform:uppercase}
+  .canvas-editor-bar select{font-family:inherit;font-size:13.5px;background:var(--cell);border:1px solid var(--line);color:#eef0ff;padding:9px 11px;border-radius:9px;min-width:200px}
+  .canvas-editor-bar .savestate{font-family:var(--mono);font-size:11.5px;color:#9296bd;margin-left:auto}
+  .canvas-editor-bar .savestate.ok{color:#9af0cd}
+  .canvas-editor-bar .savestate.err{color:#ffb3b3}
+
+  .canvas-stale{background:rgba(255,206,90,.14);border:1px solid var(--warn);color:#ffe19a;border-radius:11px;padding:12px 16px;margin:14px 0;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .canvas-stale b{color:#fff}
+  .canvas-stale button{background:transparent;border:1px solid var(--warn);color:#ffe19a;font-family:inherit;font-size:12px;font-weight:700;padding:6px 12px;border-radius:7px;cursor:pointer}
+
+  .canvas-history{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+  .canvas-history summary{cursor:pointer;list-style:none;padding:14px 20px;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .canvas-history summary::-webkit-details-marker{display:none}
+  .canvas-history summary::after{content:"▾";font-family:var(--mono);color:#9296bd;transition:transform .2s}
+  .canvas-history[open] summary::after{transform:rotate(180deg)}
+  .canvas-history .hbody{padding:0 20px 18px}
+  .hitem{border-top:1px solid var(--line);padding:12px 0;display:flex;flex-direction:column;gap:4px}
+  .hitem:first-child{border-top:0}
+  .hitem .hhead{font-family:var(--mono);font-size:11.5px;color:#9296bd;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .hitem .hauthor{background:var(--card2);border:1px solid var(--line);color:#cfd2ef;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700}
+  .hitem .hdor{font-size:13.5px;color:#e9eaf6;line-height:1.45}
+  .hitem .hempty{color:#9296bd;font-size:12.5px;font-style:italic}
 </style>
 </head>
 <body>
@@ -261,7 +315,7 @@
   <div class="tabs">
     <button class="tab on" data-view="board">📌 Quadro</button>
     <button class="tab" data-view="cron">⏱ Cronograma</button>
-    <button class="tab" data-view="dor">🎯 A Dor que tratamos</button>
+    <button class="tab" data-view="dor">🎯 Dor &amp; Persona</button>
     <button class="tab" data-view="settings">⚙ Time &amp; Raias</button>
   </div>
 </div>
@@ -325,31 +379,7 @@
 
 <div id="view-dor" style="display:none">
   <div class="wrap">
-    <div class="dor">
-      <div class="dor-card">
-        <div class="eyebrow">O problema que resolvemos</div>
-        <h3>Freelancer, dev e prestador fecham serviço sem contrato — ou com contrato genérico baixado da internet</h3>
-        <p>Hoje quem presta serviço por conta própria <b>não tem dinheiro nem paciência</b> para pagar advogado a cada job. Resultado: combina por WhatsApp, copia um modelo do Google, ou simplesmente confia. Quando dá ruim — escopo expandindo, cliente atrasando pagamento, propriedade intelectual disputada — <b>não há nada para sustentar a negociação</b>.</p>
-        <p>O contrato que existe não protege porque tem <b>cláusulas faltando, juridiquês incompreensível e zero explicação</b> sobre o que cada parte realmente significa. O profissional assina sem entender e descobre só quando o problema já estourou.</p>
-        <div class="quote">"Eu nunca sei se o contrato que mandam pra mim me protege. Leio, parece tudo certo, mas quando o cliente fala que o escopo era outro eu não tenho como provar nada."<br><span style="font-style:normal;color:#9296bd;font-size:12.5px">— freelancer dev · persona-alvo</span></div>
-        <p><b>Nossa solução — Combinado Não Sai Caro:</b> conversa curta → contrato sólido em <b>linguagem clara</b>, com cláusulas de proteção curadas, <b>explicação leiga de cada cláusula</b> e <b>sinalização de red flags</b>, pronto pra assinar em PDF/DOC. Custo zero comparado ao escritório de advocacia, foco em <b>proteger quem presta serviço</b>.</p>
-      </div>
-      <div>
-        <div class="dor-card">
-          <div class="eyebrow">Por que dói</div>
-          <ul class="painlist">
-            <li>Advogado custa caro e é desproporcional ao ticket do job.</li>
-            <li>Modelo da internet vem com cláusulas erradas ou faltando — e o usuário não tem como saber.</li>
-            <li>Juridiquês esconde armadilhas (multa, foro, PI) que só explodem depois.</li>
-            <li>Sem registro escrito, qualquer disputa vira "minha palavra contra a sua".</li>
-          </ul>
-          <div class="metricbox">
-            <div class="big">Conversa → contrato em minutos</div>
-            <div class="sm">Sem alucinação de lei (RAG sobre Código Civil + Direito Autoral) e com guardrails testados em 2–3 contratos reais. É esse o slide forte do pitch.</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div id="view-dor-body"></div>
   </div>
 </div>
 
@@ -696,6 +726,7 @@ document.querySelectorAll(".tab").forEach(tab=>{
     document.getElementById("view-dor").style.display      = (v==="dor")      ? "" : "none";
     document.getElementById("view-settings").style.display = (v==="settings") ? "" : "none";
     if(v === "settings") renderSettings();
+    if(v === "dor")      renderCanvas();
   });
 });
 
@@ -1199,6 +1230,306 @@ sb.channel("activity_notes_rt")
   .subscribe();
 
 fetchNotes();
+
+// ============================================================
+// DOR & PERSONA — canvas editável + histórico de versões
+// ============================================================
+let problemCanvas = null;       // { id, persona_perfil, ... updated_at }
+let canvasHistory = [];         // snapshots ordenados por edited_at desc
+let canvasMode = "read";        // "read" | "edit"
+let canvasDraft = null;         // valores no buffer enquanto edita
+let canvasLoadedAt = null;      // updated_at carregado na entrada do edit
+let canvasStaleNotice = null;   // { by, at } quando chega update externo durante edit
+let canvasSaveState = "";       // mensagem do rodapé do editor
+
+const CANVAS_FIELDS = [
+  {key:"persona_perfil",   label:"Persona — perfil",   placeholder:"Cargo, área, contexto profissional…"},
+  {key:"persona_contexto", label:"Persona — contexto", placeholder:"Onde está, como trabalha, ticket, decisão…"},
+  {key:"solucao_atual",    label:"Como resolve hoje",  placeholder:"O que a persona faz hoje pra contornar a dor…"},
+  {key:"porque_falha",     label:"Por que falha",      placeholder:"Por que a solução atual não basta…"},
+  {key:"evidencias",       label:"Evidências",         placeholder:"Números, entrevistas, fontes que sustentam…"},
+];
+
+function fmtDateTimeShort(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function fetchCanvas(){
+  const { data, error } = await sb.from("problem_canvas").select("*").order("created_at",{ascending:true}).limit(1).maybeSingle();
+  if(error){
+    if(/relation .* does not exist/i.test(error.message)){
+      console.warn("[canvas] tabela problem_canvas ausente — rode supabase-setup.sql");
+    } else { console.error(error); }
+    return;
+  }
+  // detecção de update externo durante modo edit
+  if(canvasMode === "edit" && problemCanvas && data && data.updated_at !== problemCanvas.updated_at){
+    canvasStaleNotice = { by: data.updated_by || "alguém", at: data.updated_at };
+  }
+  problemCanvas = data || null;
+  renderCanvas();
+}
+
+async function fetchCanvasHistory(){
+  if(!problemCanvas) return;
+  const { data, error } = await sb.from("problem_canvas_history")
+    .select("*").eq("canvas_id", problemCanvas.id).order("edited_at",{ascending:false}).limit(50);
+  if(error){
+    if(!/relation .* does not exist/i.test(error.message)) console.error(error);
+    canvasHistory = []; return;
+  }
+  canvasHistory = data || [];
+}
+
+function renderCanvas(){
+  const root = document.getElementById("view-dor-body");
+  if(!root) return;
+  if(!problemCanvas){
+    root.innerHTML = `<div class="canvas"><div class="canvas-bar"><h2>🎯 Dor &amp; Persona</h2></div>
+      <div class="canvas-card"><div class="val empty">Carregando o canvas… se demorar, verifique se a migração <b>problem_canvas</b> foi rodada no Supabase.</div></div></div>`;
+    return;
+  }
+  if(canvasMode === "edit") return renderCanvasEdit(root);
+  return renderCanvasRead(root);
+}
+
+function renderCanvasRead(root){
+  const c = problemCanvas;
+  const fields = CANVAS_FIELDS.map(f=>{
+    const v = (c[f.key] || "").trim();
+    const body = v ? escapeHtml(v) : `<span class="empty">Sem conteúdo ainda — edite para preencher.</span>`;
+    return `<div class="canvas-card"><div class="lbl">${escapeHtml(f.label)}</div><div class="val">${body}</div></div>`;
+  }).join("");
+  const dor = (c.dor_central||"").trim();
+  const historyHtml = renderCanvasHistory();
+  root.innerHTML = `
+    <div class="canvas">
+      <div class="canvas-bar">
+        <h2>🎯 Dor &amp; Persona</h2>
+        <div class="canvas-actions">
+          <button class="canvas-btn" id="canvas-edit">✏️ Editar</button>
+        </div>
+      </div>
+      <div class="canvas-hero">
+        <div class="eyebrow">A dor central</div>
+        <div class="dor">${dor ? escapeHtml(dor) : '<span style="opacity:.7">Defina a dor central no modo edição.</span>'}</div>
+      </div>
+      <div class="canvas-grid">${fields}</div>
+      <div class="canvas-foot">📝 Editado por <b>${escapeHtml(c.updated_by||"—")}</b> · ${escapeHtml(fmtDateTimeShort(c.updated_at))}</div>
+      ${historyHtml}
+    </div>
+  `;
+  document.getElementById("canvas-edit").addEventListener("click", enterCanvasEdit);
+  bindHistoryToggle();
+}
+
+function renderCanvasEdit(root){
+  const draft = canvasDraft || {};
+  const teamOpts = `<option value="">Quem está editando…</option>` +
+    TEAM.map(p=>`<option value="${escapeHtml(p)}"${draft.updated_by===p?" selected":""}>${escapeHtml(p)}</option>`).join("");
+  const fields = CANVAS_FIELDS.map(f=>{
+    const v = (draft[f.key] != null ? draft[f.key] : (problemCanvas[f.key] || ""));
+    return `<div class="canvas-card">
+      <div class="lbl">${escapeHtml(f.label)}</div>
+      <textarea data-fld="${f.key}" placeholder="${escapeHtml(f.placeholder)}">${escapeHtml(v)}</textarea>
+    </div>`;
+  }).join("");
+  const dor = draft.dor_central != null ? draft.dor_central : (problemCanvas.dor_central || "");
+  const stale = canvasStaleNotice
+    ? `<div class="canvas-stale">⚠ Esta página foi atualizada por <b>${escapeHtml(canvasStaleNotice.by)}</b> (${escapeHtml(fmtDateTimeShort(canvasStaleNotice.at))}). Recarregue antes de salvar para não sobrescrever. <button id="canvas-reload">Recarregar</button></div>`
+    : "";
+  const stateCls = canvasSaveState.startsWith("ok:") ? "savestate ok"
+                : canvasSaveState.startsWith("err:") ? "savestate err"
+                : "savestate";
+  const stateTxt = canvasSaveState.replace(/^ok:|^err:/,"");
+  const historyHtml = renderCanvasHistory();
+  root.innerHTML = `
+    <div class="canvas">
+      <div class="canvas-bar">
+        <h2>🎯 Dor &amp; Persona — edição</h2>
+        <div class="canvas-actions">
+          <button class="canvas-btn ghost" id="canvas-cancel">Cancelar</button>
+          <button class="canvas-btn" id="canvas-save">💾 Salvar</button>
+        </div>
+      </div>
+      ${stale}
+      <div class="canvas-hero">
+        <div class="eyebrow">A dor central</div>
+        <textarea data-fld="dor_central" placeholder="Em uma ou duas frases, qual é a dor que estamos atacando?">${escapeHtml(dor)}</textarea>
+      </div>
+      <div class="canvas-grid">${fields}</div>
+      <div class="canvas-editor-bar">
+        <label for="canvas-author">Quem está editando *</label>
+        <select id="canvas-author">${teamOpts}</select>
+        <span class="${stateCls}">${escapeHtml(stateTxt || "—")}</span>
+      </div>
+      ${historyHtml}
+    </div>
+  `;
+  // bind
+  root.querySelectorAll("textarea[data-fld]").forEach(t=>{
+    t.addEventListener("input", ()=>{
+      if(!canvasDraft) canvasDraft = {};
+      canvasDraft[t.dataset.fld] = t.value;
+    });
+  });
+  const sel = document.getElementById("canvas-author");
+  sel.addEventListener("change", ()=>{
+    if(!canvasDraft) canvasDraft = {};
+    canvasDraft.updated_by = sel.value;
+  });
+  document.getElementById("canvas-cancel").addEventListener("click", cancelCanvasEdit);
+  document.getElementById("canvas-save").addEventListener("click", saveCanvas);
+  const rb = document.getElementById("canvas-reload");
+  if(rb) rb.addEventListener("click", ()=>{
+    canvasStaleNotice = null;
+    canvasMode = "read";
+    canvasDraft = null;
+    fetchCanvas();
+  });
+  bindHistoryToggle();
+}
+
+function renderCanvasHistory(){
+  const items = (canvasHistory||[]).map(h=>{
+    const dor = (h.dor_central||"").trim();
+    return `<div class="hitem">
+      <div class="hhead">
+        <span class="hauthor">${escapeHtml(h.edited_by||"?")}</span>
+        <span>${escapeHtml(fmtDateTimeShort(h.edited_at))}</span>
+      </div>
+      <div class="hdor">${dor ? escapeHtml(dor) : '<span class="hempty">Sem dor central registrada nesta versão.</span>'}</div>
+    </div>`;
+  }).join("");
+  const empty = `<div class="hitem"><div class="hempty">Nenhuma versão anterior ainda. Edite e salve para criar o primeiro snapshot.</div></div>`;
+  return `<details class="canvas-history" id="canvas-history">
+    <summary>📜 Ver como a persona evoluiu <span class="meta" style="font-family:var(--mono);font-size:11.5px;color:#9296bd">${(canvasHistory||[]).length} versão${(canvasHistory||[]).length===1?"":"ões"}</span></summary>
+    <div class="hbody">${items || empty}</div>
+  </details>`;
+}
+
+function bindHistoryToggle(){
+  const det = document.getElementById("canvas-history");
+  if(!det) return;
+  det.addEventListener("toggle", ()=>{
+    if(det.open) fetchCanvasHistory().then(()=>{
+      // rerender so the new history fills in
+      const body = det.querySelector(".hbody");
+      if(!body) return;
+      const items = (canvasHistory||[]).map(h=>{
+        const dor = (h.dor_central||"").trim();
+        return `<div class="hitem">
+          <div class="hhead">
+            <span class="hauthor">${escapeHtml(h.edited_by||"?")}</span>
+            <span>${escapeHtml(fmtDateTimeShort(h.edited_at))}</span>
+          </div>
+          <div class="hdor">${dor ? escapeHtml(dor) : '<span class="hempty">Sem dor central registrada nesta versão.</span>'}</div>
+        </div>`;
+      }).join("");
+      body.innerHTML = items || `<div class="hitem"><div class="hempty">Nenhuma versão anterior ainda.</div></div>`;
+    });
+  }, {once:true});
+}
+
+function enterCanvasEdit(){
+  if(!problemCanvas) return;
+  canvasMode = "edit";
+  canvasDraft = {
+    dor_central:     problemCanvas.dor_central || "",
+    persona_perfil:  problemCanvas.persona_perfil || "",
+    persona_contexto:problemCanvas.persona_contexto || "",
+    solucao_atual:   problemCanvas.solucao_atual || "",
+    porque_falha:    problemCanvas.porque_falha || "",
+    evidencias:      problemCanvas.evidencias || "",
+    updated_by:      ""
+  };
+  canvasLoadedAt = problemCanvas.updated_at;
+  canvasStaleNotice = null;
+  canvasSaveState = "";
+  renderCanvas();
+}
+
+function cancelCanvasEdit(){
+  if(canvasDraft){
+    // verifica se houve mudança
+    const dirty = CANVAS_FIELDS.some(f => (canvasDraft[f.key]||"") !== (problemCanvas[f.key]||""))
+               || (canvasDraft.dor_central||"") !== (problemCanvas.dor_central||"");
+    if(dirty && !confirm("Descartar as alterações?")) return;
+  }
+  canvasMode = "read";
+  canvasDraft = null;
+  canvasStaleNotice = null;
+  canvasSaveState = "";
+  renderCanvas();
+}
+
+async function saveCanvas(){
+  if(!canvasDraft || !problemCanvas) return;
+  if(!canvasDraft.updated_by){
+    canvasSaveState = "err:selecione quem está editando.";
+    renderCanvas(); return;
+  }
+  if(canvasStaleNotice){
+    canvasSaveState = "err:há atualização nova — recarregue antes de salvar.";
+    renderCanvas(); return;
+  }
+  canvasSaveState = "salvando…";
+  renderCanvas();
+
+  // 1) snapshot do estado atual no history (antes do UPDATE)
+  const snap = {
+    canvas_id:        problemCanvas.id,
+    persona_perfil:   problemCanvas.persona_perfil,
+    persona_contexto: problemCanvas.persona_contexto,
+    solucao_atual:    problemCanvas.solucao_atual,
+    porque_falha:     problemCanvas.porque_falha,
+    dor_central:      problemCanvas.dor_central,
+    evidencias:       problemCanvas.evidencias,
+    edited_by:        problemCanvas.updated_by || canvasDraft.updated_by,
+  };
+  const snapRes = await sb.from("problem_canvas_history").insert(snap);
+  if(snapRes.error){
+    canvasSaveState = "err:falha ao salvar snapshot — " + snapRes.error.message;
+    renderCanvas(); return;
+  }
+
+  // 2) UPDATE no canvas
+  const payload = {
+    persona_perfil:   canvasDraft.persona_perfil   || null,
+    persona_contexto: canvasDraft.persona_contexto || null,
+    solucao_atual:    canvasDraft.solucao_atual    || null,
+    porque_falha:     canvasDraft.porque_falha     || null,
+    dor_central:      canvasDraft.dor_central      || null,
+    evidencias:       canvasDraft.evidencias       || null,
+    updated_by:       canvasDraft.updated_by,
+    updated_at:       new Date().toISOString()
+  };
+  const upd = await sb.from("problem_canvas").update(payload).eq("id", problemCanvas.id).select().single();
+  if(upd.error){
+    canvasSaveState = "err:falha ao atualizar — " + upd.error.message;
+    renderCanvas(); return;
+  }
+  problemCanvas = upd.data;
+  canvasMode = "read";
+  canvasDraft = null;
+  canvasSaveState = "ok:✓ salvo";
+  await fetchCanvasHistory();
+  renderCanvas();
+}
+
+// realtime
+sb.channel("problem_canvas_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"problem_canvas"}, fetchCanvas)
+  .subscribe();
+sb.channel("problem_canvas_history_rt")
+  .on("postgres_changes", {event:"*", schema:"public", table:"problem_canvas_history"}, ()=>{
+    if(problemCanvas) fetchCanvasHistory();
+  })
+  .subscribe();
+
+fetchCanvas();
 
 // ============================================================
 // CRONOGRAMA — relógio, contagem regressiva, checklist com timestamps
